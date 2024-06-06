@@ -1,0 +1,30 @@
+.circle {
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: transparent;
+    border: 10px solid black;
+    position: relative;
+    box-sizing: border-box;
+  }
+  
+  .lines > li {
+    list-style: none;
+    height: 4px; /* line width on a circle border */
+    background-color: transparent; /* transparent lines inside circle */
+    width: 280px; /* circle diameter */
+    
+    position: absolute;
+    left: -10px; /* shift lines to left by border width */
+    top: calc(50% - 2px); /* shift lines by half of line height */
+  }
+  
+  .lines > li:nth-child(1) {
+    transform: rotate(0deg);
+  }
+  .lines > li:nth-child(2) {
+    transform: rotate(60deg);
+  }
+  .lines > li:nth-child(3) {
+    transform: rotate(-60deg);
+  }

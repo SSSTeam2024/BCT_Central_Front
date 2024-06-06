@@ -1,0 +1,51 @@
+.input-wrapper {
+    position: relative;
+    width: 100%;
+  }
+  
+  #autoCompleteFruit {
+    width: 100%;
+    padding-right: 30px; /* Make room for the icon */
+  }
+  
+  .dropdown-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+  
+  .email-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    border: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: #fff;
+    position: absolute;
+    width: 100%;
+    z-index: 1;
+    border-radius: 5px;
+  }
+  
+  .email-item {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .email-item:last-child {
+    border-bottom: none;
+  }
+  
+  .email-item:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .email-item:active {
+    background-color: #e0e0e0;
+  }
+  

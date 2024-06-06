@@ -1,0 +1,72 @@
+
+@media print {
+    .print-container {
+      display: flex;
+      flex-direction: row;
+      width: 100%; /* Ensure the container takes up the full width */
+    }
+    .card-logo {
+      margin-right: 50px; /* Adjust margin bottom for logo */
+    }
+  
+    h5 {
+      margin-top: 10px; /* Adjust margin top for h5 element */
+    }
+    .canvas-container {
+      width: 50%; /* Set the width of each canvas container */
+      margin-top: 20px; /* Add margin top */
+    }
+  
+    .canvas-container canvas {
+      width: 100%; /* Ensure the canvas fills its container */
+      border: 1px solid black;
+    }
+      /* Set margin space for the printed page */
+      @page {
+        margin: 20mm;
+        size: auto;
+        margin: 20px;
+      }
+    
+      body {
+        font-size: 12pt;
+        margin: 0;
+        padding: 0;
+      }
+    
+      /* Define styles for headers, logos, and other elements */
+      .page-content {
+        width: 100%;
+        padding: 0;
+        margin: 0;
+      }
+    
+      .card-logo {
+        margin-bottom: 20px; /* Add margin below logos */
+      }
+    
+      .card-header {
+        padding: 20px; /* Add padding to header sections */
+        margin-bottom: 20px; /* Add margin below headers */
+      }
+    
+      .section {
+        margin-bottom: 20px; /* Add margin between sections */
+      }
+    
+      /* Adjust layout for printing */
+      .page-content .row {
+        display: block;
+      }
+    
+  }
+  .print-button {
+    position: fixed;
+    bottom: 20px; /* Adjust as needed */
+    right: 20px; /* Adjust as needed */
+    z-index: 999; /* Ensure it's above other content */
+  }
+  
+  
+  
+  
