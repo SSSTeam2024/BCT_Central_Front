@@ -151,9 +151,7 @@ const PendingQuotes = () => {
         return (
           <span>
             <Link to={`/new-quote/${cell?._id!}`} state={cell}>
-              <span className="text-dark">
-                QT{cell?._id?.substring(18, 24)}
-              </span>
+              <span className="text-dark">{cell?.quote_ref!}</span>
             </Link>{" "}
             <i className="ph ph-eye" onClick={() => tog_QuoteInfo()}></i>
           </span>

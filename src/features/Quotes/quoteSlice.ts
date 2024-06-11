@@ -20,6 +20,7 @@ export interface Quote {
       lon: number;
     };
   };
+  quote_ref?: string;
   vehicle_type: string;
   id_visitor: string;
   school_id?: string;

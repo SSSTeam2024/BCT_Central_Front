@@ -246,7 +246,7 @@ const Bookings = () => {
         return (
           <span>
             <Link to={`/assign-quote/${cell?._id!}`} state={cell}>
-              <span className="text-dark">{cell?._id}</span>
+              <span className="text-dark">{cell?.quote_ref!}</span>
             </Link>{" "}
           </span>
         );

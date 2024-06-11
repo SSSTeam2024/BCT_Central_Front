@@ -2471,7 +2471,7 @@ const AddProgramm = (props: any) => {
                                           (vehicleType) => (
                                             <option
                                               value={
-                                                vehicleType.vehicle_type._id
+                                                vehicleType.vehicle_type.type
                                               }
                                               key={vehicleType.vehicle_type._id}
                                             >
