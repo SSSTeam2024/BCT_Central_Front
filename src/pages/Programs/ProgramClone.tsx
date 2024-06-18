@@ -55,7 +55,7 @@ const ProgramClone = (props: any) => {
   const [duration, setDuration] = useState("");
 
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyBbORSZJBXcqDnY6BbMx_JSP0l_9HLQSkw",
+    googleMapsApiKey: process.env.REACT_APP_MAPS_API!,
     libraries: ["places"],
   });
 
@@ -558,7 +558,7 @@ const ProgramClone = (props: any) => {
                                   <h5>Trip Times</h5>
                                 </div>
                                 <Row>
-                                <InputGroup>PickUp Time</InputGroup>
+                                  <InputGroup>PickUp Time</InputGroup>
                                   <Col lg={5}>
                                     <Flatpickr
                                       className="form-control"
@@ -572,7 +572,7 @@ const ProgramClone = (props: any) => {
                                     />
                                   </Col>
                                   <Col lg={5}>
-                                  <InputGroup>DropOff Time</InputGroup>
+                                    <InputGroup>DropOff Time</InputGroup>
                                     <Flatpickr
                                       className="form-control"
                                       options={{
@@ -585,8 +585,8 @@ const ProgramClone = (props: any) => {
                                     />
                                   </Col>
                                   <div>
-                                  <h5>Run Dates</h5>
-                                </div>
+                                    <h5>Run Dates</h5>
+                                  </div>
                                   <Col lg={5}>
                                     <div className="mb-3">
                                       <Flatpickr
@@ -639,15 +639,15 @@ const ProgramClone = (props: any) => {
                                     </div>
                                   </Col>
                                   <Col lg={5}>
-                                  <InputGroup>Free Days</InputGroup>
-                                  <Flatpickr
-                                        className="form-control flatpickr-input"
-                                        placeholder="Select Date"
-                                        options={{
-                                          dateFormat: "d M, Y",
-                                        }}
-                                        defaultValue={cloneLocation.state?.Date}
-                                      />
+                                    <InputGroup>Free Days</InputGroup>
+                                    <Flatpickr
+                                      className="form-control flatpickr-input"
+                                      placeholder="Select Date"
+                                      options={{
+                                        dateFormat: "d M, Y",
+                                      }}
+                                      defaultValue={cloneLocation.state?.Date}
+                                    />
                                   </Col>
                                 </Row>
                                 <div className="d-flex align-items-start gap-3 mt-4">

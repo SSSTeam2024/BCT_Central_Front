@@ -25,7 +25,7 @@ const ProgramDetail = () => {
   >([]);
 
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyBbORSZJBXcqDnY6BbMx_JSP0l_9HLQSkw",
+    googleMapsApiKey: process.env.REACT_APP_MAPS_API!,
     libraries: ["places"],
   });
   useEffect(() => {

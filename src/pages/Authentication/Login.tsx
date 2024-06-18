@@ -103,7 +103,7 @@ const Login = () => {
                     </Card.Header>
                     <Card.Body>
                       <p className="text-muted fs-15">
-                        Sign in to continue to School Dashboard.
+                        Sign in to continue to Bouden Coach Travel Dashboard.
                       </p>
                       <div className="p-2">
                         <div className="mb-3">

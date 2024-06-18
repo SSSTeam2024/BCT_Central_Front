@@ -2,16 +2,6 @@ import { Navigate } from "react-router-dom";
 
 import Dashboard from "pages/Dashboard";
 
-// Accounts
-import SignIn from "pages/Accounts/AuthenticationInner/SignIn";
-import PasswordReset from "pages/Accounts/AuthenticationInner/PasswordReset";
-import PasswordCreate from "pages/Accounts/AuthenticationInner/PasswordCreate";
-import SuccessMessage from "pages/Accounts/AuthenticationInner/SuccessMessage";
-import TwoStepVerify from "pages/Accounts/AuthenticationInner/TwoStepVerify";
-import BasicLogout from "pages/Accounts/AuthenticationInner/Logout";
-import Error404 from "pages/Accounts/AuthenticationInner/Error404";
-import Error500 from "pages/Accounts/AuthenticationInner/Error500";
-
 import UserProfile from "pages/Authentication/user-profile";
 
 //? Administration

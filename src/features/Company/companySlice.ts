@@ -26,7 +26,7 @@ export interface Company {
 export const companySlice = createApi({
   reducerPath: "company",
   baseQuery: fetchBaseQuery({
-    baseUrl: `${process.env.REACT_APP_BASE_URL}/api/company`,
+    baseUrl: `${process.env.REACT_APP_BASE_URL}/api/companies`,
   }),
   tagTypes: ["Company"],
   endpoints(builder) {

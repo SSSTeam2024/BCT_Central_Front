@@ -124,6 +124,7 @@ const PendingQuotes = () => {
   }, [selectedFromDate]);
 
   const { data: AllQuotes = [] } = useGetAllQuoteQuery();
+
   const result = AllQuotes.filter((bookings) => bookings.progress === "New");
   const filteredResult = result.filter(
     (quotes) =>
@@ -547,7 +548,7 @@ const PendingQuotes = () => {
                       <option value="Last Month">Last Month</option>
                     </select>
                   </Col>
-                  <Col lg={2}>
+                  {/* <Col lg={2}>
                     <Flatpickr
                       className="form-control flatpickr-input"
                       placeholder={selectedFromDate}
@@ -557,8 +558,8 @@ const PendingQuotes = () => {
                       defaultValue={selectedFromDate}
                       onChange={handleFromDateChange}
                     />
-                  </Col>
-                  <Col lg={2}>
+                  </Col> */}
+                  {/* <Col lg={2}>
                     <Flatpickr
                       className="form-control flatpickr-input"
                       placeholder={selectedToDate}
@@ -568,15 +569,15 @@ const PendingQuotes = () => {
                       defaultValue={selectedToDate}
                       onChange={handleToDateChange}
                     />
-                  </Col>
+                  </Col> */}
                 </Row>
               </Card.Body>
             </Card>
-            <Card id="shipmentsList">
+            <Card>
               <Card.Header className="border-bottom-dashed">
-                <Row className="g-2">
-                  <Col lg={2} className="d-flex justify-content-center">
-                    {isChecked ? (
+                <Row>
+                  <Col lg={2} className="mb-2">
+                    {isChecked && (
                       <ul className="hstack gap-2 list-unstyled mb-0">
                         <li>
                           <Link
@@ -598,12 +599,11 @@ const PendingQuotes = () => {
                           </Link>
                         </li>
                       </ul>
-                    ) : (
-                      ""
                     )}
                   </Col>
-                  <Col lg={8} className="d-flex justify-content-center">
-                    <div className="search-box">
+                  <Col lg={2}></Col>
+                  <Col lg={8}>
+                    <div className="search-box w-50">
                       <input
                         type="text"
                         className="form-control search"
@@ -612,7 +612,7 @@ const PendingQuotes = () => {
                       <i className="ri-search-line search-icon"></i>
                     </div>
                   </Col>
-                  <Col lg={2} className="d-flex justify-content-end">
+                  {/* <Col lg={4} className="d-flex justify-content-end">
                     <div
                       className="btn-group btn-group-sm mt-2"
                       role="group"
@@ -628,13 +628,13 @@ const PendingQuotes = () => {
                         Print
                       </button>
                     </div>
-                  </Col>
+                  </Col> */}
                 </Row>
               </Card.Header>
               <Card.Body>
                 <DataTable
                   columns={filteredColumns}
-                  data={result}
+                  data={result.reverse()}
                   selectableRows
                   onSelectedRowsChange={handleChange}
                   pagination
@@ -737,6 +737,19 @@ const PendingQuotes = () => {
                       key={index}
                     >
                       <table>
+                        <tr>
+                          <td>
+                            {affiliate.jobStatus === "Refused" ? (
+                              <span className="badge bg-danger">
+                                {affiliate.jobStatus}
+                              </span>
+                            ) : (
+                              <span className="badge bg-info">
+                                {affiliate.jobStatus}
+                              </span>
+                            )}
+                          </td>
+                        </tr>
                         <tr>
                           <td>
                             <h6>Price :</h6>{" "}

@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Card, Row } from "react-bootstrap";
 
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import SimpleBar from "simplebar-react";
 import { useGetAllAffiliatesQuery } from "features/Affiliate/affiliateSlice";
@@ -50,6 +50,7 @@ const ModalAffiliate = () => {
     []
   );
 
+  const affiliateLocation = useLocation();
   return (
     <React.Fragment>
       <Row>
@@ -57,16 +58,20 @@ const ModalAffiliate = () => {
           <div className="card card-height-100">
             <SimpleBar style={{ maxHeight: "445px" }}>
               {(acceptedAffiliates || []).map((item, key) => (
-                <div
-                  className="p-3 border-bottom border-bottom-dashed"
-                  key={key}
-                  onClick={() => open()}
-                >
-                  <div className="d-flex align-items-center gap-2">
-                    <div className="flex-grow-1">
-                      <h6 className="mb-1">{item.name}</h6>
+                <div className="p-3 border-bottom border-bottom-dashed">
+                  <Link
+                    to="#"
+                    // className="p-3 border-bottom border-bottom-dashed"
+                    key={key}
+                    onClick={() => open()}
+                    state={item}
+                  >
+                    <div className="d-flex align-items-center gap-2">
+                      <div className="flex-grow-1">
+                        <h6 className="mb-1">{item.name}</h6>
+                      </div>
                     </div>
-                  </div>
+                  </Link>
                 </div>
               ))}
             </SimpleBar>
@@ -76,7 +81,9 @@ const ModalAffiliate = () => {
           <div className="col-xxl-6 col-lg-6">
             <div className="card card-height-100">
               <div className="card-header align-items-center d-flex">
-                <h4 className="card-title mb-0 flex-grow-1">Red Rose Travel</h4>
+                <h4 className="card-title mb-0 flex-grow-1">
+                  {affiliateLocation.state.name}
+                </h4>
               </div>
 
               <Card.Body id="transactionDetails">
@@ -91,7 +98,7 @@ const ModalAffiliate = () => {
                         </td>
                         <td>
                           <span className="fw-semibold">
-                            bookings@albatrosscars.com
+                            {affiliateLocation.state.email}
                           </span>
                         </td>
                       </tr>
@@ -102,7 +109,9 @@ const ModalAffiliate = () => {
                           </span>
                         </td>
                         <td>
-                          <span className="fw-semibold">01332 345343</span>
+                          <span className="fw-semibold">
+                            {affiliateLocation.state.phone}
+                          </span>
                         </td>
                       </tr>
                       <tr>
@@ -113,7 +122,7 @@ const ModalAffiliate = () => {
                         </td>
                         <td>
                           <span className="fw-semibold">
-                            14A Midland Rd, Derby
+                            {affiliateLocation.state.address}
                           </span>
                         </td>
                       </tr>
@@ -124,7 +133,9 @@ const ModalAffiliate = () => {
                           </span>
                         </td>
                         <td>
-                          <span className="fw-semibold">14 Dec 2021</span>
+                          <span className="fw-semibold">
+                            {affiliateLocation.state.service_date}
+                          </span>
                         </td>
                       </tr>
 
@@ -135,7 +146,7 @@ const ModalAffiliate = () => {
                           </span>
                         </td>
                         <td>
-                          <Status status={paymentDetails.status} />
+                          <Status status={paymentDetails.statusAffiliate} />
                         </td>
                       </tr>
                     </tbody>

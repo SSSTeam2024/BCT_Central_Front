@@ -13,7 +13,7 @@ import { useGetAllPricingCalendarsQuery } from "features/PricingCalendar/pricing
 import { useGetAllModePricesQuery } from "features/modePrice/modePriceSlice";
 
 const Newquote = () => {
-  document.title = "Create New Quote | Bouden Coach Travel";
+  document.title = "Add Price To Quote | Bouden Coach Travel";
   const quoteLocation = useLocation();
 
   const { data: AllPricingCalendar = [] } = useGetAllPricingCalendarsQuery();
@@ -145,13 +145,13 @@ const Newquote = () => {
                       </div>
                       <div className="flex-grow-1 hstack gap-2">
                         <h5 className="card-title mb-1">
-                          Quote n°: {quoteLocation.state?._id!}
+                          Quote n°: {quoteLocation.state?.quote_ref!}
                         </h5>
                         <span className="badge bg-danger">
                           {quoteLocation.state.status}
                         </span>
                       </div>
-                      <div className="hstack gap-2 justify-content-end">
+                      {/* <div className="hstack gap-2 justify-content-end">
                         <Button
                           variant="success"
                           id="add-btn"
@@ -168,7 +168,7 @@ const Newquote = () => {
                         >
                           Quick Save
                         </Button>
-                      </div>
+                      </div> */}
                     </div>
                     <Card.Header>
                       <div className="d-flex align-items-center p-1">
@@ -482,21 +482,25 @@ const Newquote = () => {
                                 </div>
                               </Col>
                               {/* Suggested Price  == Done */}
-                              {allModes[0].type === "0" ? "" : <Col lg={3}>
-                                <div className="mb-3">
-                                  <Form.Label htmlFor="automatic_cost">
-                                    Suggested Price
-                                  </Form.Label>
-                                  <Form.Control
-                                    type="number"
-                                    id="automatic_cost"
-                                    name="automatic_cost"
-                                    placeholder="00.00"
-                                    value={quoteById?.manual_cost!}
-                                    readOnly
-                                  />
-                                </div>
-                              </Col>}
+                              {allModes[0].type === "0" ? (
+                                ""
+                              ) : (
+                                <Col lg={3}>
+                                  <div className="mb-3">
+                                    <Form.Label htmlFor="automatic_cost">
+                                      Suggested Price
+                                    </Form.Label>
+                                    <Form.Control
+                                      type="number"
+                                      id="automatic_cost"
+                                      name="automatic_cost"
+                                      placeholder="00.00"
+                                      value={quoteById?.manual_cost!}
+                                      readOnly
+                                    />
+                                  </div>
+                                </Col>
+                              )}
                               {/* Total Price == Done */}
                               <Col lg={2}>
                                 <div className="mb-3">
@@ -517,7 +521,7 @@ const Newquote = () => {
                                 </div>
                               </Col>
                               {/* Deposit %  == Done */}
-                              <Col lg={1}>
+                              <Col lg={2}>
                                 <div className="mb-3">
                                   <Form.Label htmlFor="deposit_percentage">
                                     Deposit %
@@ -560,14 +564,14 @@ const Newquote = () => {
                               >
                                 Save & Send
                               </Button>
-                              <Button
+                              {/* <Button
                                 variant="info"
                                 id="add-btn"
                                 className="btn-sm"
                                 type="submit"
                               >
                                 Quick Save
-                              </Button>
+                              </Button> */}
                             </div>
                           </Col>
                         </Row>
