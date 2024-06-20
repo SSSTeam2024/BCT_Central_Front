@@ -87,6 +87,17 @@ export const emailSlice = createApi({
         },
         invalidatesTags: ["NewEmail"],
       }),
+      sendAllQueueEmails: builder.mutation<void, any>({
+        query() {
+          return {
+            url: "/sendAllQueueEmails",
+            method: "POST",
+            body: {
+          },
+          };
+        },
+        invalidatesTags: ["NewEmail"],
+      }),
     };
   },
 });
@@ -97,5 +108,6 @@ export const {
   useFetchEmailByIdQuery,
   useUpdateEmailTemplateMutation,
   useGetAllEmailQuery,
-  useSendNewEmailMutation
+  useSendNewEmailMutation,
+  useSendAllQueueEmailsMutation
 } = emailSlice;

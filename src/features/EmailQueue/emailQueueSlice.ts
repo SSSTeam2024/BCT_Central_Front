@@ -14,12 +14,16 @@ export interface DeleteEmailQueues {
     ids?: string[];
   }
 
+  export interface MultipleEmailQueue {
+    emails?: EmailQueue[];
+  }
+
 export const emailQueueSlice = createApi({
   reducerPath: "emailQueue",
   baseQuery: fetchBaseQuery({
     baseUrl: `${process.env.REACT_APP_BASE_URL}/api/emailQueue`,
   }),
-  tagTypes: ["EmailQueue", "DeleteEmailQueues"],
+  tagTypes: ["EmailQueue", "DeleteEmailQueues", "MultipleEmailQueue"],
   endpoints(builder) {
     return {
       getAllEmailQueues: builder.query<EmailQueue[], number | void>({
@@ -37,6 +41,16 @@ export const emailQueueSlice = createApi({
           };
         },
         invalidatesTags: ["EmailQueue"],
+      }),
+      addMultipleEmailQueue: builder.mutation<void, MultipleEmailQueue>({
+        query(payload) {
+          return {
+            url: "/newMultipleEmailQueue",
+            method: "POST",
+            body: payload,
+          };
+        },
+        invalidatesTags: ["EmailQueue", "MultipleEmailQueue"],
       }),
       deleteEmailQueue: builder.mutation<void, string>({
         query: (_id) => ({
@@ -61,5 +75,6 @@ export const {
   useAddNewEmailQueueMutation,
   useGetAllEmailQueuesQuery,
   useDeleteEmailQueueMutation,
-  useDeleteMultipleEmailQueuesMutation
+  useDeleteMultipleEmailQueuesMutation,
+  useAddMultipleEmailQueueMutation
 } = emailQueueSlice;

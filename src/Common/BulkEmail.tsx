@@ -16,6 +16,11 @@ import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
 import { GoogleApiWrapper, Map, Marker, Circle } from "google-maps-react";
 import { useGetAllShortCodesQuery } from "features/ShortCode/shortCodeSlice";
 import { useGetAllQuoteQuery } from "features/Quotes/quoteSlice";
+import {
+  EmailQueue,
+  useAddMultipleEmailQueueMutation,
+  useAddNewEmailQueueMutation,
+} from "features/EmailQueue/emailQueueSlice";
 
 const LoadingContainer = () => <div>Loading...</div>;
 interface Stop {
@@ -161,40 +166,28 @@ const BulkEmail = (props: any) => {
       quote.progress === selectedJobStatus && quote.id_affiliate !== null
   );
 
-  const [saveEmailSentMutation] = useAddNewEmailSentMutation();
+  const [newMultipleEmailQueueMutation] = useAddMultipleEmailQueueMutation();
 
   const [sendNewEmail, setSendNewEmail] = useState(initialSendNewEmailData);
 
   const { newEmail, subject, body, file, sender, name } = sendNewEmail;
-
-  const onSubmitSendNewEmail = (e: React.FormEvent<HTMLFormElement>) => {
+  let emails: EmailQueue[] = [];
+  const onSubmitSendNewEmail = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       if (selectedSendTo === "AllCustomers") {
-        const sendEmailsWithDelay = (index: number) => {
-          if (index >= AllVisitors.length) return;
-
-          const element = AllVisitors[index];
-          sendNewEmail["body"] = props.data;
-          sendNewEmail["newEmail"] = element.email;
-          sendNewEmail["subject"] = subjectNewEmail;
-          sendNewEmail["file"] = OneAttachment?.attachment!;
-          sendNewEmail["sender"] = user?.email;
-          sendNewEmail["name"] = element?.name;
-          sendNewEmailMutation(sendNewEmail).then(() => {
-            saveEmailSentMutation({
-              date: currentDate.toDateString(),
-              subjectEmail: subjectNewEmail,
-              from: user?.email,
-              to: element.email,
-            }).then(() => {
-              setTimeout(() => {
-                sendEmailsWithDelay(index + 1);
-              }, 1000);
-            });
+        AllVisitors.forEach((element) => {
+          emails.push({
+            newEmail: element.email!,
+            subject: subjectNewEmail,
+            body: props.data,
+            file: OneAttachment?.attachment!,
+            sender: user?.email,
+            name: element?.name!,
           });
-        };
-        sendEmailsWithDelay(0);
+        });
+
+        await newMultipleEmailQueueMutation({ emails: emails });
         notifySuccess();
         navigate("/emails-sent");
       }
@@ -203,127 +196,117 @@ const BulkEmail = (props: any) => {
         selectedJourney === "" &&
         selectedJobStatus === ""
       ) {
-        const sendEmailsWithDelay = (index: number) => {
-          if (index >= acceptedAffiliates.length) return;
-          const element = acceptedAffiliates[index];
-          sendNewEmail["body"] = props.data;
-          sendNewEmail["newEmail"] = element.email;
-          sendNewEmail["subject"] = subjectNewEmail;
-          sendNewEmail["file"] = OneAttachment?.attachment!;
-          sendNewEmail["sender"] = user?.email;
-          sendNewEmail["name"] = element?.name;
-          sendNewEmailMutation(sendNewEmail).then(() => {
-            saveEmailSentMutation({
-              date: currentDate.toDateString(),
-              subjectEmail: subjectNewEmail,
-              from: user?.email,
-              to: element.email,
-            }).then(() => {
-              setTimeout(() => {
-                sendEmailsWithDelay(index + 1);
-              }, 1000);
-            });
+        acceptedAffiliates.forEach((element) => {
+          emails.push({
+            newEmail: element.email!,
+            subject: subjectNewEmail,
+            body: props.data,
+            file: OneAttachment?.attachment!,
+            sender: user?.email,
+            name: element?.name!,
           });
-        };
-        sendEmailsWithDelay(0);
+        });
+
+        await newMultipleEmailQueueMutation({ emails: emails });
         notifySuccess();
         navigate("/emails-sent");
       }
-      if (
-        selectedSendTo === "AllAffiliates" &&
-        selectedJourney !== "" &&
-        selectedJobStatus === ""
-      ) {
-        const sendEmailsWithDelay = (index: number) => {
-          if (index >= filtredQuoteJourney.length) return;
-          const element: any = filtredQuoteJourney[index];
-          sendNewEmail["body"] = props.data;
-          sendNewEmail["newEmail"] = element?.id_affiliate?.email!;
-          sendNewEmail["subject"] = subjectNewEmail;
-          sendNewEmail["file"] = OneAttachment?.attachment!;
-          sendNewEmail["sender"] = user?.email;
-          sendNewEmail["name"] = element?.name;
-          sendNewEmailMutation(sendNewEmail).then(() => {
-            saveEmailSentMutation({
-              date: currentDate.toDateString(),
-              quoteID: element?._id,
-              subjectEmail: subjectNewEmail,
-              from: user?.email,
-              to: element?.id_affiliate?.email!,
-            }).then(() => {
-              setTimeout(() => {
-                sendEmailsWithDelay(index + 1);
-              }, 1000);
-            });
-          });
-        };
-        sendEmailsWithDelay(0);
-        notifySuccess();
-        navigate("/emails-sent");
-      }
-      if (
-        selectedSendTo === "AllAffiliates" &&
-        selectedJobStatus !== "" &&
-        selectedJourney === ""
-      ) {
-        const sendEmailsWithDelay = (index: number) => {
-          if (index >= filtredQuoteJobStatus.length) return;
-          const element: any = filtredQuoteJobStatus[index];
-          sendNewEmail["body"] = props.data;
-          sendNewEmail["newEmail"] = element?.id_affiliate?.email!;
-          sendNewEmail["subject"] = subjectNewEmail;
-          sendNewEmail["file"] = OneAttachment?.attachment!;
-          sendNewEmail["sender"] = user?.email;
-          sendNewEmail["name"] = element?.name;
-          sendNewEmailMutation(sendNewEmail).then(() => {
-            saveEmailSentMutation({
-              date: currentDate.toDateString(),
-              quoteID: element?._id,
-              subjectEmail: subjectNewEmail,
-              from: user?.email,
-              to: element?.id_affiliate?.email!,
-            }).then(() => {
-              setTimeout(() => {
-                sendEmailsWithDelay(index + 1);
-              }, 1000);
-            });
-          });
-        };
-        sendEmailsWithDelay(0);
-        notifySuccess();
-        navigate("/emails-sent");
-      }
-      if (
-        selectedSendTo === "AllAffiliates" &&
-        selectedJourney !== "" &&
-        selectedJobStatus !== ""
-      ) {
-        const sendEmailsWithDelay = (index: number) => {
-          if (index >= filtredQuoteJobStatusAndJourneyType.length) return;
-          const element: any = filtredQuoteJobStatusAndJourneyType[index];
-          sendNewEmail["body"] = props.data;
-          sendNewEmail["newEmail"] = element?.id_affiliate?.email!;
-          sendNewEmail["subject"] = subjectNewEmail;
-          sendNewEmail["file"] = OneAttachment?.attachment!;
-          sendNewEmail["name"] = element?.name;
-          sendNewEmailMutation(sendNewEmail).then(() => {
-            saveEmailSentMutation({
-              date: currentDate.toDateString(),
-              quoteID: element?._id,
-              subjectEmail: subjectNewEmail,
-              from: user?.email,
-              to: element?.id_affiliate?.email!,
-            }).then(() => {
-              setTimeout(() => {
-                sendEmailsWithDelay(index + 1);
-              }, 1000);
-            });
-          });
-        };
-        sendEmailsWithDelay(0);
-        notifySuccess();
-        navigate("/emails-sent");
-      }
+
+      // if (
+      //   selectedSendTo === "AllAffiliates" &&
+      //   selectedJourney !== "" &&
+      //   selectedJobStatus === ""
+      // ) {
+      //   const sendEmailsWithDelay = (index: number) => {
+      //     if (index >= filtredQuoteJourney.length) return;
+      //     const element: any = filtredQuoteJourney[index];
+      //     sendNewEmail["body"] = props.data;
+      //     sendNewEmail["newEmail"] = element?.id_affiliate?.email!;
+      //     sendNewEmail["subject"] = subjectNewEmail;
+      //     sendNewEmail["file"] = OneAttachment?.attachment!;
+      //     sendNewEmail["sender"] = user?.email;
+      //     sendNewEmail["name"] = element?.name;
+      //     sendNewEmailMutation(sendNewEmail).then(() => {
+      //       saveEmailSentMutation({
+      //         date: currentDate.toDateString(),
+      //         quoteID: element?._id,
+      //         subjectEmail: subjectNewEmail,
+      //         from: user?.email,
+      //         to: element?.id_affiliate?.email!,
+      //       }).then(() => {
+      //         setTimeout(() => {
+      //           sendEmailsWithDelay(index + 1);
+      //         }, 1000);
+      //       });
+      //     });
+      //   };
+      //   sendEmailsWithDelay(0);
+      //   notifySuccess();
+      //   navigate("/emails-sent");
+      // }
+      // if (
+      //   selectedSendTo === "AllAffiliates" &&
+      //   selectedJobStatus !== "" &&
+      //   selectedJourney === ""
+      // ) {
+      //   const sendEmailsWithDelay = (index: number) => {
+      //     if (index >= filtredQuoteJobStatus.length) return;
+      //     const element: any = filtredQuoteJobStatus[index];
+      //     sendNewEmail["body"] = props.data;
+      //     sendNewEmail["newEmail"] = element?.id_affiliate?.email!;
+      //     sendNewEmail["subject"] = subjectNewEmail;
+      //     sendNewEmail["file"] = OneAttachment?.attachment!;
+      //     sendNewEmail["sender"] = user?.email;
+      //     sendNewEmail["name"] = element?.name;
+      //     sendNewEmailMutation(sendNewEmail).then(() => {
+      //       saveEmailSentMutation({
+      //         date: currentDate.toDateString(),
+      //         quoteID: element?._id,
+      //         subjectEmail: subjectNewEmail,
+      //         from: user?.email,
+      //         to: element?.id_affiliate?.email!,
+      //       }).then(() => {
+      //         setTimeout(() => {
+      //           sendEmailsWithDelay(index + 1);
+      //         }, 1000);
+      //       });
+      //     });
+      //   };
+      //   sendEmailsWithDelay(0);
+      //   notifySuccess();
+      //   navigate("/emails-sent");
+      // }
+      // if (
+      //   selectedSendTo === "AllAffiliates" &&
+      //   selectedJourney !== "" &&
+      //   selectedJobStatus !== ""
+      // ) {
+      //   const sendEmailsWithDelay = (index: number) => {
+      //     if (index >= filtredQuoteJobStatusAndJourneyType.length) return;
+      //     const element: any = filtredQuoteJobStatusAndJourneyType[index];
+      //     sendNewEmail["body"] = props.data;
+      //     sendNewEmail["newEmail"] = element?.id_affiliate?.email!;
+      //     sendNewEmail["subject"] = subjectNewEmail;
+      //     sendNewEmail["file"] = OneAttachment?.attachment!;
+      //     sendNewEmail["name"] = element?.name;
+      //     sendNewEmailMutation(sendNewEmail).then(() => {
+      //       saveEmailSentMutation({
+      //         date: currentDate.toDateString(),
+      //         quoteID: element?._id,
+      //         subjectEmail: subjectNewEmail,
+      //         from: user?.email,
+      //         to: element?.id_affiliate?.email!,
+      //       }).then(() => {
+      //         setTimeout(() => {
+      //           sendEmailsWithDelay(index + 1);
+      //         }, 1000);
+      //       });
+      //     });
+      //   };
+      //   sendEmailsWithDelay(0);
+      //   notifySuccess();
+      //   navigate("/emails-sent");
+      // }
     } catch (error) {
       notifyError(error);
     }

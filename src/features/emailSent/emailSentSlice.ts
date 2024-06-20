@@ -12,7 +12,7 @@ export interface EmailSent {
 export const emailSentSlice = createApi({
   reducerPath: "EmailSent",
   baseQuery: fetchBaseQuery({
-    baseUrl: "${process.env.REACT_APP_BASE_URL}/api/emailSent",
+    baseUrl: `${process.env.REACT_APP_BASE_URL}/api/emailSent`,
   }),
   tagTypes: ["EmailSent"],
   endpoints(builder) {

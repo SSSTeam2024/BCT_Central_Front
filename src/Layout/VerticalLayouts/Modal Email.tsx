@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Row } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import DataTable from "react-data-table-component";
 import Swal from "sweetalert2";
 import {
@@ -8,7 +8,10 @@ import {
   useDeleteMultipleEmailQueuesMutation,
   useGetAllEmailQueuesQuery,
 } from "features/EmailQueue/emailQueueSlice";
-import { useSendNewEmailMutation } from "features/Emails/emailSlice";
+import {
+  useSendAllQueueEmailsMutation,
+  useSendNewEmailMutation,
+} from "features/Emails/emailSlice";
 import { useAddNewEmailSentMutation } from "features/emailSent/emailSentSlice";
 
 interface ChildProps {
@@ -17,6 +20,8 @@ interface ChildProps {
 }
 
 const ModalEmail: React.FC<ChildProps> = ({ setmodal_Email, modal_Email }) => {
+  const navigate = useNavigate();
+
   const { data: AllEmailQueue = [] } = useGetAllEmailQueuesQuery();
 
   const [deleteEmailQueue] = useDeleteEmailQueueMutation();
@@ -115,6 +120,12 @@ const ModalEmail: React.FC<ChildProps> = ({ setmodal_Email, modal_Email }) => {
         name: queue.name,
       };
       await sendNewEmailMutation(emailData);
+      await saveEmailSentMutation({
+        date: currentDate.toDateString(),
+        subjectEmail: queue.subject,
+        from: queue.sender,
+        to: queue.newEmail!,
+      });
       await deleteEmailQueue(queue?._id!);
       notifySuccess();
       setmodal_Email(!modal_Email);
@@ -182,6 +193,7 @@ const ModalEmail: React.FC<ChildProps> = ({ setmodal_Email, modal_Email }) => {
     },
   ];
 
+  const [sendAllQueueEmailsMutation] = useSendAllQueueEmailsMutation();
   const onSubmitSendAllEmails = async (
     e?: React.MouseEvent<HTMLAnchorElement, MouseEvent>
   ) => {
@@ -189,35 +201,14 @@ const ModalEmail: React.FC<ChildProps> = ({ setmodal_Email, modal_Email }) => {
       e.preventDefault();
     }
     try {
-      for (const queue of allEmailQueue) {
-        await onSubmitSendNewEmail(queue);
-      }
+      await sendAllQueueEmailsMutation({});
+      setmodal_Email(!modal_Email);
       notifySuccess();
+      navigate("/emails-sent");
     } catch (error) {
       notifyError(error);
     }
   };
-
-  const handleNewEmailQueue = (newEmailData: any) => {
-    setAllEmailQueue([
-      ...allEmailQueue,
-      { ...newEmailData, createdAt: Date.now() },
-    ]);
-  };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const now = Date.now();
-      allEmailQueue.forEach((queue) => {
-        if (now - queue.createdAt >= 30000) {
-          // 30 seconds
-          onSubmitSendNewEmail(queue);
-        }
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [allEmailQueue]);
 
   let arrToDelete: string[] = [];
   const [deleteMultipleEmailQueuesMutation] =
@@ -241,6 +232,7 @@ const ModalEmail: React.FC<ChildProps> = ({ setmodal_Email, modal_Email }) => {
       notifyError(error);
     }
   };
+
   return (
     <React.Fragment>
       <Row>

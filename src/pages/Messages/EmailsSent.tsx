@@ -14,6 +14,7 @@ const EmailsSent = () => {
   document.title = "Emails Sent | Bouden Coach Travel";
   const lottieRef3 = useRef<LottieRefCurrentProps>(null);
   const { data: AllSentEmails = [], isLoading } = useGetAllSentEmailsQuery();
+  console.log(AllSentEmails);
   const [deleteEmailSent] = useDeleteEmailSentMutation();
 
   const swalWithBootstrapButtons = Swal.mixin({
