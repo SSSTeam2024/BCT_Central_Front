@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAddAssignDriverMutation } from "features/Quotes/quoteSlice";
+import {
+  useAddAssignDriverMutation,
+  useGetQuotesByReferenceQuery,
+} from "features/Quotes/quoteSlice";
 import Swal from "sweetalert2";
 import { useGetAllDriverQuery } from "features/Driver/driverSlice";
 import { useGetAllVehiclesQuery } from "features/Vehicles/vehicleSlice";
@@ -32,6 +35,9 @@ const NewQuoteBook = () => {
 
   const { data: AllDrivers = [] } = useGetAllDriverQuery();
   const { data: AllVehicles = [] } = useGetAllVehiclesQuery();
+  const { data: quotesByReference = [] } = useGetQuotesByReferenceQuery(
+    quoteLocation.state.quote_ref
+  );
 
   const result = AllVehicles.filter(
     (vehicle) => vehicle.statusVehicle === "Active"
@@ -653,26 +659,53 @@ const NewQuoteBook = () => {
                       </div>
                     </Card.Header>
                     <Card.Body>
-                      <Row>
-                        <Col lg={12}>
-                          <h6>Pickup date</h6>
-                          <Form.Label>
-                            {quoteLocation.state.estimated_start_time}
-                          </Form.Label>
-                        </Col>
-                        <Col lg={12}>
-                          <h6>Collection Address</h6>
-                          <Form.Label>
-                            {quoteLocation.state.start_point?.placeName!}
-                          </Form.Label>
-                        </Col>
-                        <Col lg={12}>
-                          <h6>Destination Address</h6>
-                          <Form.Label>
-                            {quoteLocation.state.destination_point?.placeName!}
-                          </Form.Label>
-                        </Col>
+                      <Row className="mb-2">
+                        <h5>Journey 01</h5>
+                        <table border={1}>
+                          <tr>
+                            <td>Collection</td>
+                            <td>Destination</td>
+                            <td>Pickup Date</td>
+                            <td>Pickup Time</td>
+                          </tr>
+                          <tr>
+                            <td>
+                              {quotesByReference[0]?.start_point?.placeName!}
+                            </td>
+                            <td>
+                              {
+                                quotesByReference[0]?.destination_point
+                                  ?.placeName!
+                              }
+                            </td>
+                            <td>{quotesByReference[0]?.date!}</td>
+                            <td>{quotesByReference[0]?.pickup_time!}</td>
+                          </tr>
+                        </table>
                       </Row>
+                      {quotesByReference.map((quote: any) =>
+                        quote?.type! === "Return" ? (
+                          <Row>
+                            <h5>Journey 02</h5>
+                            <table border={1}>
+                              <tr>
+                                <td>Collection</td>
+                                <td>Destination</td>
+                                <td>Pickup Date</td>
+                                <td>Pickup Time</td>
+                              </tr>
+                              <tr>
+                                <td>{quote?.start_point?.placeName!}</td>
+                                <td>{quote?.destination_point?.placeName!}</td>
+                                <td>{quote?.date!}</td>
+                                <td>{quote?.pickup_time!}</td>
+                              </tr>
+                            </table>
+                          </Row>
+                        ) : (
+                          ""
+                        )
+                      )}
                     </Card.Body>
                   </Card>
                 </Col>

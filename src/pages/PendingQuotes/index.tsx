@@ -125,18 +125,15 @@ const PendingQuotes = () => {
 
   const { data: AllQuotes = [] } = useGetAllQuoteQuery();
 
-  const result = AllQuotes.filter((bookings) => bookings.progress === "New");
+  const result = AllQuotes.filter(
+    (bookings) => bookings.progress === "New" && bookings?.type! === "One way"
+  );
+
   const filteredResult = result.filter(
     (quotes) =>
       quotes.date === selectedFromDate &&
       quotes?.dropoff_date! <= selectedToDate
   );
-
-  const [modal_QuoteInfo, setmodal_QuoteInfo] = useState<boolean>(false);
-
-  function tog_QuoteInfo() {
-    setmodal_QuoteInfo(!modal_QuoteInfo);
-  }
 
   const [isChecked, setIsChecked] = useState<boolean>(false);
   const [selectedRow, setSelectedRow] = useState<any>();
@@ -152,14 +149,14 @@ const PendingQuotes = () => {
         return (
           <span>
             <Link to={`/new-quote/${cell?._id!}`} state={cell}>
-              <span className="text-dark">{cell?.quote_ref!}</span>
-            </Link>{" "}
-            <i className="ph ph-eye" onClick={() => tog_QuoteInfo()}></i>
+              <span className="text-info">
+                <u>{cell?.quote_ref!}</u>
+              </span>
+            </Link>
           </span>
         );
       },
       sortable: true,
-      width: "220px",
     },
     {
       name: (

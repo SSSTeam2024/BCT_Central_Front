@@ -102,11 +102,29 @@ const Bookings = () => {
   const result = AllQuotes.filter(
     (bookings) =>
       (bookings.progress === "Booked" &&
-        bookings.status === "Driver Allocated") ||
+        bookings.status === "Driver Allocated" &&
+        bookings?.type! === "One way") ||
       (bookings.progress === "Booked" &&
-        bookings.status === "Vehicle Allocated") ||
-      (bookings.progress === "Booked" && bookings.status === "Allocated") ||
-      (bookings.progress === "Booked" && bookings.status === "Booked")
+        bookings.status === "Vehicle Allocated" &&
+        bookings?.type! === "One way") ||
+      (bookings.progress === "Booked" &&
+        bookings.status === "Allocated" &&
+        bookings?.type! === "One way") ||
+      (bookings.progress === "Booked" &&
+        bookings.status === "Booked" &&
+        bookings?.type! === "One way") ||
+      (bookings.progress === "Accepted" &&
+        bookings.status === "Driver Allocated" &&
+        bookings?.type! === "One way") ||
+      (bookings.progress === "Accepted" &&
+        bookings.status === "Vehicle Allocated" &&
+        bookings?.type! === "One way") ||
+      (bookings.progress === "Accepted" &&
+        bookings.status === "Allocated" &&
+        bookings?.type! === "One way") ||
+      (bookings.progress === "Accepted" &&
+        bookings.status === "Booked" &&
+        bookings?.type! === "One way")
   );
 
   const privateHiredJobs = result.filter(
@@ -246,7 +264,9 @@ const Bookings = () => {
         return (
           <span>
             <Link to={`/assign-quote/${cell?._id!}`} state={cell}>
-              <span className="text-dark">{cell?.quote_ref!}</span>
+              <span className="text-info">
+                <u>{cell?.quote_ref!}</u>
+              </span>
             </Link>{" "}
           </span>
         );
@@ -1168,7 +1188,10 @@ const Bookings = () => {
             centered
           >
             <Modal.Body className="p-4">
-              <ModalAssignVehicle assigned={modal_AssignVehicle} />
+              <ModalAssignVehicle
+                modal_AssignVehicle={modal_AssignVehicle}
+                setModal_AssignVehicle={setModal_AssignVehicle}
+              />
             </Modal.Body>
           </Modal>
           {/* Modal To Cancel Job */}

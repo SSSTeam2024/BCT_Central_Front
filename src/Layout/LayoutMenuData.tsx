@@ -19,7 +19,8 @@ const Navdata = () => {
   const [isHelp, setIsHelp] = useState(false);
   const { data: allQuotes = [] } = useGetAllQuoteQuery();
   let resultPendingQuotes = allQuotes.filter(
-    (pendingQuotes) => pendingQuotes.progress === "New"
+    (pendingQuotes) =>
+      pendingQuotes.progress === "New" && pendingQuotes?.type! === "One way"
   );
   const { data: allVisitors = [] } = useGetAllVisitorsQuery();
   const new_visitor = allVisitors.filter(

@@ -7,6 +7,7 @@ import { useGetAllJourneyQuery } from "features/Journeys/journeySlice";
 import {
   useAddSendBookEmailMutation,
   useGetQuoteByIdQuery,
+  useGetQuotesByReferenceQuery,
 } from "features/Quotes/quoteSlice";
 import Swal from "sweetalert2";
 import { useGetAllPricingCalendarsQuery } from "features/PricingCalendar/pricingCalendar";
@@ -19,7 +20,9 @@ const Newquote = () => {
   const { data: AllPricingCalendar = [] } = useGetAllPricingCalendarsQuery();
   const { data: allModes = [] } = useGetAllModePricesQuery();
   const { data: quoteById } = useGetQuoteByIdQuery(quoteLocation.state._id);
-
+  const { data: quotesByReference = [] } = useGetQuotesByReferenceQuery(
+    quoteLocation.state.quote_ref
+  );
   // The selected Type
   const [selectedType, setSelectedType] = useState<String>();
 
@@ -74,6 +77,9 @@ const Newquote = () => {
     deposit_amount: "",
     deposit_percentage: "",
     total_price: "",
+    type: "",
+    return_date: "",
+    return_time: "",
   };
 
   const [bookEmail, setBookEmail] = useState(initialBookEmail);
@@ -86,6 +92,9 @@ const Newquote = () => {
     deposit_amount,
     deposit_percentage,
     total_price,
+    type,
+    return_date,
+    return_time,
   } = bookEmail;
   const navigate = useNavigate();
   const onChangeBookEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,6 +128,15 @@ const Newquote = () => {
       bookEmail["deposit_amount"] = depositAmount!.toFixed(2);
       bookEmail["deposit_percentage"] = depositPourcentage!.toString();
       bookEmail["automatic_cost"] = quoteById?.manual_cost!;
+      if (quotesByReference.length > 1) {
+        bookEmail["type"] = "Return";
+        bookEmail["return_date"] = quotesByReference[1]?.date!;
+        bookEmail["return_time"] = quotesByReference[1]?.pickup_time!;
+      } else if (quotesByReference.length === 1) {
+        bookEmail["type"] = "One way";
+        bookEmail["return_date"] = "";
+        bookEmail["return_time"] = "";
+      }
       bookEmailMutation(bookEmail)
         .then(() => notifySuccess())
         .then(() => navigate("/pending-quotes"));
@@ -133,7 +151,7 @@ const Newquote = () => {
           <Row>
             <Form onSubmit={onSubmitBookEmail}>
               <Row>
-                <Col lg={8}>
+                <Col lg={6}>
                   <Card>
                     <div className="d-flex align-items-center p-2">
                       <div className="flex-shrink-0 me-3">
@@ -411,7 +429,7 @@ const Newquote = () => {
                           </Card.Header>
                         </Row>
                       </div>
-                      {allModes[0].type === "0" ? (
+                      {allModes[0]?.type! === "0" ? (
                         ""
                       ) : (
                         <div className="mb-1">
@@ -579,7 +597,7 @@ const Newquote = () => {
                     </Card.Body>
                   </Card>
                 </Col>
-                <Col lg={4}>
+                <Col lg={6}>
                   <Card>
                     <Card.Header>
                       <div className="d-flex align-items-center p-1">
@@ -596,22 +614,53 @@ const Newquote = () => {
                       </div>
                     </Card.Header>
                     <Card.Body>
-                      <Row>
-                        <Col lg={12}>
-                          <Form.Label>Pickup date</Form.Label>
-                          <h5>{quoteLocation.state.estimated_start_time}</h5>
-                        </Col>
-                        <Col lg={12}>
-                          <Form.Label>Collection Address</Form.Label>
-                          <h5>{quoteLocation.state.start_point?.placeName!}</h5>
-                        </Col>
-                        <Col lg={12}>
-                          <Form.Label>Destination Address</Form.Label>
-                          <h5>
-                            {quoteLocation.state.destination_point?.placeName!}
-                          </h5>
-                        </Col>
+                      <Row className="mb-2">
+                        <h5>Journey 01</h5>
+                        <table border={1}>
+                          <tr>
+                            <td>Collection</td>
+                            <td>Destination</td>
+                            <td>Pickup Date</td>
+                            <td>Pickup Time</td>
+                          </tr>
+                          <tr>
+                            <td>
+                              {quotesByReference[0]?.start_point?.placeName!}
+                            </td>
+                            <td>
+                              {
+                                quotesByReference[0]?.destination_point
+                                  ?.placeName!
+                              }
+                            </td>
+                            <td>{quotesByReference[0]?.date!}</td>
+                            <td>{quotesByReference[0]?.pickup_time!}</td>
+                          </tr>
+                        </table>
                       </Row>
+                      {quotesByReference.map((quote: any) =>
+                        quote?.type! === "Return" ? (
+                          <Row>
+                            <h5>Journey 02</h5>
+                            <table border={1}>
+                              <tr>
+                                <td>Collection</td>
+                                <td>Destination</td>
+                                <td>Pickup Date</td>
+                                <td>Pickup Time</td>
+                              </tr>
+                              <tr>
+                                <td>{quote?.start_point?.placeName!}</td>
+                                <td>{quote?.destination_point?.placeName!}</td>
+                                <td>{quote?.date!}</td>
+                                <td>{quote?.pickup_time!}</td>
+                              </tr>
+                            </table>
+                          </Row>
+                        ) : (
+                          ""
+                        )
+                      )}
                     </Card.Body>
                   </Card>
                 </Col>

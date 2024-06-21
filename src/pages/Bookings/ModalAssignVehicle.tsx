@@ -10,9 +10,13 @@ import Swal from "sweetalert2";
 import { useAddVehicleToQuoteMutation } from "features/Quotes/quoteSlice";
 import { boolean } from "yup";
 interface VehicleProps {
-  assigned: boolean;
+  modal_AssignVehicle: boolean;
+  setModal_AssignVehicle: React.Dispatch<React.SetStateAction<boolean>>;
 }
-const ModalAssignVehicle: React.FC<VehicleProps> = (assigned) => {
+const ModalAssignVehicle: React.FC<VehicleProps> = ({
+  modal_AssignVehicle,
+  setModal_AssignVehicle,
+}) => {
   const locationQuote = useLocation();
   const navigate = useNavigate();
   const { data: AllVehicles = [] } = useGetAllVehiclesQuery();
@@ -151,16 +155,13 @@ const ModalAssignVehicle: React.FC<VehicleProps> = (assigned) => {
 
       assignVehicleToQuoteMutation(assignvehicleToDriver)
         .then(() => notifySuccess())
-        .then(() => navigate("/bookings"));
+        .then(() => navigate("/bookings"))
+        .then(() => setModal_AssignVehicle(modal_AssignVehicle));
     } catch (error) {
       notifyError(error);
     }
   };
 
-  const [closeModal, setCloseModal] = useState<boolean>(true);
-  const tog_CloseModal = () => {
-    setCloseModal(!assigned);
-  };
   return (
     <>
       <Modal.Header className="px-4 pt-4" closeButton>
@@ -299,7 +300,7 @@ const ModalAssignVehicle: React.FC<VehicleProps> = (assigned) => {
                     variant="primary"
                     id="add-btn"
                     type="submit"
-                    onClick={() => tog_CloseModal()}
+                    onClick={() => setModal_AssignVehicle(!modal_AssignVehicle)}
                   >
                     Assign Vehicle
                   </Button>

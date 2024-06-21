@@ -68,6 +68,7 @@ export interface Quote {
       type: string;
     }[];
   }[];
+  type?: string;
 }
 
 export interface BookEmail {
@@ -78,6 +79,9 @@ export interface BookEmail {
   deposit_amount: string;
   deposit_percentage: string;
   total_price: string;
+  type?: string;
+  return_date?: string;
+  return_time?: string;
 }
 
 export interface AssignDriver {
@@ -176,6 +180,13 @@ export const quoteSlice = createApi({
         }),
         providesTags: ["Quote"],
       }),
+      getQuotesByReference: builder.query<Quote[], number | void>({
+        query: (_id) => ({
+          url: `/allQuotesByReference/${_id}`,
+          method: "GET",
+        }),
+        providesTags: ["Quote"],
+      }),
       getQuoteByIdSchedule: builder.query<Quote[], { id_schedule: string }>({
         query: ({ id_schedule }) => ({
           url: `/getQuoteByIdSchedule`,
@@ -193,6 +204,9 @@ export const quoteSlice = createApi({
           deposit_amount,
           deposit_percentage,
           total_price,
+          type,
+          return_date,
+      return_time
         }) {
           return {
             url: "/sendBookingEmail",
@@ -205,6 +219,9 @@ export const quoteSlice = createApi({
               deposit_amount,
               deposit_percentage,
               total_price,
+              type, 
+              return_date,
+      return_time
             },
           };
         },
@@ -350,5 +367,6 @@ export const {
   useAcceptAssignedAffilaiteMutation,
   useAddAffiliateToWhiteListMutation,
   useDeleteAffiliateFromWhiteListMutation,
-  useDeleteWhiteListMutation
+  useDeleteWhiteListMutation,
+  useGetQuotesByReferenceQuery
 } = quoteSlice;
