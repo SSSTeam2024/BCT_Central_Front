@@ -184,6 +184,7 @@ const BulkEmail = (props: any) => {
             file: OneAttachment?.attachment!,
             sender: user?.email,
             name: element?.name!,
+            date_email: currentDate.toDateString(),
           });
         });
 
@@ -204,9 +205,9 @@ const BulkEmail = (props: any) => {
             file: OneAttachment?.attachment!,
             sender: user?.email,
             name: element?.name!,
+            date_email: currentDate.toDateString(),
           });
         });
-
         await newMultipleEmailQueueMutation({ emails: emails });
         notifySuccess();
         navigate("/emails-sent");

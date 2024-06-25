@@ -40,7 +40,8 @@ const CompletedJobs = () => {
 
   const { data: AllQuotes = [] } = useGetAllQuoteQuery();
   const result = AllQuotes.filter(
-    (completed) => completed.progress === "Completed"
+    (completed) =>
+      completed.progress === "Completed" && completed.type === "One way"
   );
 
   const [modal_QuoteInfo, setmodal_QuoteInfo] = useState<boolean>(false);
@@ -61,10 +62,7 @@ const CompletedJobs = () => {
       selector: (cell: Quote) => {
         return (
           <span>
-            <Link to={`/new-quote/${cell?._id!}`} state={cell}>
-              <span className="text-dark">{cell?._id}</span>
-            </Link>{" "}
-            <i className="ph ph-eye" onClick={() => tog_QuoteInfo()}></i>
+            <span className="text-dark">{cell?.quote_ref}</span>
           </span>
         );
       },

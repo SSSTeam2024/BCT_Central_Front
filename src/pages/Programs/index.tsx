@@ -84,7 +84,7 @@ const ProgramList = () => {
     setmodal_Destination(!modal_Destination);
   }
   function tog_AddShippingModals() {
-    navigate("/program");
+    navigate("/new-suggested-route");
   }
 
   const programLocation = useLocation();

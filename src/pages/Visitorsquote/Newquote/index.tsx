@@ -500,7 +500,7 @@ const Newquote = () => {
                                 </div>
                               </Col>
                               {/* Suggested Price  == Done */}
-                              {allModes[0].type === "0" ? (
+                              {allModes[0]?.type! === "0" ? (
                                 ""
                               ) : (
                                 <Col lg={3}>

@@ -391,7 +391,7 @@ const Bookings = () => {
       sortable: true,
       selector: (row: any) => (
         <span>
-          £ <b>{row?.manual_cost!}</b>
+          £ <b>{row?.total_price!}</b>
         </span>
       ),
       width: "90px",

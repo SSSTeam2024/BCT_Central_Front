@@ -8,6 +8,7 @@ export interface EmailQueue {
   file: string;
   sender: string;
   name: string;
+  date_email?: string,
 }
 
 export interface DeleteEmailQueues {

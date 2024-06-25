@@ -148,7 +148,7 @@ const PassengerAndLuggageLimits = () => {
   const columns = [
     {
       name: <span className="font-weight-bold fs-13">Vehicle</span>,
-      selector: (row: any) => row.vehicle_type.type,
+      selector: (row: any) => row?.vehicle_type?.type!,
       sortable: true,
     },
     {

@@ -342,7 +342,7 @@ const PricingCalendar = () => {
         );
       },
       sortable: true,
-      width: "200px",
+      width: "220px",
     },
     {
       name: <span className="font-weight-bold fs-13">To</span>,
@@ -356,7 +356,7 @@ const PricingCalendar = () => {
         );
       },
       sortable: true,
-      width: "200px",
+      width: "220px",
     },
     {
       name: <span className="font-weight-bold fs-13">Days</span>,
@@ -370,13 +370,13 @@ const PricingCalendar = () => {
         );
       },
       sortable: true,
-      width: "80px",
+      width: "120px",
     },
     {
       name: <span className="font-weight-bold fs-13">Vehicles</span>,
       selector: (row: any) => row.vehicle_type?.type!,
       sortable: true,
-      width: "160px",
+      width: "180px",
     },
     {
       name: <span className="font-weight-bold fs-13">Uplift</span>,

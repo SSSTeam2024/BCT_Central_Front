@@ -101,7 +101,7 @@ const authProtectedRoutes = [
 
   { path: "/site-settings", component: <SiteSettings /> },
 
-  { path: "/program", component: <AddProgramm /> },
+  { path: "/new-suggested-route", component: <AddProgramm /> },
   { path: "/list-of-program", component: <ProgramList /> },
   { path: "/program/:name", component: <ProgramClone /> },
   { path: "/program-details/:name", component: <ProgramDetails /> },

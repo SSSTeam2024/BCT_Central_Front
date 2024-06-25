@@ -75,6 +75,7 @@ const SiteSettings = () => {
     setShowSupplierRoutingRule(false);
     setLocationSettings(false);
     setShowPricingPostalCodes(false);
+    setShowCheckTypes(false);
   }
 
   function tog_EmailTemplate() {
@@ -98,6 +99,7 @@ const SiteSettings = () => {
     setShowSupplierRoutingRule(false);
     setLocationSettings(false);
     setShowPricingPostalCodes(false);
+    setShowCheckTypes(false);
   }
 
   function tog_ShowSettings() {
@@ -121,6 +123,7 @@ const SiteSettings = () => {
     setLocationSettings(false);
     setShowPricingPostalCodes(false);
     setTemplateSettings(false);
+    setShowCheckTypes(false);
   }
 
   function tog_ShowVehiclesTypes() {
@@ -144,6 +147,7 @@ const SiteSettings = () => {
     setLocationSettings(false);
     setShowPricingPostalCodes(false);
     setTemplateSettings(false);
+    setShowCheckTypes(false);
   }
 
   function tog_ShowJourneyTypes() {
@@ -167,6 +171,7 @@ const SiteSettings = () => {
     setLocationSettings(false);
     setShowPricingPostalCodes(false);
     setTemplateSettings(false);
+    setShowCheckTypes(false);
   }
 
   function tog_ShowLuggageTypes() {
@@ -189,6 +194,7 @@ const SiteSettings = () => {
     setShowPassengerAndLuggageLimits(false);
     setLocationSettings(false);
     setShowPricingPostalCodes(false);
+    setShowCheckTypes(false);
     setTemplateSettings(false);
   }
   function tog_ShowMileageBands() {
@@ -211,6 +217,7 @@ const SiteSettings = () => {
     setShowPassengerAndLuggageLimits(false);
     setLocationSettings(false);
     setShowPricingPostalCodes(false);
+    setShowCheckTypes(false);
     setTemplateSettings(false);
   }
 
@@ -235,6 +242,7 @@ const SiteSettings = () => {
     setLocationSettings(false);
     setShowPricingPostalCodes(false);
     setTemplateSettings(false);
+    setShowCheckTypes(false);
   }
 
   function tog_ShowWaitingBands() {
@@ -258,6 +266,7 @@ const SiteSettings = () => {
     setLocationSettings(false);
     setShowPricingPostalCodes(false);
     setTemplateSettings(false);
+    setShowCheckTypes(false);
   }
 
   function tog_ShowSingleJourneys() {
@@ -281,10 +290,12 @@ const SiteSettings = () => {
     setLocationSettings(false);
     setShowPricingPostalCodes(false);
     setTemplateSettings(false);
+    setShowCheckTypes(false);
   }
 
   function tog_ShowPricingCalendar() {
     setShowPricingCalendar(true);
+    setShowCheckTypes(false);
     setShortCodeSettings(false);
     setAttachmentSettings(false);
     setShowSingleJourneys(false);
@@ -308,6 +319,7 @@ const SiteSettings = () => {
 
   function tog_ShowRegionalPricings() {
     setShowRegionalPricings(true);
+    setShowCheckTypes(false);
     setShortCodeSettings(false);
     setAttachmentSettings(false);
     setShowPricingCalendar(false);
@@ -331,6 +343,7 @@ const SiteSettings = () => {
 
   function tog_ShowSources() {
     setShowSources(true);
+    setShowCheckTypes(false);
     setShortCodeSettings(false);
     setAttachmentSettings(false);
     setShowRegionalPricings(false);
@@ -354,6 +367,7 @@ const SiteSettings = () => {
 
   function tog_ShowBasetoBase() {
     setShowBasetoBase(true);
+    setShowCheckTypes(false);
     setShortCodeSettings(false);
     setAttachmentSettings(false);
     setShowSources(false);
@@ -377,6 +391,7 @@ const SiteSettings = () => {
 
   function tog_ShowVehicleExtra() {
     setShowVehicleExtra(true);
+    setShowCheckTypes(false);
     setShortCodeSettings(false);
     setAttachmentSettings(false);
     setShowBasetoBase(false);
@@ -400,6 +415,7 @@ const SiteSettings = () => {
 
   function tog_ShowSupplierRoutingRule() {
     setShowSupplierRoutingRule(true);
+    setShowCheckTypes(false);
     setShortCodeSettings(false);
     setAttachmentSettings(false);
     setShowVehicleExtra(false);
@@ -423,6 +439,7 @@ const SiteSettings = () => {
 
   function tog_ShowLocations() {
     setShowSupplierRoutingRule(false);
+    setShowCheckTypes(false);
     setShortCodeSettings(false);
     setAttachmentSettings(false);
     setShowVehicleExtra(false);
@@ -446,6 +463,7 @@ const SiteSettings = () => {
 
   function tog_ShowPricingPostalCodes() {
     setShowSupplierRoutingRule(false);
+    setShowCheckTypes(false);
     setShortCodeSettings(false);
     setAttachmentSettings(false);
     setShowVehicleExtra(false);

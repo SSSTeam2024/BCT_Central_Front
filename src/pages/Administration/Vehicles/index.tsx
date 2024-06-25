@@ -125,6 +125,36 @@ const Vehicles = () => {
         filterable: true,
       },
       {
+        Header: "Status",
+        accessor: (cellProps: any) => {
+          switch (cellProps.statusVehicle) {
+            case "Active":
+              return (
+                <span className="badge bg-success-subtle text-success text-uppercase">
+                  {" "}
+                  {cellProps.statusVehicle}
+                </span>
+              );
+            case "Inactive":
+              return (
+                <span className="badge bg-warning-subtle text-warning text-uppercase">
+                  {" "}
+                  {cellProps.statusVehicle}
+                </span>
+              );
+            default:
+              return (
+                <span className="badge bg-danger-subtle text-danger text-uppercase">
+                  {" "}
+                  {cellProps.statusVehicle}
+                </span>
+              );
+          }
+        },
+        disableFilters: true,
+        filterable: true,
+      },
+      {
         Header: "Action",
         disableFilters: true,
         filterable: true,

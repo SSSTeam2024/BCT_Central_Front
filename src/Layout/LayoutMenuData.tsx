@@ -260,14 +260,14 @@ const Navdata = () => {
       subItems: [
         {
           id: "Program",
-          label: "New Program",
-          link: "/program",
+          label: "New Suggested Route",
+          link: "/new-suggested-route",
           icon: "mdi mdi-map-marker-plus",
           parentId: "Programming",
         },
         {
           id: "ListofPrograms",
-          label: "List of Programs",
+          label: "List of Suggested Routes",
           link: "/list-of-program",
           icon: "mdi mdi-bus-stop-uncovered",
           parentId: "Programming",
