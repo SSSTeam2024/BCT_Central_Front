@@ -389,11 +389,16 @@ const Bookings = () => {
     {
       name: <span className="font-weight-bold fs-13">Price</span>,
       sortable: true,
-      selector: (row: any) => (
-        <span>
-          £ <b>{row?.total_price!}</b>
-        </span>
-      ),
+      selector: (row: any) =>
+        row.category === "Regular" ? (
+          <span>
+            £ <b>{row?.manual_cost!}</b>
+          </span>
+        ) : (
+          <span>
+            £ <b>{row?.total_price!}</b>
+          </span>
+        ),
       width: "90px",
     },
     {
@@ -908,7 +913,7 @@ const Bookings = () => {
             <Card id="shipmentsList">
               <Card.Header className="border-bottom-dashed">
                 <Row className="g-3">
-                  <Col lg={3} className="d-flex justify-content-start">
+                  <Col lg={6} className="d-flex justify-content-start">
                     {isChecked ? (
                       <ul className="hstack gap-2 list-unstyled mb-0">
                         <li>
@@ -956,7 +961,7 @@ const Bookings = () => {
                       ""
                     )}
                   </Col>
-                  <Col lg={7} className="d-flex justify-content-center">
+                  <Col lg={3} className="d-flex justify-content-center">
                     <div className="search-box">
                       <input
                         type="text"

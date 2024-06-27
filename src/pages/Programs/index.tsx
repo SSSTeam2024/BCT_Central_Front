@@ -50,7 +50,7 @@ const ProgramList = () => {
     setmodal_Pickup(!modal_Pickup);
   }
   const [deleteProgram] = useDeleteProgramMutation();
-  const AlertDelete = async (_id: string) => {
+  const AlertDelete = async (_id: any) => {
     swalWithBootstrapButtons
       .fire({
         title: "Are you Sure?",

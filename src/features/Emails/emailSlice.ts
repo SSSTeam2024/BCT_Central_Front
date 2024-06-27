@@ -20,7 +20,6 @@ export const emailSlice = createApi({
   reducerPath: "email",
   baseQuery: fetchBaseQuery({
     baseUrl: `${process.env.REACT_APP_BASE_URL}/api/emailTemplate`,
-    // baseUrl: "http://57.128.184.217:3000/api/emailTemplate",
   }),
   tagTypes: ["Email", "NewEmail"],
   endpoints(builder) {

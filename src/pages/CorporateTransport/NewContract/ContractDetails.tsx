@@ -167,10 +167,10 @@ const ContractDetails: React.FC = () => {
                           </h5>
                         </div>
                         <div>
-                          <h6  className="mb-0">
+                          <h6 className="mb-0">
                             <span id="email">Bouden Coach Travel</span>
                           </h6>
-                          <h6  className="mb-0">
+                          <h6 className="mb-0">
                             <span className="text-muted fw-normal">
                               Website:
                             </span>{" "}
@@ -226,10 +226,10 @@ const ContractDetails: React.FC = () => {
                             Start Date
                           </p>
                           <h5 className="fs-15 mb-0">
-                            <span id="invoice-date">14 Jan, 2023</span>{" "}
-                            <small className="text-muted" id="invoice-time">
-                              12:22PM
-                            </small>
+                            <span id="invoice-date">
+                              {" "}
+                              {contract.idProgram.pickUp_date}
+                            </span>{" "}
                           </h5>
                         </Col>
 
@@ -364,9 +364,13 @@ const ContractDetails: React.FC = () => {
                               <li>
                                 Limitations or Exclusions:
                                 <ul>
-                                  <li>Extra: {contract.idProgram?.extra!}</li>
                                   <li>
-                                    Except Days: {contract.idProgram?.exceptDays!}
+                                    Extra:{" "}
+                                    {contract.idProgram?.extra!.join(" / ")}
+                                  </li>
+                                  <li>
+                                    Except Days:{" "}
+                                    {contract.idProgram?.exceptDays!}
                                   </li>
                                   <li>
                                     Client Note: {contract.idProgram?.note!}
@@ -432,6 +436,62 @@ const ContractDetails: React.FC = () => {
                   <Col lg={12}>
                     <Card.Body className="p-4">
                       <div className="table-container">
+                        <Table className="table-borderless table-nowrap align-middle mb-0 w-25">
+                          <tbody>
+                            <tr>
+                              <th>Your Contract Start on :</th>
+                              <td className="text-start">
+                                {contract.idProgram.pickUp_date} .
+                              </td>
+                            </tr>
+                            <tr>
+                              <th>It ends: </th>
+                              <td className="text-start">
+                                {contract.idProgram.droppOff_date} .
+                              </td>
+                            </tr>
+                            <tr>
+                              <th>Working Days</th>
+                              <td className="text-start">
+                                <span className="fw-bold text-secondary">
+                                  {contract.idProgram.workDates.length} :
+                                </span>{" "}
+                                <span>
+                                  {contract.idProgram.workDates.join(" / ")}
+                                </span>
+                              </td>
+                              {/* <td className="text-start"></td> */}
+                            </tr>
+                            <tr>
+                              <th>Free Days Date are: </th>
+                              <td className="text-start">
+                                {contract.idProgram.freeDays_date} .
+                              </td>
+                            </tr>
+                            <tr>
+                              <th>Except Days are: </th>
+                              <td className="text-start">
+                                {contract.idProgram.exceptDays} .
+                              </td>
+                            </tr>
+                            <tr>
+                              <th>Groups Number</th>
+                              {contract.idProgram.school_id === null ? (
+                                <td className="text-start">
+                                  <span className="fw-bold text-secondary">
+                                    {contract.idProgram.employees_groups.length}
+                                  </span>
+                                </td>
+                              ) : (
+                                <td className="text-start">
+                                  <span className="fw-bold text-secondary">
+                                    {contract.idProgram.students_groups.length}
+                                  </span>
+                                </td>
+                              )}
+                            </tr>
+                          </tbody>
+                        </Table>
                         <Table className="table-borderless text-center table-nowrap align-middle mb-0">
                           <thead>
                             <tr className="table-active">
@@ -465,7 +525,9 @@ const ContractDetails: React.FC = () => {
                                 </td> */}
 
                                 <td>{item.start_point.placeName}</td>
-                                <td>{item?.date!} at {item?.pickup_time}</td>
+                                <td>
+                                  {item?.date!} at {item?.pickup_time}
+                                </td>
                                 <td>{item.destination_point.placeName}</td>
                                 <td className="text-end">
                                   {item?.return_time}
@@ -473,13 +535,13 @@ const ContractDetails: React.FC = () => {
                                 <td className="text-end">
                                   {item?.mid_stations.length}
                                 </td>
-                                <td>{item.manual_cost}</td>
+                                <td>£ {item.manual_cost}</td>
                               </tr>
                             ))}
                           </tbody>
                         </Table>
                       </div>
-                      <div className="border-top border-top-dashed mt-2">
+                      <div className="d-flex border-top border-top-dashed mt-2">
                         <Table
                           className="table-borderless table-nowrap align-middle mb-0 ms-auto"
                           style={{ width: "250px" }}
@@ -487,13 +549,15 @@ const ContractDetails: React.FC = () => {
                           <tbody>
                             <tr>
                               <td>Sub Total</td>
-                              <td className="text-end">£0000.00</td>
+                              <td className="text-end">
+                                £ {contract.subTotal}
+                              </td>
                             </tr>
                             <tr>
                               <td>
                                 VAT <small className="text-muted"></small>
                               </td>
-                              <td className="text-end"> £0000.00</td>
+                              <td className="text-end"> £ {contract.tva}</td>
                             </tr>
                             <tr className="border-top border-top-dashed fs-15">
                               <th scope="row">Total Amount</th>
@@ -597,8 +661,8 @@ const ContractDetails: React.FC = () => {
                         <section>
                           <h5>Signatures and Effective Date</h5>
                           <p className="text-muted fw-medium mb-2 fs-16">
-                            This Agreement shall be effective as of [Effective
-                            Date].
+                            This Agreement shall be effective as of{" "}
+                            {contract?.effectiveDate!}.
                           </p>
                         </section>
                       </div>
@@ -641,7 +705,6 @@ const ContractDetails: React.FC = () => {
                                                     </p>
                                                 </div>
                                             </div> */}
-                                            
 
                       <div className="print-container d-flex justify-content-between mt-4">
                         <div className="canvas-container">
@@ -661,8 +724,6 @@ const ContractDetails: React.FC = () => {
                       </div>
 
                       <div className="hstack gap-2 justify-content-end d-print-none mt-4 print-button">
-                        
-
                         <ReactToPrint
                           trigger={() => (
                             <button className="btn btn-success">

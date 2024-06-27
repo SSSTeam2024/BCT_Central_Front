@@ -10,6 +10,7 @@ import {
   useGetVisitorByEmailQuery,
 } from "features/Visitor/visitorSlice";
 import { useAddNewEmailQueueMutation } from "features/EmailQueue/emailQueueSlice";
+import { useGetAllQuotesByVisitorIdQuery } from "features/Quotes/quoteSlice";
 
 interface ChildProps {
   data: string;
@@ -74,7 +75,7 @@ const SingleEmail: React.FC<ChildProps> = ({
         }
         return false;
       });
-      setFilteredEmails(filtered);
+      setFilteredEmails(AllVisitors);
     }
   }, [inputValue, AllVisitors, selectedEmail]);
 
@@ -82,13 +83,29 @@ const SingleEmail: React.FC<ChildProps> = ({
     setInputValue(event.target.value);
     setSelectedEmail(null); // Clear selected email when typing
   };
+  const [selectedVisitor, setSelectedVisitor] = useState("");
 
-  const handleEmailAutocompleteClick = (email: string) => {
-    setInputValue(email);
-    setSelectedEmail(email);
+  const [selectedQuote, setSelectedQuote] = useState("");
+
+  const handleSelectedQuoteByVisitorId = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setSelectedQuote(event?.target.value);
+  };
+
+  const handleEmailAutocompleteClick = (visitor: any) => {
+    setInputValue(visitor.email);
+    setSelectedEmail(visitor.email);
+    setSelectedVisitor(visitor._id);
+
     setFilteredEmails([]); // Hide the list
   };
 
+  const { data: allQuoteByVisitorId = [] } =
+    useGetAllQuotesByVisitorIdQuery(selectedVisitor);
+  const oneWayQuoteByVisitorId = allQuoteByVisitorId.filter(
+    (quote) => quote.type === "One way"
+  );
   const currentDate = new Date();
 
   const { data: oneVisitor } = useGetVisitorByEmailQuery(selectedEmail!);
@@ -123,9 +140,10 @@ const SingleEmail: React.FC<ChildProps> = ({
         file: OneAttachment?.attachment!,
         sender: user?.email,
         name: oneVisitor?.name!,
-        quote_Id: "",
+        quote_Id: selectedQuote,
         date_email: currentDate.toDateString(),
       };
+      console.log("updatedEmailData", updatedEmailData);
       newEmailQueueMutation(updatedEmailData)
         .then(() => notifySuccess())
         .then(() => setData(""));
@@ -137,10 +155,10 @@ const SingleEmail: React.FC<ChildProps> = ({
     <React.Fragment>
       <Form onSubmit={onSubmitSendNewEmail}>
         <Row className="mb-2">
-          <Col lg={1}>
+          <Col lg={2}>
             <Form.Label htmlFor="email">Email </Form.Label>
           </Col>
-          <Col lg={5}>
+          <Col lg={4}>
             <div className="input-wrapper">
               <Form.Control
                 placeholder="Search for email..."
@@ -160,9 +178,7 @@ const SingleEmail: React.FC<ChildProps> = ({
                     <li
                       key={visitor._id}
                       className="email-item"
-                      onClick={() =>
-                        handleEmailAutocompleteClick(visitor.email)
-                      }
+                      onClick={() => handleEmailAutocompleteClick(visitor)}
                     >
                       {visitor.email}
                     </li>
@@ -171,6 +187,41 @@ const SingleEmail: React.FC<ChildProps> = ({
               )}
             </div>
           </Col>
+          <Col lg={1}></Col>
+          <Col lg={1}>
+            {oneWayQuoteByVisitorId.length === 0 ? (
+              ""
+            ) : (
+              <Form.Label htmlFor="quote">
+                <span className="text-primary fw-bold">
+                  {oneWayQuoteByVisitorId.length}
+                </span>{" "}
+                {oneWayQuoteByVisitorId.length === 1 ? (
+                  <span>Quote</span>
+                ) : (
+                  <span>Quotes</span>
+                )}
+              </Form.Label>
+            )}
+          </Col>
+          <Col lg={4}>
+            <select
+              className="form-select text-muted"
+              onChange={handleSelectedQuoteByVisitorId}
+            >
+              <option value="">Select Quote</option>
+              {allQuoteByVisitorId.map((quote) => {
+                if (quote.type === "One way")
+                  return (
+                    <option value={quote?._id!}>
+                      Ref: {quote.quote_ref} / {quote.date}
+                    </option>
+                  );
+              })}
+            </select>
+          </Col>
+        </Row>
+        <Row className="mb-2">
           <Col lg={2}>
             <Form.Label>Email BBC</Form.Label>
           </Col>

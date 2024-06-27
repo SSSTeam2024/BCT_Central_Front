@@ -66,11 +66,7 @@ const EmailsSent = () => {
     {
       name: <span className="font-weight-bold fs-13">Quote ID</span>,
       selector: (row: any) =>
-        row?.quoteID === null ? (
-          ""
-        ) : (
-          <span>QT{row?.quoteID?.substring(18, 24)}</span>
-        ),
+        row?.quoteID === null ? "" : <span>{row?.quote_ref}</span>,
       sortable: true,
       width: "220px",
     },

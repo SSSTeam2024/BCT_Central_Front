@@ -99,6 +99,7 @@ interface GroupCompany {
   vehicle_type: string;
   luggage_details: string;
   passenger_limit: any[];
+  luggages?: any[];
   program: string;
 }
 
@@ -109,6 +110,7 @@ interface GroupSchool {
   vehicle_type: string;
   luggage_details: string;
   passenger_limit: any[];
+  luggages?: any[];
   program: string;
 }
 
@@ -287,13 +289,16 @@ const AddProgramm = (props: any) => {
       setCompanyGroups(tempArray);
     }
   };
-
+  const [selectedVehicleType, setSelectedVehicletype] = useState<string>("");
+  console.log(selectedVehicleType);
   const filteredVehicleType = AllPassengersLimit.filter(
     (vehcileType) =>
       Number(recommandedCapacityState) <= Number(vehcileType.max_passengers)
   );
   const filteredLuggageDetails = AllPassengersLimit.filter(
-    (vehcileType) => vehcileType.max_passengers === recommandedCapacityState
+    (vehcileType) =>
+      Number(recommandedCapacityState) <= Number(vehcileType.max_passengers) &&
+      selectedVehicleType === vehcileType.vehicle_type._id
   );
   // The selected Client Type
   const [selectedClientType, setSelectedClientType] = useState<string>("");
@@ -404,7 +409,7 @@ const AddProgramm = (props: any) => {
   const { data: AllVehicleTypes = [] } = useGetAllVehicleTypesQuery();
   const { data: AllLuggages = [] } = useGetAllLuggageQuery();
   const { data: AllJourneys = [] } = useGetAllJourneyQuery();
-  const [selectedVehicleType, setSelectedVehicletype] = useState<string>("");
+
   const [selectedLuggage, setSelectedLuggage] = useState<string>("");
   const [disabledNext, setDisabledNext] = useState<boolean>(true);
   // This function is triggered when the select Vehicle Type
@@ -414,7 +419,6 @@ const AddProgramm = (props: any) => {
     const value = event.target.value;
     setSelectedVehicletype(value);
     setDisabledNext(true);
-    console.log(disabledNext);
   };
   const generateGroups = () => {
     const filteredVehicleTypeID = AllPassengersLimit.filter(
@@ -481,6 +485,12 @@ const AddProgramm = (props: any) => {
     const value = event.target.value;
     let prevSchoolGroups = [...schoolGroups];
     prevSchoolGroups[index].vehicle_type = value;
+    let pass_limit = prevSchoolGroups[index].passenger_limit;
+    let luggages = pass_limit.filter(
+      (element) => element.vehicle_type._id === value
+    );
+    prevSchoolGroups[index].luggages = luggages;
+    setSchoolGroups(prevSchoolGroups);
   };
 
   const handleCustomSelectSchoolLuggageDetails = (
@@ -500,6 +510,12 @@ const AddProgramm = (props: any) => {
 
     let prevCompanyGroups = [...companyGroups];
     prevCompanyGroups[index].vehicle_type = value;
+    let pass_limit = prevCompanyGroups[index].passenger_limit;
+    let luggages = pass_limit.filter(
+      (element) => element.vehicle_type._id === value
+    );
+    prevCompanyGroups[index].luggages = luggages;
+    setCompanyGroups(prevCompanyGroups);
   };
 
   const handleCustomSelectCompanyLuggageDetails = (
@@ -519,7 +535,6 @@ const AddProgramm = (props: any) => {
     const value = event.target.value;
     setSelectedLuggage(value);
     setDisabledNext(true);
-    console.log(disabledNext);
   };
 
   const [selectedJourney, setSelectedJourney] = useState<string>("");
@@ -685,6 +700,7 @@ const AddProgramm = (props: any) => {
           vehicle_type: "",
           luggage_details: "",
           passenger_limit: [],
+          luggages: [],
           program: "",
         },
       ]);
@@ -701,6 +717,7 @@ const AddProgramm = (props: any) => {
           vehicle_type: "",
           luggage_details: "",
           passenger_limit: [],
+          luggages: [],
           program: "",
         },
       ]);
@@ -964,7 +981,15 @@ const AddProgramm = (props: any) => {
 
   const onChangeUnitPrice = (event: React.ChangeEvent<HTMLInputElement>) => {
     setQuoteUnitPrice(parseInt(event.target.value));
-    setContractTotalPrice(parseInt(event.target.value) * getWorkDates().length);
+    let groupsNumber = 0;
+    if (selectedClientType === "School") {
+      groupsNumber = schoolGroups.length;
+    } else if (selectedClientType === "Company") {
+      groupsNumber = companyGroups.length;
+    }
+    setContractTotalPrice(
+      parseInt(event.target.value) * getWorkDates().length * groupsNumber
+    );
   };
 
   const [selectedInvoiceFrequency, setSelectedInvoiceFrequency] =
@@ -1765,1234 +1790,1179 @@ const AddProgramm = (props: any) => {
       <div className="page-content">
         <Container fluid>
           <Breadcrumb title="Program" pageTitle="Management" />
-          <Card className="overflow-hidden">
+          <Card className="overflow-auto" style={{ height: 850 }}>
+            {/* <Card.Body className="form-steps">
+              <Card> */}
             <Card.Body className="form-steps">
-              <Card>
-                <Card.Body className="form-steps" style={{ height: "70vh" }}>
-                  <Form
-                    className="vertical-navs-step"
-                    onSubmit={onSubmitProgramm}
-                  >
-                    <Tab.Container activeKey={activeVerticalTab}>
-                      <Tab.Content>
-                        <Tab.Pane eventKey="1">
+              <Form className="vertical-navs-step" onSubmit={onSubmitProgramm}>
+                <Tab.Container activeKey={activeVerticalTab}>
+                  <Tab.Content>
+                    <Tab.Pane eventKey="1">
+                      <Row>
+                        <Col lg={4}>
                           <Row>
-                            <Col lg={4}>
-                              <Row>
-                                <Col lg={2}>
-                                  <div className="form-check mb-2">
-                                    <input
-                                      className="form-check-input"
-                                      type="radio"
-                                      name="flexRadioDefault"
-                                      id="flexRadioDefault1"
-                                      onChange={radioHandler}
-                                      value="School"
-                                    />
-                                    <Form.Label
-                                      className="form-check-label fs-17"
-                                      htmlFor="flexRadioDefault1"
-                                    >
-                                      School
-                                    </Form.Label>
-                                  </div>
-                                </Col>
-                                <Col lg={2}>
-                                  <div className="form-check mb-2">
-                                    <input
-                                      className="form-check-input"
-                                      type="radio"
-                                      name="flexRadioDefault"
-                                      id="flexRadioDefault1"
-                                      onChange={radioHandler}
-                                      value="Company"
-                                    />
-                                    <Form.Label
-                                      className="form-check-label fs-17"
-                                      htmlFor="flexRadioDefault1"
-                                    >
-                                      Company
-                                    </Form.Label>
-                                  </div>
-                                </Col>
-                              </Row>
-                              {selectedClientType === "School" ? (
-                                <Row>
-                                  <Col lg={10}>
-                                    <Form.Label htmlFor="school_id">
-                                      Client Name
-                                    </Form.Label>
-                                    <div className="mb-3">
-                                      <select
-                                        className="form-select text-muted"
-                                        name="school_id"
-                                        id="school_id"
-                                        onChange={handleSelectSchoolID}
-                                      >
-                                        <option value="">Select</option>
-                                        {allSchools.map((school) => (
-                                          <option
-                                            value={`${school?._id!}`}
-                                            key={school?._id!}
-                                          >
-                                            {school.name}
-                                          </option>
-                                        ))}
-                                      </select>
-                                    </div>
-                                  </Col>
-                                </Row>
-                              ) : (
-                                ""
-                              )}
-                              {selectedClientType === "Company" ? (
-                                <Row>
-                                  <Col lg={10}>
-                                    <Form.Label htmlFor="company_id">
-                                      Client Name
-                                    </Form.Label>
-                                    <div className="mb-3">
-                                      <select
-                                        className="form-select text-muted"
-                                        name="company_id"
-                                        id="company_id"
-                                        onChange={handleSelectCompanyID}
-                                      >
-                                        <option value="">Select</option>
-                                        {allCompanies.map((company) => (
-                                          <option
-                                            value={`${company?._id!}`}
-                                            key={company?._id!}
-                                          >
-                                            {company.name}
-                                          </option>
-                                        ))}
-                                      </select>
-                                    </div>
-                                  </Col>
-                                </Row>
-                              ) : (
-                                ""
-                              )}
-                              <Row>
-                                <Col lg={10}>
-                                  <Form.Label htmlFor="programDetails.programName">
-                                    Program Name
-                                  </Form.Label>
-                                  <Form.Control
-                                    type="text"
-                                    id="programDetails.programName"
-                                    required
-                                    className="mb-2"
-                                    placeholder="Add Program Name"
-                                    name="programDetails.programName"
-                                    value={programm_name}
-                                    onChange={onChangeProgramName}
-                                  />
-                                </Col>
-                              </Row>
-                              <Row>
-                                <Col>
-                                  <Form.Label htmlFor="customerName-field">
-                                    Locations
-                                  </Form.Label>
-                                </Col>
-                              </Row>
-                              <Row className="mb-2">
-                                <Col lg={2}>
-                                  {/* <div className="d-flex gap-1"> */}
-                                  <InputGroup.Text
-                                    id="basic-addon1"
-                                    style={{ width: "100px" }}
-                                  >
-                                    From
-                                  </InputGroup.Text>
-                                </Col>
-                                <Col lg={5}>
-                                  <Autocomplete
-                                    onPlaceChanged={onPlaceChanged}
-                                    onLoad={onLoad}
-                                  >
-                                    <Form.Control
-                                      type="text"
-                                      placeholder="Origin"
-                                      ref={originRef}
-                                      id="origin"
-                                      onClick={() => {
-                                        handleLocationButtonClick();
-                                        if (nom) {
-                                          map?.panTo(nom);
-                                          map?.setZoom(15);
-                                        }
-                                      }}
-                                      onChange={onChangeProgramms}
-                                      required
-                                    />
-                                  </Autocomplete>
-                                  {/* </div> */}
-                                </Col>
-                                <Col lg={3}>
-                                  {/* <div className="d-flex justify-content-center"> */}
-                                  <Flatpickr
-                                    className="form-control text-center"
-                                    id="pickUp_time"
-                                    options={{
-                                      enableTime: true,
-                                      noCalendar: true,
-                                      dateFormat: "H:i",
-                                      time_24hr: true,
-                                      onChange: handlePickupTime,
-                                    }}
-                                  />
-                                </Col>
-                              </Row>
-                              <Row>
-                                <Col lg={1}>
-                                  <InputGroup.Text
-                                    id="basic-addon1"
-                                    style={{ width: "100px" }}
-                                  >
-                                    To
-                                  </InputGroup.Text>
-                                </Col>
-                                <Col lg={6}>
-                                  <Autocomplete
-                                    onPlaceChanged={onPlaceChangedDest}
-                                    onLoad={onLoadDest}
-                                  >
-                                    <Form.Control
-                                      type="text"
-                                      // style={{ width: "300px" }}
-                                      placeholder="Destination"
-                                      ref={destinationRef}
-                                      id="dest"
-                                      onClick={() => {
-                                        handleLocationButtonClickDest();
-                                        if (fatma) {
-                                          map?.panTo(fatma);
-                                          map?.setZoom(15);
-                                        }
-                                      }}
-                                      onChange={onChangeProgramms}
-                                    />
-                                  </Autocomplete>
-                                </Col>
-                                <Col lg={3}>
-                                  <Flatpickr
-                                    placeholder="HH:MM"
-                                    className="form-control text-center"
-                                    id="pickUp_time"
-                                    value={createDateFromStrings(
-                                      String(new Date().getFullYear()).padStart(
-                                        2,
-                                        "0"
-                                      ) +
-                                        "-" +
-                                        String(
-                                          new Date().getMonth() + 1
-                                        ).padStart(2, "0") +
-                                        "-" +
-                                        String(
-                                          new Date().getDate().toLocaleString()
-                                        ).padStart(2, "0"),
-                                      stopTimes[stopTimes.length - 1]?.hours +
-                                        ":" +
-                                        stopTimes[stopTimes.length - 1]
-                                          ?.minutes +
-                                        ":00"
-                                    ).getTime()}
-                                    disabled={true}
-                                    options={{
-                                      enableTime: true,
-                                      noCalendar: true,
-                                      dateFormat: "H:i",
-                                      time_24hr: true,
-                                    }}
-                                  />
-                                </Col>
-                              </Row>
-                              {loading ? (
-                                <p>Calculating route...</p>
-                              ) : (
-                                <Row>
-                                  <Col lg={10}>
-                                    <Button
-                                      type="submit"
-                                      onClick={calculateRoute}
-                                      className="custom-button"
-                                    >
-                                      Plan Route
-                                    </Button>
-                                  </Col>
-                                </Row>
-                              )}
-                              <div
-                                style={{
-                                  marginTop: "20px",
-                                  maxHeight: "300px",
-                                  overflowX: "auto",
-                                }}
-                              >
-                                {stops2.map((stop, index) => (
-                                  <Row>
-                                    <Col lg={7} key={index}>
-                                      <Form.Label htmlFor="customerName-field">
-                                        Stop {index + 1}
-                                      </Form.Label>
-                                      <div className="mb-3 d-flex">
-                                        <Autocomplete
-                                          onPlaceChanged={onPlaceChangedStop}
-                                          onLoad={onLoadStop}
-                                        >
-                                          <Form.Control
-                                            type="text"
-                                            style={{ width: "280px" }}
-                                            placeholder="Stop"
-                                            ref={stopRef}
-                                            id="stop"
-                                            onClick={() => {
-                                              handleLocationButtonClickStop();
-                                            }}
-                                          />
-                                        </Autocomplete>
-                                        {
-                                          <Flatpickr
-                                            className="form-control"
-                                            style={{ width: "100px" }}
-                                            id="pickUp_time"
-                                            value={createDateFromStrings(
-                                              String(
-                                                new Date().getFullYear()
-                                              ).padStart(2, "0") +
-                                                "-" +
-                                                String(
-                                                  new Date().getMonth() + 1
-                                                ).padStart(2, "0") +
-                                                "-" +
-                                                String(
-                                                  new Date()
-                                                    .getDate()
-                                                    .toLocaleString()
-                                                ).padStart(2, "0"),
-                                              stopTimes[index]?.hours +
-                                                ":" +
-                                                stopTimes[index]?.minutes +
-                                                ":00"
-                                            ).getTime()}
-                                            options={{
-                                              enableTime: true,
-                                              noCalendar: true,
-                                              dateFormat: "H:i",
-                                              time_24hr: true,
-                                            }}
-                                            onChange={(selectedDates) =>
-                                              handleStopTime(
-                                                selectedDates,
-                                                index
-                                              )
-                                            }
-                                          />
-                                        }
-                                      </div>
-                                    </Col>
-                                    <button
-                                      type="button"
-                                      className="btn btn-danger btn-icon"
-                                      onClick={() =>
-                                        handleRemoveStopClick(stop.id)
-                                      }
-                                      style={{
-                                        marginTop: "29px",
-                                        marginLeft: "152px",
-                                      }}
-                                    >
-                                      <i className="ri-delete-bin-5-line"></i>
-                                    </button>
-                                  </Row>
-                                ))}
-                                <div className="d-flex flex-btn-via">
-                                  <Link
-                                    to="#"
-                                    id="add-item"
-                                    className="btn btn-soft-info fw-medium"
-                                    onClick={handleAddStopClickWrapper(
-                                      "New Stop Address"
-                                    )}
-                                    style={{ width: "150px" }}
-                                  >
-                                    <i className="ri-add-line label-icon align-middle rounded-pill fs-16 me-2">
-                                      {" "}
-                                      Via
-                                    </i>
-                                  </Link>
-                                </div>
+                            <Col lg={2}>
+                              <div className="form-check mb-2">
+                                <input
+                                  className="form-check-input"
+                                  type="radio"
+                                  name="flexRadioDefault"
+                                  id="flexRadioDefault1"
+                                  onChange={radioHandler}
+                                  value="School"
+                                />
+                                <Form.Label
+                                  className="form-check-label fs-17"
+                                  htmlFor="flexRadioDefault1"
+                                >
+                                  School
+                                </Form.Label>
                               </div>
                             </Col>
-                            <Col lg={8}>
-                              <div
-                                style={{
-                                  position: "absolute",
-                                  left: "0",
-                                  height: "100%",
-                                  width: "100%",
-                                }}
-                              >
-                                <GoogleMap
-                                  center={center}
-                                  zoom={15}
-                                  mapContainerStyle={{
-                                    width: "100%",
-                                    height: "80%",
-                                  }}
-                                  options={{
-                                    zoomControl: false,
-                                    streetViewControl: false,
-                                    mapTypeControl: false,
-                                    fullscreenControl: true,
-
-                                    fullscreenControlOptions: {
-                                      position:
-                                        google.maps.ControlPosition.TOP_RIGHT,
-                                    },
-                                  }}
-                                  onLoad={(map) => setMap(map)}
+                            <Col lg={2}>
+                              <div className="form-check mb-2">
+                                <input
+                                  className="form-check-input"
+                                  type="radio"
+                                  name="flexRadioDefault"
+                                  id="flexRadioDefault1"
+                                  onChange={radioHandler}
+                                  value="Company"
+                                />
+                                <Form.Label
+                                  className="form-check-label fs-17"
+                                  htmlFor="flexRadioDefault1"
                                 >
-                                  {selectedLocation && (
-                                    <Marker position={nom} />
-                                  )}
-                                  {selectedDestination && (
-                                    <Marker position={fatma} />
-                                  )}
-                                  {directionsResponse && (
-                                    <DirectionsRenderer
-                                      directions={directionsResponse}
-                                    />
-                                  )}
-                                </GoogleMap>
-                                <Button
-                                  aria-label="center back"
-                                  onClick={clearRoute}
-                                  variant="danger"
-                                  style={{
-                                    position: "absolute",
-                                    top: "10px",
-                                    left: "10px",
-                                    zIndex: 1000,
-                                    marginLeft: "15px",
-                                  }}
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 20 20"
-                                    fill="currentColor"
-                                    width="20"
-                                    height="20"
-                                  >
-                                    <path
-                                      fillRule="evenodd"
-                                      d="M16.146 14.146a.5.5 0 0 1-.708 0L8.5 7.207l-3.938 3.937a.5.5 0 0 1-.707-.707l4.146-4.146a1.5 1.5 0 0 1 2.121 0l6 6a.5.5 0 0 1 0 .708zM6.646 9.354a.5.5 0 0 1 .708 0L8 10.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"
-                                    />
-                                  </svg>
-                                  Clear Route
-                                </Button>
+                                  Company
+                                </Form.Label>
                               </div>
-                              <div
-                                className="d-flex align-items-end"
-                                style={{ marginTop: "570px" }}
-                              >
-                                <Dropdown style={{ marginLeft: "0" }}>
-                                  <Dropdown.Toggle
-                                    variant="light"
-                                    id="dropdown-basic"
+                            </Col>
+                          </Row>
+                          {selectedClientType === "School" ? (
+                            <Row>
+                              <Col lg={10}>
+                                <Form.Label htmlFor="school_id">
+                                  Client Name
+                                </Form.Label>
+                                <div className="mb-3">
+                                  <select
+                                    className="form-select text-muted"
+                                    name="school_id"
+                                    id="school_id"
+                                    onChange={handleSelectSchoolID}
                                   >
-                                    Route Information
-                                  </Dropdown.Toggle>
-                                  <Dropdown.Menu>
-                                    {routeSegments.map((segment, index) => (
-                                      <Dropdown.Item key={index}>
-                                        <div>
-                                          <p>
-                                            Route Segment: {segment.segment}
-                                          </p>
-                                          <p>
-                                            {segment.startAddress} To{" "}
-                                            {segment.endAddress}
-                                          </p>
-                                          <p>{segment.distance}</p>
-                                          <p>{segment.duration}</p>
-                                        </div>
-                                      </Dropdown.Item>
+                                    <option value="">Select</option>
+                                    {allSchools.map((school) => (
+                                      <option
+                                        value={`${school?._id!}`}
+                                        key={school?._id!}
+                                      >
+                                        {school.name}
+                                      </option>
                                     ))}
-                                  </Dropdown.Menu>
-                                </Dropdown>
-                                <Button
-                                  type="button"
-                                  className="btn btn-success btn-label right ms-auto nexttab "
-                                  onClick={() => handleNextStep(false)}
-                                  disabled={isNextButtonDisabled()}
-                                >
-                                  <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
-                                  Set Run dates
-                                </Button>
-                              </div>
+                                  </select>
+                                </div>
+                              </Col>
+                            </Row>
+                          ) : (
+                            ""
+                          )}
+                          {selectedClientType === "Company" ? (
+                            <Row>
+                              <Col lg={10}>
+                                <Form.Label htmlFor="company_id">
+                                  Client Name
+                                </Form.Label>
+                                <div className="mb-3">
+                                  <select
+                                    className="form-select text-muted"
+                                    name="company_id"
+                                    id="company_id"
+                                    onChange={handleSelectCompanyID}
+                                  >
+                                    <option value="">Select</option>
+                                    {allCompanies.map((company) => (
+                                      <option
+                                        value={`${company?._id!}`}
+                                        key={company?._id!}
+                                      >
+                                        {company.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                              </Col>
+                            </Row>
+                          ) : (
+                            ""
+                          )}
+                          <Row>
+                            <Col lg={10}>
+                              <Form.Label htmlFor="programDetails.programName">
+                                Program Name
+                              </Form.Label>
+                              <Form.Control
+                                type="text"
+                                id="programDetails.programName"
+                                required
+                                className="mb-2"
+                                placeholder="Add Program Name"
+                                name="programDetails.programName"
+                                value={programm_name}
+                                onChange={onChangeProgramName}
+                              />
                             </Col>
                           </Row>
-                        </Tab.Pane>
-                        <Tab.Pane eventKey="2">
                           <Row>
-                            <div className="mt-2">
-                              <h5>Run Dates</h5>
-                            </div>
+                            <Col>
+                              <Form.Label htmlFor="customerName-field">
+                                Locations
+                              </Form.Label>
+                            </Col>
+                          </Row>
+                          <Row className="mb-2">
+                            <Col lg={2}>
+                              {/* <div className="d-flex gap-1"> */}
+                              <InputGroup.Text
+                                id="basic-addon1"
+                                style={{ width: "100px" }}
+                              >
+                                From
+                              </InputGroup.Text>
+                            </Col>
                             <Col lg={5}>
-                              <InputGroup>Start Date</InputGroup>
-                              <div className="mb-3">
-                                <Flatpickr
-                                  value={pickUp_date!}
-                                  onChange={handleDateChange1}
-                                  className="form-control flatpickr-input"
-                                  id="pickUp_date"
-                                  placeholder="Select Date"
-                                  options={{
-                                    dateFormat: "d M, Y",
-                                    onChange: (selectedDates: Date[]) => {
-                                      setPickUp_date(selectedDates[0]);
-                                    },
+                              <Autocomplete
+                                onPlaceChanged={onPlaceChanged}
+                                onLoad={onLoad}
+                              >
+                                <Form.Control
+                                  type="text"
+                                  placeholder="Origin"
+                                  ref={originRef}
+                                  id="origin"
+                                  onClick={() => {
+                                    handleLocationButtonClick();
+                                    if (nom) {
+                                      map?.panTo(nom);
+                                      map?.setZoom(15);
+                                    }
                                   }}
+                                  onChange={onChangeProgramms}
+                                  required
                                 />
-                              </div>
+                              </Autocomplete>
+                              {/* </div> */}
                             </Col>
-                            <Col className="d-flex justify-content-center align-items-center">
-                              <h5>to</h5>
-                            </Col>
-                            <Col lg={5}>
-                              <InputGroup>End Date</InputGroup>
-
+                            <Col lg={3}>
+                              {/* <div className="d-flex justify-content-center"> */}
                               <Flatpickr
-                                value={dropOff_date!}
-                                onChange={handleDateChange2}
-                                className="form-control flatpickr-input"
-                                id="dropOff_date"
-                                placeholder="Select Date"
+                                className="form-control text-center"
+                                id="pickUp_time"
                                 options={{
-                                  dateFormat: "d M, Y",
-                                  onChange: (selectedDates: Date[]) => {
-                                    setDropOff_date(selectedDates[0]);
-                                  },
+                                  enableTime: true,
+                                  noCalendar: true,
+                                  dateFormat: "H:i",
+                                  time_24hr: true,
+                                  onChange: handlePickupTime,
                                 }}
                               />
                             </Col>
                           </Row>
                           <Row>
-                            <div className="mt-2">
-                              <h5>Free Days</h5>
-                            </div>
-                            <Col lg={5}>
-                              <Flatpickr
-                                value={free_date!}
-                                onChange={handleDateChange3}
-                                className="form-control flatpickr-input"
-                                id="free_date"
-                                placeholder="Select Date"
-                                options={{
-                                  dateFormat: "d M, Y",
-                                  mode: "multiple",
-                                  onChange: (selectedDates: Date[]) => {
-                                    setFree_date(selectedDates);
-                                  },
-                                }}
-                              />
+                            <Col lg={1}>
+                              <InputGroup.Text
+                                id="basic-addon1"
+                                style={{ width: "100px" }}
+                              >
+                                To
+                              </InputGroup.Text>
                             </Col>
-                          </Row>
-                          <Row>
                             <Col lg={6}>
-                              <div className="mt-2">
-                                <h5 className="fs-14 mb-1">
-                                  Days of week not running
-                                </h5>
-                                <p className="text-muted">
-                                  Slide the selected excepted days to the right
-                                </p>
-                                <DualListBox
-                                  options={options1}
-                                  selected={selected1}
-                                  onChange={(e: any) => {
-                                    setSelected1(e);
+                              <Autocomplete
+                                onPlaceChanged={onPlaceChangedDest}
+                                onLoad={onLoadDest}
+                              >
+                                <Form.Control
+                                  type="text"
+                                  // style={{ width: "300px" }}
+                                  placeholder="Destination"
+                                  ref={destinationRef}
+                                  id="dest"
+                                  onClick={() => {
+                                    handleLocationButtonClickDest();
+                                    if (fatma) {
+                                      map?.panTo(fatma);
+                                      map?.setZoom(15);
+                                    }
                                   }}
-                                  icons={{
-                                    moveLeft: (
-                                      <span
-                                        className="mdi mdi-chevron-left"
-                                        key="key"
-                                      />
-                                    ),
-                                    moveAllLeft: [
-                                      <span
-                                        className="mdi mdi-chevron-double-left"
-                                        key="key"
-                                      />,
-                                    ],
-                                    moveRight: (
-                                      <span
-                                        className="bi bi-chevron-right"
-                                        key="key"
-                                      />
-                                    ),
-                                    moveAllRight: [
-                                      <span
-                                        className="mdi mdi-chevron-double-right"
-                                        key="key"
-                                      />,
-                                    ],
-                                    moveDown: (
-                                      <span
-                                        className="mdi mdi-chevron-down"
-                                        key="key"
-                                      />
-                                    ),
-                                    moveUp: (
-                                      <span
-                                        className="mdi mdi-chevron-up"
-                                        key="key"
-                                      />
-                                    ),
-                                    moveTop: (
-                                      <span
-                                        className="mdi mdi-chevron-double-up"
-                                        key="key"
-                                      />
-                                    ),
-                                    moveBottom: (
-                                      <span
-                                        className="mdi mdi-chevron-double-down"
-                                        key="key"
-                                      />
-                                    ),
-                                  }}
+                                  onChange={onChangeProgramms}
                                 />
-                              </div>
+                              </Autocomplete>
+                            </Col>
+                            <Col lg={3}>
+                              <Flatpickr
+                                placeholder="HH:MM"
+                                className="form-control text-center"
+                                id="pickUp_time"
+                                value={createDateFromStrings(
+                                  String(new Date().getFullYear()).padStart(
+                                    2,
+                                    "0"
+                                  ) +
+                                    "-" +
+                                    String(new Date().getMonth() + 1).padStart(
+                                      2,
+                                      "0"
+                                    ) +
+                                    "-" +
+                                    String(
+                                      new Date().getDate().toLocaleString()
+                                    ).padStart(2, "0"),
+                                  stopTimes[stopTimes.length - 1]?.hours +
+                                    ":" +
+                                    stopTimes[stopTimes.length - 1]?.minutes +
+                                    ":00"
+                                ).getTime()}
+                                disabled={true}
+                                options={{
+                                  enableTime: true,
+                                  noCalendar: true,
+                                  dateFormat: "H:i",
+                                  time_24hr: true,
+                                }}
+                              />
                             </Col>
                           </Row>
-                          <div className="d-flex align-items-start gap-3 mt-3">
-                            <Button
-                              type="button"
-                              className="btn btn-light btn-label previestab"
-                              onClick={() => setactiveVerticalTab(1)}
+                          {loading ? (
+                            <p>Calculating route...</p>
+                          ) : (
+                            <Row>
+                              <Col lg={10}>
+                                <Button
+                                  type="submit"
+                                  onClick={calculateRoute}
+                                  className="custom-button"
+                                >
+                                  Plan Route
+                                </Button>
+                              </Col>
+                            </Row>
+                          )}
+                          <div
+                            style={{
+                              marginTop: "20px",
+                              maxHeight: "300px",
+                              overflowX: "auto",
+                            }}
+                          >
+                            {stops2.map((stop, index) => (
+                              <Row>
+                                <Col lg={7} key={index}>
+                                  <Form.Label htmlFor="customerName-field">
+                                    Stop {index + 1}
+                                  </Form.Label>
+                                  <div className="mb-3 d-flex">
+                                    <Autocomplete
+                                      onPlaceChanged={onPlaceChangedStop}
+                                      onLoad={onLoadStop}
+                                    >
+                                      <Form.Control
+                                        type="text"
+                                        style={{ width: "280px" }}
+                                        placeholder="Stop"
+                                        ref={stopRef}
+                                        id="stop"
+                                        onClick={() => {
+                                          handleLocationButtonClickStop();
+                                        }}
+                                      />
+                                    </Autocomplete>
+                                    {
+                                      <Flatpickr
+                                        className="form-control"
+                                        style={{ width: "100px" }}
+                                        id="pickUp_time"
+                                        value={createDateFromStrings(
+                                          String(
+                                            new Date().getFullYear()
+                                          ).padStart(2, "0") +
+                                            "-" +
+                                            String(
+                                              new Date().getMonth() + 1
+                                            ).padStart(2, "0") +
+                                            "-" +
+                                            String(
+                                              new Date()
+                                                .getDate()
+                                                .toLocaleString()
+                                            ).padStart(2, "0"),
+                                          stopTimes[index]?.hours +
+                                            ":" +
+                                            stopTimes[index]?.minutes +
+                                            ":00"
+                                        ).getTime()}
+                                        options={{
+                                          enableTime: true,
+                                          noCalendar: true,
+                                          dateFormat: "H:i",
+                                          time_24hr: true,
+                                        }}
+                                        onChange={(selectedDates) =>
+                                          handleStopTime(selectedDates, index)
+                                        }
+                                      />
+                                    }
+                                  </div>
+                                </Col>
+                                <button
+                                  type="button"
+                                  className="btn btn-danger btn-icon"
+                                  onClick={() => handleRemoveStopClick(stop.id)}
+                                  style={{
+                                    marginTop: "29px",
+                                    marginLeft: "152px",
+                                  }}
+                                >
+                                  <i className="ri-delete-bin-5-line"></i>
+                                </button>
+                              </Row>
+                            ))}
+                            <div className="d-flex flex-btn-via">
+                              <Link
+                                to="#"
+                                id="add-item"
+                                className="btn btn-soft-info fw-medium"
+                                onClick={handleAddStopClickWrapper(
+                                  "New Stop Address"
+                                )}
+                                style={{ width: "150px" }}
+                              >
+                                <i className="ri-add-line label-icon align-middle rounded-pill fs-16 me-2">
+                                  {" "}
+                                  Via
+                                </i>
+                              </Link>
+                            </div>
+                          </div>
+                        </Col>
+                        <Col lg={8}>
+                          <div
+                            style={{
+                              position: "absolute",
+                              left: "0",
+                              height: "100%",
+                              width: "100%",
+                            }}
+                          >
+                            <GoogleMap
+                              center={center}
+                              zoom={15}
+                              mapContainerStyle={{
+                                width: "100%",
+                                height: "80%",
+                              }}
+                              options={{
+                                zoomControl: false,
+                                streetViewControl: false,
+                                mapTypeControl: false,
+                                fullscreenControl: true,
+
+                                fullscreenControlOptions: {
+                                  position:
+                                    google.maps.ControlPosition.TOP_RIGHT,
+                                },
+                              }}
+                              onLoad={(map) => setMap(map)}
                             >
-                              <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
-                              Back to Journey
+                              {selectedLocation && <Marker position={nom} />}
+                              {selectedDestination && (
+                                <Marker position={fatma} />
+                              )}
+                              {directionsResponse && (
+                                <DirectionsRenderer
+                                  directions={directionsResponse}
+                                />
+                              )}
+                            </GoogleMap>
+                            <Button
+                              aria-label="center back"
+                              onClick={clearRoute}
+                              variant="danger"
+                              style={{
+                                position: "absolute",
+                                top: "10px",
+                                left: "10px",
+                                zIndex: 1000,
+                                marginLeft: "15px",
+                              }}
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                                width="20"
+                                height="20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M16.146 14.146a.5.5 0 0 1-.708 0L8.5 7.207l-3.938 3.937a.5.5 0 0 1-.707-.707l4.146-4.146a1.5 1.5 0 0 1 2.121 0l6 6a.5.5 0 0 1 0 .708zM6.646 9.354a.5.5 0 0 1 .708 0L8 10.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"
+                                />
+                              </svg>
+                              Clear Route
                             </Button>
+                          </div>
+                          <div
+                            className="d-flex align-items-end"
+                            style={{ marginTop: "570px" }}
+                          >
+                            <Dropdown style={{ marginLeft: "0" }}>
+                              <Dropdown.Toggle
+                                variant="light"
+                                id="dropdown-basic"
+                              >
+                                Route Information
+                              </Dropdown.Toggle>
+                              <Dropdown.Menu>
+                                {routeSegments.map((segment, index) => (
+                                  <Dropdown.Item key={index}>
+                                    <div>
+                                      <p>Route Segment: {segment.segment}</p>
+                                      <p>
+                                        {segment.startAddress} To{" "}
+                                        {segment.endAddress}
+                                      </p>
+                                      <p>{segment.distance}</p>
+                                      <p>{segment.duration}</p>
+                                    </div>
+                                  </Dropdown.Item>
+                                ))}
+                              </Dropdown.Menu>
+                            </Dropdown>
                             <Button
                               type="button"
-                              className="btn btn-success btn-label right ms-auto nexttab nexttab"
+                              className="btn btn-success btn-label right ms-auto nexttab "
                               onClick={() => handleNextStep(false)}
                               disabled={isNextButtonDisabled()}
                             >
                               <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
-                              Add Options
+                              Set Run dates
                             </Button>
                           </div>
-                        </Tab.Pane>
-                        <Tab.Pane eventKey="3">
-                          <Row>
-                            <Col lg={2}>
-                              <div className="form-check mb-2">
-                                <input
-                                  className="form-check-input"
-                                  type="radio"
-                                  name="flexRadioDefault"
-                                  id="flexRadioDefault1"
-                                  onChange={radioHandlerGroupCreationMode}
-                                  value="AutoGroup"
-                                />
-                                <Form.Label
-                                  className="form-check-label fs-17"
-                                  htmlFor="flexRadioDefault1"
-                                >
-                                  Auto Groups
-                                </Form.Label>
-                              </div>
-                            </Col>
-                            <Col lg={2}>
-                              <div className="form-check mb-2">
-                                <input
-                                  className="form-check-input"
-                                  type="radio"
-                                  name="flexRadioDefault"
-                                  id="flexRadioDefault1"
-                                  onChange={radioHandlerGroupCreationMode}
-                                  value="Custom"
-                                />
-                                <Form.Label
-                                  className="form-check-label fs-17"
-                                  htmlFor="flexRadioDefault1"
-                                >
-                                  Custom Groups
-                                </Form.Label>
-                              </div>
-                            </Col>
-                          </Row>
-                          {selectedGroupCreationMode === "AutoGroup" ? (
-                            <>
-                              <Row>
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <Form.Label htmlFor="recommanded_capacity">
-                                      Recommanded Capacity
-                                    </Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      id="recommanded_capacity"
-                                      required
-                                      className="mb-2"
-                                      name="recommanded_capacity"
-                                      value={recommandedCapacityState}
-                                      onChange={
-                                        onChangeRecommandedCapacityState
-                                      }
-                                    />
-                                  </div>
-                                </Col>
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <Form.Label htmlFor="vehicleType">
-                                      Vehicle Type
-                                    </Form.Label>
-                                    <div>
-                                      <select
-                                        className="form-select text-muted"
-                                        name="vehicleType"
-                                        id="vehicleType"
-                                        onChange={handleSelectVehicleType}
-                                      >
-                                        <option value="">
-                                          Select Vehicle Type
-                                        </option>
-                                        {filteredVehicleType.map(
-                                          (vehicleType) => (
-                                            <option
-                                              value={
-                                                vehicleType.vehicle_type.type
-                                              }
-                                              key={vehicleType.vehicle_type._id}
-                                            >
-                                              {vehicleType.vehicle_type.type}
-                                            </option>
-                                          )
-                                        )}
-                                      </select>
-                                    </div>
-                                  </div>
-                                </Col>
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <Form.Label htmlFor="luggageDetails">
-                                      Luggage Details
-                                    </Form.Label>
-                                    <select
-                                      className="form-select text-muted"
-                                      name="luggageDetails"
-                                      id="luggageDetails"
-                                      onChange={handleSelectLuggage}
-                                    >
-                                      <option value="">Select Luggage</option>
-                                      {filteredVehicleType.map((Luggage) => (
-                                        <option
-                                          value={Luggage.max_luggage._id}
-                                          key={Luggage.max_luggage._id}
-                                        >
-                                          {Luggage.max_luggage.description}
-                                        </option>
-                                      ))}
-                                    </select>
-                                  </div>
-                                </Col>
-                                <Col lg={3}>
-                                  <button
-                                    type="button"
-                                    className="btn btn-info"
-                                    onClick={() => generateGroups()}
-                                    disabled={
-                                      selectedVehicleType === "" ||
-                                      selectedLuggage === ""
-                                        ? true
-                                        : false
-                                    }
-                                    style={{ marginTop: "28px" }}
-                                  >
-                                    <span className="mdi mdi-cog"></span>{" "}
-                                    Generate
-                                  </button>
-                                </Col>
-                              </Row>
-                              <Row>{rows}</Row>
-                              <hr className="text-muted" />
-                            </>
-                          ) : selectedGroupCreationMode === "Custom" ? (
-                            <>
-                              <Row>
-                                <Col lg={4}>
-                                  <div className="mb-3">
-                                    <Form.Label htmlFor="recommanded_capacity">
-                                      Recommanded Capacity
-                                    </Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      id="recommanded_capacity"
-                                      required
-                                      className="mb-2"
-                                      name="recommanded_capacity"
-                                      value={recommandedCapacityState}
-                                      onChange={
-                                        onChangeRecommandedCapacityState
-                                      }
-                                    />
-                                  </div>
-                                </Col>
-                                <Col lg={4}>
-                                  <div className="mb-3">
-                                    <Form.Label htmlFor="recommanded_capacity">
-                                      Affected / Total
-                                    </Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      id="recommanded_capacity"
-                                      disabled
-                                      // defaultValue="0/15"
-                                      className="bg-light mb-2"
-                                      name="recommanded_capacity"
-                                      value={
-                                        affectedCounter +
-                                        "/" +
-                                        recommandedCapacityState
-                                      }
-                                    />
-                                  </div>
-                                </Col>
-                              </Row>
-                              <hr className="text-muted" />
-                              <Row
-                                className="mb-3"
-                                style={{
-                                  maxHeight: "calc(50vh - 50px)",
-                                  overflowX: "auto",
-                                }}
-                              >
-                                {selectedClientType === "School"
-                                  ? schoolGroups.map((group, index) => (
-                                      <Row key={index}>
-                                        <Col lg={3}>
-                                          <Form.Label htmlFor="customerName-field">
-                                            Group Name
-                                          </Form.Label>
-                                          <Form.Control
-                                            type="text"
-                                            id="customerName-field"
-                                            className="mb-2"
-                                            name="customerName-field"
-                                            value={group.groupName}
-                                            onChange={(e) =>
-                                              onChangeSchoolGroupName(e, index)
-                                            }
-                                          />
-                                        </Col>
-                                        <Col lg={2}>
-                                          <Form.Label htmlFor="pax">
-                                            Passengers
-                                          </Form.Label>
-                                          <Form.Control
-                                            type="text"
-                                            id="pax"
-                                            className="mb-2"
-                                            name="pax"
-                                            placeholder={`1 - ${recommandedCapacityState}`}
-                                            value={group.student_number}
-                                            onChange={(e) =>
-                                              onChangeSchoolGroupPax(e, index)
-                                            }
-                                          />
-                                        </Col>
-                                        <Col lg={3}>
-                                          <div>
-                                            <Form.Label htmlFor="customerName-field">
-                                              Vehicle
-                                            </Form.Label>
-                                            <select
-                                              className="form-select text-muted"
-                                              name="vehicleType"
-                                              id="vehicleType"
-                                              onChange={(e) =>
-                                                handleCustomSelectSchoolVehicleType(
-                                                  e,
-                                                  index
-                                                )
-                                              }
-                                            >
-                                              <option value="">
-                                                Select Vehicle Type
-                                              </option>
-                                              {group.passenger_limit.map(
-                                                (vehicleType) => (
-                                                  <option
-                                                    value={
-                                                      vehicleType.vehicle_type
-                                                        .type
-                                                    }
-                                                    key={
-                                                      vehicleType.vehicle_type
-                                                        ._id
-                                                    }
-                                                  >
-                                                    {
-                                                      vehicleType.vehicle_type
-                                                        .type
-                                                    }
-                                                  </option>
-                                                )
-                                              )}
-                                            </select>
-                                          </div>
-                                        </Col>
-                                        <Col lg={3}>
-                                          <div className="mb-3">
-                                            <Form.Label htmlFor="luggageDetails">
-                                              Luggage Details
-                                            </Form.Label>
-                                            <select
-                                              className="form-select text-muted"
-                                              name="luggageDetails"
-                                              id="luggageDetails"
-                                              onChange={(e) =>
-                                                handleCustomSelectSchoolLuggageDetails(
-                                                  e,
-                                                  index
-                                                )
-                                              }
-                                            >
-                                              <option value="">
-                                                Select Luggage
-                                              </option>
-                                              {group.passenger_limit.map(
-                                                (Luggage) => (
-                                                  <option
-                                                    value={
-                                                      Luggage.max_luggage
-                                                        .description
-                                                    }
-                                                    key={
-                                                      Luggage.max_luggage._id
-                                                    }
-                                                  >
-                                                    {
-                                                      Luggage.max_luggage
-                                                        .description
-                                                    }
-                                                  </option>
-                                                )
-                                              )}
-                                            </select>
-                                          </div>
-                                        </Col>
-                                        <Col lg={1}>
-                                          <button
-                                            type="button"
-                                            className="btn btn-danger btn-icon"
-                                            onClick={() =>
-                                              handleRemoveStudentGroupClick(
-                                                index
-                                              )
-                                            }
-                                            style={{
-                                              marginTop: "29px",
-                                              marginBottom: "15px",
-                                              // marginLeft: "152px",
-                                            }}
-                                          >
-                                            <i className="ri-delete-bin-5-line"></i>
-                                          </button>
-                                        </Col>
-                                      </Row>
-                                    ))
-                                  : companyGroups.map((group, index) => (
-                                      <Row key={index}>
-                                        <Col lg={3}>
-                                          <Form.Label htmlFor="customerName-field">
-                                            Group Name
-                                          </Form.Label>
-                                          <Form.Control
-                                            type="text"
-                                            id="customerName-field"
-                                            className="mb-2"
-                                            name="customerName-field"
-                                            value={group.groupName}
-                                            onChange={(e) =>
-                                              onChangeCompanyGroupName(e, index)
-                                            }
-                                          />
-                                        </Col>
-                                        <Col lg={2}>
-                                          <Form.Label htmlFor="pax">
-                                            Passengers
-                                          </Form.Label>
-                                          <Form.Control
-                                            type="text"
-                                            id="pax"
-                                            className="mb-2"
-                                            name="pax"
-                                            placeholder={`1 - ${recommandedCapacityState}`}
-                                            value={group.passenger_number}
-                                            onChange={(e) =>
-                                              onChangeCompanyGroupPax(e, index)
-                                            }
-                                          />
-                                        </Col>
-                                        <Col lg={3}>
-                                          <div>
-                                            <Form.Label htmlFor="customerName-field">
-                                              Vehicle
-                                            </Form.Label>
-                                            <select
-                                              className="form-select text-muted"
-                                              name="vehicleType"
-                                              id="vehicleType"
-                                              onChange={(e) =>
-                                                handleCustomSelectCompanyVehicleType(
-                                                  e,
-                                                  index
-                                                )
-                                              }
-                                            >
-                                              <option value="">
-                                                Select Vehicle Type
-                                              </option>
-                                              {group.passenger_limit.map(
-                                                (vehicleType) => (
-                                                  <option
-                                                    value={
-                                                      vehicleType.vehicle_type
-                                                        ._id
-                                                    }
-                                                    key={
-                                                      vehicleType.vehicle_type
-                                                        ._id
-                                                    }
-                                                  >
-                                                    {
-                                                      vehicleType.vehicle_type
-                                                        .type
-                                                    }
-                                                  </option>
-                                                )
-                                              )}
-                                            </select>
-                                          </div>
-                                        </Col>
-                                        <Col lg={3}>
-                                          <div className="mb-3">
-                                            <Form.Label htmlFor="luggageDetails">
-                                              Luggage Details
-                                            </Form.Label>
-                                            <select
-                                              className="form-select text-muted"
-                                              name="luggageDetails"
-                                              id="luggageDetails"
-                                              onChange={(e) =>
-                                                handleCustomSelectCompanyLuggageDetails(
-                                                  e,
-                                                  index
-                                                )
-                                              }
-                                            >
-                                              <option value="">
-                                                Select Luggage
-                                              </option>
-                                              {group.passenger_limit.map(
-                                                (Luggage) => (
-                                                  <option
-                                                    value={
-                                                      Luggage.max_luggage._id
-                                                    }
-                                                    key={
-                                                      Luggage.max_luggage._id
-                                                    }
-                                                  >
-                                                    {
-                                                      Luggage.max_luggage
-                                                        .description
-                                                    }
-                                                  </option>
-                                                )
-                                              )}
-                                            </select>
-                                          </div>
-                                        </Col>
-                                        <Col lg={1}>
-                                          <button
-                                            type="button"
-                                            className="btn btn-danger btn-icon"
-                                            onClick={() =>
-                                              handleRemoveCompanyGroupClick(
-                                                index
-                                              )
-                                            }
-                                            style={{
-                                              marginTop: "29px",
-                                              marginBottom: "15px",
-                                              // marginLeft: "152px",
-                                            }}
-                                          >
-                                            <i className="ri-delete-bin-5-line"></i>
-                                          </button>
-                                        </Col>
-                                      </Row>
-                                    ))}
+                        </Col>
+                      </Row>
+                    </Tab.Pane>
+                    <Tab.Pane eventKey="2">
+                      <Row>
+                        <div className="mt-2">
+                          <h5>Run Dates</h5>
+                        </div>
+                        <Col lg={5}>
+                          <InputGroup>Start Date</InputGroup>
+                          <div className="mb-3">
+                            <Flatpickr
+                              value={pickUp_date!}
+                              onChange={handleDateChange1}
+                              className="form-control flatpickr-input"
+                              id="pickUp_date"
+                              placeholder="Select Date"
+                              options={{
+                                dateFormat: "d M, Y",
+                                onChange: (selectedDates: Date[]) => {
+                                  setPickUp_date(selectedDates[0]);
+                                },
+                              }}
+                            />
+                          </div>
+                        </Col>
+                        <Col className="d-flex justify-content-center align-items-center">
+                          <h5>to</h5>
+                        </Col>
+                        <Col lg={5}>
+                          <InputGroup>End Date</InputGroup>
 
-                                <div className="d-flex">
-                                  <Link
-                                    to="#"
-                                    id="add-item"
-                                    className="btn btn-soft-info fw-medium"
-                                    onClick={handleAddGroupClick}
-                                  >
-                                    <i className="ri-add-line label-icon align-middle rounded-pill fs-16 me-2"></i>
-                                  </Link>
-                                </div>
-                              </Row>
-                            </>
-                          ) : (
-                            ""
-                          )}
-                          <div className="d-flex align-items-start gap-3">
-                            <Button
-                              type="button"
-                              className="btn btn-light btn-label previestab"
-                              onClick={() => setactiveVerticalTab(2)}
-                            >
-                              <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
-                              Back to Run Dates
-                            </Button>
-                            <Button
-                              type="button"
-                              className="btn btn-success btn-label right ms-auto nexttab nexttab"
-                              onClick={() => setactiveVerticalTab(4)}
-                              // disabled={disabledNext}
-                            >
-                              <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
-                              Go To Extra
-                            </Button>
+                          <Flatpickr
+                            value={dropOff_date!}
+                            onChange={handleDateChange2}
+                            className="form-control flatpickr-input"
+                            id="dropOff_date"
+                            placeholder="Select Date"
+                            options={{
+                              dateFormat: "d M, Y",
+                              onChange: (selectedDates: Date[]) => {
+                                setDropOff_date(selectedDates[0]);
+                              },
+                            }}
+                          />
+                        </Col>
+                      </Row>
+                      <Row>
+                        <div className="mt-2">
+                          <h5>Free Days</h5>
+                        </div>
+                        <Col lg={5}>
+                          <Flatpickr
+                            value={free_date!}
+                            onChange={handleDateChange3}
+                            className="form-control flatpickr-input"
+                            id="free_date"
+                            placeholder="Select Date"
+                            options={{
+                              dateFormat: "d M, Y",
+                              mode: "multiple",
+                              onChange: (selectedDates: Date[]) => {
+                                setFree_date(selectedDates);
+                              },
+                            }}
+                          />
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col lg={6}>
+                          <div className="mt-2">
+                            <h5 className="fs-14 mb-1">
+                              Days of week not running
+                            </h5>
+                            <p className="text-muted">
+                              Slide the selected excepted days to the right
+                            </p>
+                            <DualListBox
+                              options={options1}
+                              selected={selected1}
+                              onChange={(e: any) => {
+                                setSelected1(e);
+                              }}
+                              icons={{
+                                moveLeft: (
+                                  <span
+                                    className="mdi mdi-chevron-left"
+                                    key="key"
+                                  />
+                                ),
+                                moveAllLeft: [
+                                  <span
+                                    className="mdi mdi-chevron-double-left"
+                                    key="key"
+                                  />,
+                                ],
+                                moveRight: (
+                                  <span
+                                    className="bi bi-chevron-right"
+                                    key="key"
+                                  />
+                                ),
+                                moveAllRight: [
+                                  <span
+                                    className="mdi mdi-chevron-double-right"
+                                    key="key"
+                                  />,
+                                ],
+                                moveDown: (
+                                  <span
+                                    className="mdi mdi-chevron-down"
+                                    key="key"
+                                  />
+                                ),
+                                moveUp: (
+                                  <span
+                                    className="mdi mdi-chevron-up"
+                                    key="key"
+                                  />
+                                ),
+                                moveTop: (
+                                  <span
+                                    className="mdi mdi-chevron-double-up"
+                                    key="key"
+                                  />
+                                ),
+                                moveBottom: (
+                                  <span
+                                    className="mdi mdi-chevron-double-down"
+                                    key="key"
+                                  />
+                                ),
+                              }}
+                            />
                           </div>
-                        </Tab.Pane>
-                        <Tab.Pane eventKey="4">
+                        </Col>
+                      </Row>
+                      <div className="d-flex align-items-start gap-3 mt-3">
+                        <Button
+                          type="button"
+                          className="btn btn-light btn-label previestab"
+                          onClick={() => setactiveVerticalTab(1)}
+                        >
+                          <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
+                          Back to Journey
+                        </Button>
+                        <Button
+                          type="button"
+                          className="btn btn-success btn-label right ms-auto nexttab nexttab"
+                          onClick={() => handleNextStep(false)}
+                          disabled={isNextButtonDisabled()}
+                        >
+                          <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
+                          Add Options
+                        </Button>
+                      </div>
+                    </Tab.Pane>
+                    <Tab.Pane eventKey="3">
+                      <Row>
+                        <Col lg={2}>
+                          <div className="form-check mb-2">
+                            <input
+                              className="form-check-input"
+                              type="radio"
+                              name="flexRadioDefault"
+                              id="flexRadioDefault1"
+                              onChange={radioHandlerGroupCreationMode}
+                              value="AutoGroup"
+                            />
+                            <Form.Label
+                              className="form-check-label fs-17"
+                              htmlFor="flexRadioDefault1"
+                            >
+                              Auto Groups
+                            </Form.Label>
+                          </div>
+                        </Col>
+                        <Col lg={2}>
+                          <div className="form-check mb-2">
+                            <input
+                              className="form-check-input"
+                              type="radio"
+                              name="flexRadioDefault"
+                              id="flexRadioDefault1"
+                              onChange={radioHandlerGroupCreationMode}
+                              value="Custom"
+                            />
+                            <Form.Label
+                              className="form-check-label fs-17"
+                              htmlFor="flexRadioDefault1"
+                            >
+                              Custom Groups
+                            </Form.Label>
+                          </div>
+                        </Col>
+                      </Row>
+                      {selectedGroupCreationMode === "AutoGroup" ? (
+                        <>
                           <Row>
-                            <Col lg={6}>
+                            <Col lg={3}>
                               <div className="mb-3">
-                                <Form.Label htmlFor="journeyType">
-                                  Journey Type
+                                <Form.Label htmlFor="recommanded_capacity">
+                                  Recommanded Capacity
+                                </Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  id="recommanded_capacity"
+                                  required
+                                  className="mb-2"
+                                  name="recommanded_capacity"
+                                  value={recommandedCapacityState}
+                                  onChange={onChangeRecommandedCapacityState}
+                                />
+                              </div>
+                            </Col>
+                            <Col lg={3}>
+                              <div className="mb-3">
+                                <Form.Label htmlFor="vehicleType">
+                                  Vehicle Type
+                                </Form.Label>
+                                <div>
+                                  <select
+                                    className="form-select text-muted"
+                                    name="vehicleType"
+                                    id="vehicleType"
+                                    onChange={handleSelectVehicleType}
+                                  >
+                                    <option value="">
+                                      Select Vehicle Type
+                                    </option>
+                                    {filteredVehicleType.map((vehicleType) => (
+                                      <option
+                                        value={vehicleType.vehicle_type._id}
+                                        key={vehicleType.vehicle_type._id}
+                                      >
+                                        {vehicleType.vehicle_type.type}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                              </div>
+                            </Col>
+                            <Col lg={3}>
+                              <div className="mb-3">
+                                <Form.Label htmlFor="luggageDetails">
+                                  Luggage Details
                                 </Form.Label>
                                 <select
                                   className="form-select text-muted"
-                                  name="journeyType"
-                                  id="journeyType"
-                                  onChange={handleSelectJourney}
+                                  name="luggageDetails"
+                                  id="luggageDetails"
+                                  onChange={handleSelectLuggage}
                                 >
-                                  <option value="">Select Journey Type</option>
-                                  {AllJourneys.map((journeys) => (
+                                  <option value="">Select Luggage</option>
+                                  {filteredLuggageDetails.map((Luggage) => (
                                     <option
-                                      value={journeys._id}
-                                      key={journeys._id}
+                                      value={Luggage.max_luggage._id}
+                                      key={Luggage.max_luggage._id}
                                     >
-                                      {journeys.type}
+                                      {Luggage.max_luggage.description}
                                     </option>
                                   ))}
                                 </select>
                               </div>
                             </Col>
+                            <Col lg={3}>
+                              <button
+                                type="button"
+                                className="btn btn-info"
+                                onClick={() => generateGroups()}
+                                disabled={
+                                  selectedVehicleType === "" ||
+                                  selectedLuggage === ""
+                                    ? true
+                                    : false
+                                }
+                                style={{ marginTop: "28px" }}
+                              >
+                                <span className="mdi mdi-cog"></span> Generate
+                              </button>
+                            </Col>
                           </Row>
+                          <Row>{rows}</Row>
+                          <hr className="text-muted" />
+                        </>
+                      ) : selectedGroupCreationMode === "Custom" ? (
+                        <>
                           <Row>
-                            <Col lg={6}>
-                              <div>
-                                <Form.Label htmlFor="VertiExtraInput">
-                                  Extra
+                            <Col lg={4}>
+                              <div className="mb-3">
+                                <Form.Label htmlFor="recommanded_capacity">
+                                  Recommanded Capacity
                                 </Form.Label>
-                                <p className="text-muted">
-                                  Slide the selected option to the right
-                                </p>
-                                <DualListBox
-                                  options={options}
-                                  selected={selected}
-                                  onChange={(e: any) => setSelected(e)}
-                                  icons={{
-                                    moveLeft: (
-                                      <span
-                                        className="mdi mdi-chevron-left"
-                                        key="key"
-                                      />
-                                    ),
-                                    moveAllLeft: [
-                                      <span
-                                        className="mdi mdi-chevron-double-left"
-                                        key="key"
-                                      />,
-                                    ],
-                                    moveRight: (
-                                      <span
-                                        className="bi bi-chevron-right"
-                                        key="key"
-                                      />
-                                    ),
-                                    moveAllRight: [
-                                      <span
-                                        className="mdi mdi-chevron-double-right"
-                                        key="key"
-                                      />,
-                                    ],
-                                    moveDown: (
-                                      <span
-                                        className="mdi mdi-chevron-down"
-                                        key="key"
-                                      />
-                                    ),
-                                    moveUp: (
-                                      <span
-                                        className="mdi mdi-chevron-up"
-                                        key="key"
-                                      />
-                                    ),
-                                    moveTop: (
-                                      <span
-                                        className="mdi mdi-chevron-double-up"
-                                        key="key"
-                                      />
-                                    ),
-                                    moveBottom: (
-                                      <span
-                                        className="mdi mdi-chevron-double-down"
-                                        key="key"
-                                      />
-                                    ),
-                                  }}
+                                <Form.Control
+                                  type="text"
+                                  id="recommanded_capacity"
+                                  required
+                                  className="mb-2"
+                                  name="recommanded_capacity"
+                                  value={recommandedCapacityState}
+                                  onChange={onChangeRecommandedCapacityState}
                                 />
                               </div>
                             </Col>
-                            <Col lg={6}>
-                              <div>
-                                <Form.Label htmlFor="notes" className="mb-5">
-                                  Notes
+                            <Col lg={4}>
+                              <div className="mb-3">
+                                <Form.Label htmlFor="recommanded_capacity">
+                                  Affected / Total
                                 </Form.Label>
-                                <textarea
-                                  className="form-control"
-                                  id="notes"
-                                  name="notes"
-                                  rows={5}
-                                  placeholder="Enter your notes"
-                                  value={programm_notes}
-                                  onChange={onChangeProgramNotes}
-                                ></textarea>
+                                <Form.Control
+                                  type="text"
+                                  id="recommanded_capacity"
+                                  disabled
+                                  // defaultValue="0/15"
+                                  className="bg-light mb-2"
+                                  name="recommanded_capacity"
+                                  value={
+                                    affectedCounter +
+                                    "/" +
+                                    recommandedCapacityState
+                                  }
+                                />
                               </div>
                             </Col>
                           </Row>
+                          <hr className="text-muted" />
+                          <Row
+                            className="mb-3"
+                            style={{
+                              maxHeight: "calc(50vh - 50px)",
+                              overflowX: "auto",
+                            }}
+                          >
+                            {selectedClientType === "School"
+                              ? schoolGroups.map((group, index) => (
+                                  <Row key={index}>
+                                    <Col lg={3}>
+                                      <Form.Label htmlFor="customerName-field">
+                                        Group Name
+                                      </Form.Label>
+                                      <Form.Control
+                                        type="text"
+                                        id="customerName-field"
+                                        className="mb-2"
+                                        name="customerName-field"
+                                        value={group.groupName}
+                                        onChange={(e) =>
+                                          onChangeSchoolGroupName(e, index)
+                                        }
+                                      />
+                                    </Col>
+                                    <Col lg={2}>
+                                      <Form.Label htmlFor="pax">
+                                        Passengers
+                                      </Form.Label>
+                                      <Form.Control
+                                        type="text"
+                                        id="pax"
+                                        className="mb-2"
+                                        name="pax"
+                                        placeholder={`1 - ${recommandedCapacityState}`}
+                                        value={group.student_number}
+                                        onChange={(e) =>
+                                          onChangeSchoolGroupPax(e, index)
+                                        }
+                                      />
+                                    </Col>
+                                    <Col lg={3}>
+                                      <div>
+                                        <Form.Label htmlFor="customerName-field">
+                                          Vehicle
+                                        </Form.Label>
+                                        <select
+                                          className="form-select text-muted"
+                                          name="vehicleType"
+                                          id="vehicleType"
+                                          onChange={(e) =>
+                                            handleCustomSelectSchoolVehicleType(
+                                              e,
+                                              index
+                                            )
+                                          }
+                                        >
+                                          <option value="">
+                                            Select Vehicle Type
+                                          </option>
+                                          {group.passenger_limit.map(
+                                            (vehicleType) => (
+                                              <option
+                                                value={
+                                                  vehicleType.vehicle_type._id
+                                                }
+                                                key={
+                                                  vehicleType.vehicle_type._id
+                                                }
+                                              >
+                                                {vehicleType.vehicle_type.type}
+                                              </option>
+                                            )
+                                          )}
+                                        </select>
+                                      </div>
+                                    </Col>
+                                    <Col lg={3}>
+                                      <div className="mb-3">
+                                        <Form.Label htmlFor="luggageDetails">
+                                          Luggage Details
+                                        </Form.Label>
+                                        <select
+                                          className="form-select text-muted"
+                                          name="luggageDetails"
+                                          id="luggageDetails"
+                                          onChange={(e) =>
+                                            handleCustomSelectSchoolLuggageDetails(
+                                              e,
+                                              index
+                                            )
+                                          }
+                                        >
+                                          <option value="">
+                                            Select Luggage
+                                          </option>
+                                          {group?.luggages!.map((Luggage) => (
+                                            <option
+                                              value={
+                                                Luggage.max_luggage.description
+                                              }
+                                              key={Luggage.max_luggage._id}
+                                            >
+                                              {Luggage.max_luggage.description}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      </div>
+                                    </Col>
+                                    <Col lg={1}>
+                                      <button
+                                        type="button"
+                                        className="btn btn-danger btn-icon"
+                                        onClick={() =>
+                                          handleRemoveStudentGroupClick(index)
+                                        }
+                                        style={{
+                                          marginTop: "29px",
+                                          marginBottom: "15px",
+                                          // marginLeft: "152px",
+                                        }}
+                                      >
+                                        <i className="ri-delete-bin-5-line"></i>
+                                      </button>
+                                    </Col>
+                                  </Row>
+                                ))
+                              : companyGroups.map((group, index) => (
+                                  <Row key={index}>
+                                    <Col lg={3}>
+                                      <Form.Label htmlFor="customerName-field">
+                                        Group Name
+                                      </Form.Label>
+                                      <Form.Control
+                                        type="text"
+                                        id="customerName-field"
+                                        className="mb-2"
+                                        name="customerName-field"
+                                        value={group.groupName}
+                                        onChange={(e) =>
+                                          onChangeCompanyGroupName(e, index)
+                                        }
+                                      />
+                                    </Col>
+                                    <Col lg={2}>
+                                      <Form.Label htmlFor="pax">
+                                        Passengers
+                                      </Form.Label>
+                                      <Form.Control
+                                        type="text"
+                                        id="pax"
+                                        className="mb-2"
+                                        name="pax"
+                                        placeholder={`1 - ${recommandedCapacityState}`}
+                                        value={group.passenger_number}
+                                        onChange={(e) =>
+                                          onChangeCompanyGroupPax(e, index)
+                                        }
+                                      />
+                                    </Col>
+                                    <Col lg={3}>
+                                      <div>
+                                        <Form.Label htmlFor="customerName-field">
+                                          Vehicle
+                                        </Form.Label>
+                                        <select
+                                          className="form-select text-muted"
+                                          name="vehicleType"
+                                          id="vehicleType"
+                                          onChange={(e) =>
+                                            handleCustomSelectCompanyVehicleType(
+                                              e,
+                                              index
+                                            )
+                                          }
+                                        >
+                                          <option value="">
+                                            Select Vehicle Type
+                                          </option>
+                                          {group.passenger_limit.map(
+                                            (vehicleType) => (
+                                              <option
+                                                value={
+                                                  vehicleType.vehicle_type._id
+                                                }
+                                                key={
+                                                  vehicleType.vehicle_type._id
+                                                }
+                                              >
+                                                {vehicleType.vehicle_type.type}
+                                              </option>
+                                            )
+                                          )}
+                                        </select>
+                                      </div>
+                                    </Col>
+                                    <Col lg={3}>
+                                      <div className="mb-3">
+                                        <Form.Label htmlFor="luggageDetails">
+                                          Luggage Details
+                                        </Form.Label>
+                                        <select
+                                          className="form-select text-muted"
+                                          name="luggageDetails"
+                                          id="luggageDetails"
+                                          onChange={(e) =>
+                                            handleCustomSelectCompanyLuggageDetails(
+                                              e,
+                                              index
+                                            )
+                                          }
+                                        >
+                                          <option value="">
+                                            Select Luggage
+                                          </option>
+                                          {group?.luggages!.map((Luggage) => (
+                                            <option
+                                              value={
+                                                Luggage.max_luggage.description
+                                              }
+                                              key={Luggage.max_luggage._id}
+                                            >
+                                              {Luggage.max_luggage.description}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      </div>
+                                    </Col>
+                                    <Col lg={1}>
+                                      <button
+                                        type="button"
+                                        className="btn btn-danger btn-icon"
+                                        onClick={() =>
+                                          handleRemoveCompanyGroupClick(index)
+                                        }
+                                        style={{
+                                          marginTop: "29px",
+                                          marginBottom: "15px",
+                                          // marginLeft: "152px",
+                                        }}
+                                      >
+                                        <i className="ri-delete-bin-5-line"></i>
+                                      </button>
+                                    </Col>
+                                  </Row>
+                                ))}
 
-                          <Row className="mt-1">
-                            <Card.Header>
+                            <div className="d-flex">
+                              <Link
+                                to="#"
+                                id="add-item"
+                                className="btn btn-soft-info fw-medium"
+                                onClick={handleAddGroupClick}
+                              >
+                                <i className="ri-add-line label-icon align-middle rounded-pill fs-16 me-2"></i>
+                              </Link>
+                            </div>
+                          </Row>
+                        </>
+                      ) : (
+                        ""
+                      )}
+                      <div className="d-flex align-items-start gap-3">
+                        <Button
+                          type="button"
+                          className="btn btn-light btn-label previestab"
+                          onClick={() => setactiveVerticalTab(2)}
+                        >
+                          <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
+                          Back to Run Dates
+                        </Button>
+                        <Button
+                          type="button"
+                          className="btn btn-success btn-label right ms-auto nexttab nexttab"
+                          onClick={() => setactiveVerticalTab(4)}
+                          // disabled={disabledNext}
+                        >
+                          <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
+                          Go To Extra
+                        </Button>
+                      </div>
+                    </Tab.Pane>
+                    <Tab.Pane eventKey="4" style={{ height: 320 }}>
+                      <Row>
+                        <Col lg={6}>
+                          <div className="mb-3">
+                            <Form.Label htmlFor="journeyType">
+                              Journey Type
+                            </Form.Label>
+                            <select
+                              className="form-select text-muted"
+                              name="journeyType"
+                              id="journeyType"
+                              onChange={handleSelectJourney}
+                            >
+                              <option value="">Select Journey Type</option>
+                              {AllJourneys.map((journeys) => (
+                                <option value={journeys._id} key={journeys._id}>
+                                  {journeys.type}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col lg={6}>
+                          <div>
+                            <Form.Label htmlFor="VertiExtraInput">
+                              Extra
+                            </Form.Label>
+                            <p className="text-muted">
+                              Slide the selected option to the right
+                            </p>
+                            <DualListBox
+                              options={options}
+                              selected={selected}
+                              onChange={(e: any) => setSelected(e)}
+                              icons={{
+                                moveLeft: (
+                                  <span
+                                    className="mdi mdi-chevron-left"
+                                    key="key"
+                                  />
+                                ),
+                                moveAllLeft: [
+                                  <span
+                                    className="mdi mdi-chevron-double-left"
+                                    key="key"
+                                  />,
+                                ],
+                                moveRight: (
+                                  <span>
+                                    <i className="ri-arrow-drop-right-line"></i>
+                                  </span>
+                                ),
+                                moveAllRight: [
+                                  <span
+                                    className="mdi mdi-chevron-double-right"
+                                    key="key"
+                                  />,
+                                ],
+                                moveDown: (
+                                  <span
+                                    className="mdi mdi-chevron-down"
+                                    key="key"
+                                  />
+                                ),
+                                moveUp: (
+                                  <span
+                                    className="mdi mdi-chevron-up"
+                                    key="key"
+                                  />
+                                ),
+                                moveTop: (
+                                  <span
+                                    className="mdi mdi-chevron-double-up"
+                                    key="key"
+                                  />
+                                ),
+                                moveBottom: (
+                                  <span
+                                    className="mdi mdi-chevron-double-down"
+                                    key="key"
+                                  />
+                                ),
+                              }}
+                            />
+                          </div>
+                        </Col>
+                        <Col lg={6}>
+                          <div>
+                            <Form.Label htmlFor="notes" className="mb-5">
+                              Notes
+                            </Form.Label>
+                            <textarea
+                              className="form-control"
+                              id="notes"
+                              name="notes"
+                              rows={5}
+                              placeholder="Enter your notes"
+                              value={programm_notes}
+                              onChange={onChangeProgramNotes}
+                            ></textarea>
+                          </div>
+                        </Col>
+                      </Row>
+                      <Row className="mt-1">
+                        {/* <Card.Header>
                               <div className="d-flex align-items-center">
                                 <div className="flex-shrink-0 me-3">
                                   <div className="avatar-sm">
@@ -3005,30 +2975,88 @@ const AddProgramm = (props: any) => {
                                   <h5 className="card-title mb-1">Price</h5>
                                 </div>
                               </div>
-                            </Card.Header>
-                            <Card.Body>
-                              <Row>
-                                <Col lg={3}>
-                                  <div className="mb-2">
-                                    <Form.Label htmlFor="unit_price">
-                                      Unit Price
-                                    </Form.Label>
-                                    <Form.Control
+                            </Card.Header> */}
+                        {/* <Card.Body> */}
+                        <Row>
+                          <Col lg={3}>
+                            <div className="mb-2">
+                              <Form.Label htmlFor="unit_price">
+                                Unit Price
+                              </Form.Label>
+                              <Form.Control
+                                type="text"
+                                id="unit_price"
+                                name="unit_price"
+                                placeholder="£ 00.00"
+                                onChange={onChangeUnitPrice}
+                                value={quoteUnitPrice}
+                              />
+                            </div>
+                          </Col>
+
+                          <Col lg={3}>
+                            <div className="mb-2">
+                              <Form.Label htmlFor="unit_price">
+                                Working Days
+                              </Form.Label>
+                              {/* <Form.Control
                                       type="text"
                                       id="unit_price"
                                       name="unit_price"
-                                      placeholder="£ 00.00"
-                                      onChange={onChangeUnitPrice}
-                                      value={quoteUnitPrice}
-                                    />
-                                  </div>
-                                </Col>
-                                <Col lg={3}>
-                                  <div className="mb-2">
-                                    <Form.Label htmlFor="prices">
-                                      Total Price
-                                    </Form.Label>
-                                    <Form.Control
+                                      readOnly
+                                      value={getWorkDates().length}
+                                    /> */}
+                              <br />
+                              <span className="badge bg-dark-subtle text-dark fs-14 mt-2">
+                                {getWorkDates().length}
+                              </span>
+                            </div>
+                          </Col>
+                          {selectedClientType === "School" ? (
+                            <Col lg={3}>
+                              <div className="mb-2">
+                                <Form.Label htmlFor="unit_price">
+                                  Groups Number
+                                </Form.Label>
+                                {/* <Form.Control
+                                        type="text"
+                                        id="unit_price"
+                                        name="unit_price"
+                                        readOnly
+                                        value={schoolGroups.length}
+                                      /> */}
+                                <br />
+                                <span className="badge bg-dark-subtle text-dark fs-14 mt-2">
+                                  {schoolGroups.length}
+                                </span>
+                              </div>
+                            </Col>
+                          ) : (
+                            <Col lg={3}>
+                              <div className="mb-2">
+                                <Form.Label htmlFor="unit_price">
+                                  Groups Number
+                                </Form.Label>
+                                {/* <Form.Control
+                                        type="text"
+                                        id="unit_price"
+                                        name="unit_price"
+                                        readOnly
+                                        value={companyGroups.length}
+                                      /> */}
+                                <br />
+                                <span className="badge bg-dark-subtle text-dark fs-14 mt-2">
+                                  {companyGroups.length}
+                                </span>
+                              </div>
+                            </Col>
+                          )}
+                          <Col lg={3}>
+                            <div className="mb-2">
+                              <Form.Label htmlFor="prices">
+                                Total Price
+                              </Form.Label>
+                              {/* <Form.Control
                                       type="text"
                                       id="prices"
                                       name="prices"
@@ -3036,109 +3064,133 @@ const AddProgramm = (props: any) => {
                                       onChange={onChangeUnitPrice}
                                       defaultValue={contractTotalPrice}
                                       readOnly
-                                    />
+                                    /> */}
+                              <br />
+                              <span className="badge bg-dark-subtle text-dark fs-14 mt-2">
+                                £ {contractTotalPrice}
+                              </span>
+                            </div>
+                          </Col>
+                        </Row>
+                        {/* </Card.Body> */}
+                      </Row>
+                      <Row className="mt-1">
+                        {/* <Card.Header>
+                              <div className="d-flex align-items-center">
+                                <div className="flex-shrink-0 me-3">
+                                  <div className="avatar-sm">
+                                    <div className="avatar-title rounded-circle bg-light text-primary fs-20">
+                                      <i className="mdi mdi-cash-multiple"></i>
+                                    </div>
                                   </div>
-                                </Col>
-                                <Col lg={3}>
-                                  <div className="mb-2">
-                                    <Form.Label htmlFor="invoiceFrequency">
-                                      Invoice Frequency
-                                    </Form.Label>
-                                    <select
-                                      className="form-select text-muted"
-                                      name="invoiceFrequency"
-                                      id="invoiceFrequency"
-                                      onChange={handleSelectInvoiceFrequency}
-                                    >
-                                      <option value="">Select</option>
-                                      <option value="Daily">Daily</option>
-                                      <option value="Weekly">Weekly</option>
-                                      <option value="Bi Weekly">
-                                        Bi Weekly
-                                      </option>
-                                      <option value="Third Weekly">
-                                        Third Weekly
-                                      </option>
-                                      <option value="Monthly">Monthly</option>
-                                    </select>
-                                  </div>
-                                </Col>
-                                <Col lg={3}>
-                                  <div className="mb-2">
-                                    <Form.Label htmlFor="within_payment_days">
-                                      Within Payment Days
-                                    </Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      id="within_payment_days"
-                                      name="within_payment_days"
-                                      placeholder="1 Day"
-                                      value={programm_paymentDays}
-                                      onChange={onChangeProgramPaymentDays}
-                                    />
-                                  </div>
-                                </Col>
-                              </Row>
-                            </Card.Body>
-                          </Row>
-                          <div className="d-flex align-items-start gap-3">
-                            <Button
-                              type="button"
-                              className="btn btn-light btn-label previestab"
-                              onClick={() => setactiveVerticalTab(3)}
-                            >
-                              <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
-                              Back to Options
-                            </Button>
-
-                            <Button
-                              type="button"
-                              className="btn btn-success btn-label right ms-auto nexttab nexttab"
-                              onClick={() => handleNextStep(true)}
-                              disabled={isNextButtonDisabled()}
-                            >
-                              <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
-                              Go To Resume
-                            </Button>
-                          </div>
-                        </Tab.Pane>
-                        <Tab.Pane eventKey="5">
-                          <div
-                            style={{
-                              maxHeight: "calc(80vh - 80px)",
-                              overflowY: "auto",
-                            }}
+                                </div>
+                                <div className="flex-grow-1">
+                                  <h5 className="card-title mb-1">Billing</h5>
+                                </div>
+                              </div>
+                            </Card.Header>
+                            <Card.Body> */}
+                        <Row>
+                          <Col lg={3}>
+                            <div className="mb-2">
+                              <Form.Label htmlFor="invoiceFrequency">
+                                Invoice Frequency
+                              </Form.Label>
+                              <select
+                                className="form-select text-muted"
+                                name="invoiceFrequency"
+                                id="invoiceFrequency"
+                                onChange={handleSelectInvoiceFrequency}
+                              >
+                                <option value="">Select</option>
+                                <option value="Daily">Daily</option>
+                                <option value="Weekly">Weekly</option>
+                                <option value="Bi Weekly">Bi Weekly</option>
+                                <option value="Third Weekly">
+                                  Third Weekly
+                                </option>
+                                <option value="Monthly">Monthly</option>
+                              </select>
+                            </div>
+                          </Col>
+                          <Col lg={3}>
+                            <div className="mb-2">
+                              <Form.Label htmlFor="within_payment_days">
+                                Within Payment Days
+                              </Form.Label>
+                              <Form.Control
+                                type="text"
+                                id="within_payment_days"
+                                name="within_payment_days"
+                                placeholder="1 Day"
+                                value={programm_paymentDays}
+                                onChange={onChangeProgramPaymentDays}
+                              />
+                            </div>
+                          </Col>
+                        </Row>
+                        {/* </Card.Body> */}
+                      </Row>
+                      <Row>
+                        <div className="d-flex align-items-start gap-3">
+                          <Button
+                            type="button"
+                            className="btn btn-light btn-label previestab"
+                            onClick={() => setactiveVerticalTab(3)}
                           >
-                            {renderRecapPage()}
-                          </div>
-                          <div
-                            className="d-flex justify-content-between"
-                            style={{ marginTop: "10px", marginBottom: "15px" }}
-                          >
-                            <Button
-                              type="button"
-                              className="btn btn-light btn-label previestab"
-                              onClick={() => setactiveVerticalTab(4)}
-                            >
-                              <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
-                              Back to Extra
-                            </Button>
+                            <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
+                            Back to Options
+                          </Button>
 
-                            <Button
-                              variant="success"
-                              type="submit"
-                              className="w-sm"
-                            >
-                              Submit
-                            </Button>
-                          </div>
-                        </Tab.Pane>
-                      </Tab.Content>
-                    </Tab.Container>
-                  </Form>
-                </Card.Body>
-              </Card>
+                          <Button
+                            type="button"
+                            className="btn btn-success btn-label right ms-auto nexttab nexttab"
+                            onClick={() => handleNextStep(true)}
+                            disabled={isNextButtonDisabled()}
+                          >
+                            <i className="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
+                            Go To Resume
+                          </Button>
+                        </div>
+                      </Row>
+                    </Tab.Pane>
+                    <Tab.Pane eventKey="5">
+                      <div
+                        style={{
+                          maxHeight: "calc(80vh - 80px)",
+                          overflowY: "auto",
+                        }}
+                      >
+                        {renderRecapPage()}
+                      </div>
+                      <div
+                        className="d-flex justify-content-between"
+                        style={{ marginTop: "10px", marginBottom: "15px" }}
+                      >
+                        <Button
+                          type="button"
+                          className="btn btn-light btn-label previestab"
+                          onClick={() => setactiveVerticalTab(4)}
+                        >
+                          <i className="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>{" "}
+                          Back to Extra
+                        </Button>
+
+                        <Button
+                          variant="success"
+                          type="submit"
+                          className="w-sm"
+                        >
+                          Submit
+                        </Button>
+                      </div>
+                    </Tab.Pane>
+                  </Tab.Content>
+                </Tab.Container>
+              </Form>
             </Card.Body>
+            {/* </Card>
+            </Card.Body> */}
           </Card>
         </Container>
       </div>

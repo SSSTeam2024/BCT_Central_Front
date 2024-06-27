@@ -9,7 +9,10 @@ import {
   useGetAllJourneyQuery,
 } from "features/Journeys/journeySlice";
 import Swal from "sweetalert2";
-import { useGetAllCheckTypesQuery } from "features/ChechTypes/checkTypesSlice";
+import {
+  useDeleteCheckTypeMutation,
+  useGetAllCheckTypesQuery,
+} from "features/ChechTypes/checkTypesSlice";
 
 const CheckTypes = () => {
   const { data = [] } = useGetAllCheckTypesQuery();
@@ -34,7 +37,7 @@ const CheckTypes = () => {
     });
   };
 
-  const [deleteVehicleType] = useDeleteJourneyMutation();
+  const [deleteCheckType] = useDeleteCheckTypeMutation();
 
   const swalWithBootstrapButtons = Swal.mixin({
     customClass: {
@@ -57,10 +60,10 @@ const CheckTypes = () => {
       })
       .then((result) => {
         if (result.isConfirmed) {
-          deleteVehicleType(_id);
+          deleteCheckType(_id);
           swalWithBootstrapButtons.fire(
             "Deleted !",
-            "Journey is deleted.",
+            "Check Type is deleted.",
             "success"
           );
         } else if (
@@ -69,7 +72,7 @@ const CheckTypes = () => {
         ) {
           swalWithBootstrapButtons.fire(
             "Canceled",
-            "Journey is safe :)",
+            "Check Type  is safe :)",
             "info"
           );
         }
@@ -107,22 +110,41 @@ const CheckTypes = () => {
     }
   };
 
+  let newArr: any[] = [];
+
+  data.map((checkType: any) =>
+    checkType.type.map((type: any) =>
+      newArr.push({ ...type, duration: checkType.duration })
+    )
+  );
   const columns = [
     {
-      name: <span className="font-weight-bold fs-13">Check Type</span>,
-      selector: (row: any) => row.type.category,
+      name: <span className="font-weight-bold fs-13">Title</span>,
+      selector: (row: any) => row.title,
       sortable: true,
+    },
+    {
+      name: <span className="font-weight-bold fs-13">Image</span>,
+      selector: (row: any) => row.checkType_image,
+      sortable: true,
+    },
+    {
+      name: <span className="font-weight-bold fs-13">Category</span>,
+      selector: (row: any) => row.category,
+      sortable: true,
+      width: "140px",
     },
     {
       name: <span className="font-weight-bold fs-13">Message</span>,
-      selector: (row: any) => row.type.message,
+      selector: (row: any) => row.message,
       sortable: true,
     },
     {
-        name: <span className="font-weight-bold fs-13">Duration</span>,
-        selector: (row: any) => <span><strong>{row.duration}</strong> min</span>,
-        sortable: true,
-      },
+      name: <span className="font-weight-bold fs-13">Duration</span>,
+      selector: (row: any) => row.duration,
+      sortable: true,
+      width: "90px",
+    },
     {
       name: <span className="font-weight-bold fs-13">Action</span>,
       sortable: true,
@@ -169,6 +191,7 @@ const CheckTypes = () => {
           </ul>
         );
       },
+      width: "120px",
     },
   ];
 
@@ -221,7 +244,7 @@ const CheckTypes = () => {
             </Row>
           </Card.Header>
           <Card.Body>
-            <DataTable columns={columns} data={data} pagination />
+            <DataTable columns={columns} data={newArr} pagination />
           </Card.Body>
         </Card>
       </Col>

@@ -195,6 +195,13 @@ export const quoteSlice = createApi({
         }),
         providesTags: ["Quote"],
       }),
+      getAllQuotesByVisitorId: builder.query<Quote[], string>({
+      query: (_id) =>({
+          url: `/getAllQuotesByVisitorId/${_id}`,
+          method: "GET",
+      }),
+      providesTags: ["Quote"],
+    }),
       addSendBookEmail: builder.mutation<void, BookEmail>({
         query({
           id_visitor,
@@ -368,5 +375,6 @@ export const {
   useAddAffiliateToWhiteListMutation,
   useDeleteAffiliateFromWhiteListMutation,
   useDeleteWhiteListMutation,
-  useGetQuotesByReferenceQuery
+  useGetQuotesByReferenceQuery,
+  useGetAllQuotesByVisitorIdQuery
 } = quoteSlice;

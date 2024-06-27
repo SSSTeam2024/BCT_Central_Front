@@ -28,6 +28,9 @@ export interface Team {
   salary: string;
   IdFileBase64String: string;
   IdFileExtension: string;
+  avatar: string;
+  avatarBase64String: string;
+  avatarExtension: string;
 }
 
 export const teamSlice = createApi({

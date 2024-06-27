@@ -254,7 +254,7 @@ export const programmSlice = createApi({
         },
         invalidatesTags: ["Programm", "UpdateStatus"],
       }),
-      deleteProgram: builder.mutation<void, string>({
+      deleteProgram: builder.mutation<void, Programm>({
         query: (_id) => ({
           url: `/deleteProgram/${_id}`,
           method: "DELETE",

@@ -1619,31 +1619,67 @@ const SiteSettings = () => {
                               </span>
                             </Accordion.Header>
                             <Accordion.Body className="text-body pt-1">
-                              <Link
-                                className="text-dark"
-                                to="#"
-                                onClick={() => {
-                                  tog_ShowCheckTypes();
-                                }}
-                              >
-                                <i
-                                  className="ph ph-check-circle align-middle"
-                                  style={{
-                                    transition: "transform 0.3s ease-in-out",
-                                    cursor: "pointer",
-                                    fontSize: "1.6em",
-                                  }}
-                                  onMouseEnter={(e) =>
-                                    (e.currentTarget.style.transform =
-                                      "scale(1.3)")
-                                  }
-                                  onMouseLeave={(e) =>
-                                    (e.currentTarget.style.transform =
-                                      "scale(1)")
-                                  }
-                                ></i>{" "}
-                                <span className="fw-bold">Check Types</span>
-                              </Link>
+                              <ul className="list-unstyled">
+                                {showCheckTypes && showCheckTypes === true ? (
+                                  <li className="mb-1 bg-warning">
+                                    <Link
+                                      className="text-white"
+                                      to="#"
+                                      onClick={() => {
+                                        tog_ShowCheckTypes();
+                                      }}
+                                    >
+                                      <i
+                                        className="ph ph-check-circle align-middle"
+                                        style={{
+                                          transition:
+                                            "transform 0.3s ease-in-out",
+                                          cursor: "pointer",
+                                          fontSize: "1.6em",
+                                        }}
+                                        onMouseEnter={(e) =>
+                                          (e.currentTarget.style.transform =
+                                            "scale(1.3)")
+                                        }
+                                        onMouseLeave={(e) =>
+                                          (e.currentTarget.style.transform =
+                                            "scale(1)")
+                                        }
+                                      ></i>{" "}
+                                      <span className="fw-bold">
+                                        Check Types
+                                      </span>
+                                    </Link>
+                                  </li>
+                                ) : (
+                                  <Link
+                                    className="text-dark"
+                                    to="#"
+                                    onClick={() => {
+                                      tog_ShowCheckTypes();
+                                    }}
+                                  >
+                                    <i
+                                      className="ph ph-check-circle align-middle"
+                                      style={{
+                                        transition:
+                                          "transform 0.3s ease-in-out",
+                                        cursor: "pointer",
+                                        fontSize: "1.6em",
+                                      }}
+                                      onMouseEnter={(e) =>
+                                        (e.currentTarget.style.transform =
+                                          "scale(1.3)")
+                                      }
+                                      onMouseLeave={(e) =>
+                                        (e.currentTarget.style.transform =
+                                          "scale(1)")
+                                      }
+                                    ></i>{" "}
+                                    <span className="fw-bold">Check Types</span>
+                                  </Link>
+                                )}
+                              </ul>
                             </Accordion.Body>
                           </Accordion.Item>
                         </Accordion>

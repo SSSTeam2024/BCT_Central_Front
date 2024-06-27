@@ -127,7 +127,6 @@ const TeamTable = ({ team }: any) => {
         ref={teamList}
       >
         {(paginatedData || []).map((item: any, key: number) => (
-
           <Col key={key}>
             <Card>
               <Link
@@ -137,7 +136,9 @@ const TeamTable = ({ team }: any) => {
               >
                 <Card.Header>
                   <div className="d-flex justify-content-between">
-                    <h6 className="card-title mb-0">{item.firstName} {item.lastName}</h6>
+                    <h6 className="card-title mb-0">
+                      {item.firstName} {item.lastName}
+                    </h6>
                     {item.statusTeam === "Active" ? (
                       <span className="badge badge-soft-success text-uppercase">
                         Active
@@ -146,9 +147,16 @@ const TeamTable = ({ team }: any) => {
                       <span className="badge badge-soft-danger text-uppercase">
                         Inactive
                       </span>
-                    ) : item.statusTeam === "Annual vacation" ? <span className="badge badge-soft-warning text-uppercase">
-                    Annual vacation
-                  </span> : <span className="badge badge-soft-info text-uppercase"> Exceptional vacation</span>}
+                    ) : item.statusTeam === "Annual vacation" ? (
+                      <span className="badge badge-soft-warning text-uppercase">
+                        Annual vacation
+                      </span>
+                    ) : (
+                      <span className="badge badge-soft-info text-uppercase">
+                        {" "}
+                        Exceptional vacation
+                      </span>
+                    )}
                   </div>
                   <span>
                     {item.access_level === "Visitor Jobs" ? (
@@ -169,12 +177,14 @@ const TeamTable = ({ team }: any) => {
                 <Card.Body className="p-4 text-center">
                   <div className="mx-auto avatar-md mb-3">
                     <img
-                      src={avtar1}
+                      src={`${process.env.REACT_APP_BASE_URL}/teamFiles/avatarImages/${item.avatar}`}
                       alt=""
                       className="img-fluid rounded-circle"
                     />
                   </div>
-                  <h5 className="card-title mb-1">{item.firstName} {item.lastName}</h5>
+                  <h5 className="card-title mb-1">
+                    {item.firstName} {item.lastName}
+                  </h5>
                   <p className="text-muted mb-0">{item.email}</p>
                   <p className="text-muted mb-0">{item.phone}</p>
                 </Card.Body>
@@ -184,23 +194,28 @@ const TeamTable = ({ team }: any) => {
                   className="btn-group btn-group-lg d-flex justify-content-center"
                   role="group"
                   aria-label="Basic example"
-                > <Link to={`/team-details/${item.firstName}`} state={item}>
+                >
+                  {" "}
+                  <Link to={`/team-details/${item.firstName}`} state={item}>
                     <button type="button" className="btn btn-outline-info">
-                      < i className="ri-eye-line ri-xl"></i>
+                      <i className="ri-eye-line ri-xl"></i>
                     </button>
                   </Link>
                   <Link to="#">
-                  <button type="button" className="btn btn-outline-secondary">
-                    < i className="ri-edit-2-line ri-xl"></i>
-                  </button></Link>
+                    <button type="button" className="btn btn-outline-secondary">
+                      <i className="ri-edit-2-line ri-xl"></i>
+                    </button>
+                  </Link>
                   <Link to="#">
-                  <button type="button" className="btn btn-outline-dark">
-                    < i className="ri-settings-5-line ri-xl"></i>
-                  </button></Link>
-                  <Link to="#" onClick={()=> AlertDelete(item?._id!)}>
-                  <button type="button" className="btn btn-outline-danger">
-                    <i className="ri-delete-bin-5-line ri-xl" />
-                  </button></Link>
+                    <button type="button" className="btn btn-outline-dark">
+                      <i className="ri-settings-5-line ri-xl"></i>
+                    </button>
+                  </Link>
+                  <Link to="#" onClick={() => AlertDelete(item?._id!)}>
+                    <button type="button" className="btn btn-outline-danger">
+                      <i className="ri-delete-bin-5-line ri-xl" />
+                    </button>
+                  </Link>
                 </div>
               </Card.Footer>
             </Card>

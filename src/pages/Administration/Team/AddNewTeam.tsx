@@ -38,7 +38,7 @@ function convertToBase64(
 
 const AddNewTeam = () => {
   document.title = "Create Team | Bouden Coach Travel";
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [seletedCountry1, setseletedCountry1] = useState<any>({});
 
   const notifySuccess = () => {
@@ -61,7 +61,9 @@ const AddNewTeam = () => {
     });
   };
   // DateOfBirth
-  const [selectedDateOfBirth, setSelectedDateOfBirth] = useState<Date | null>(null);
+  const [selectedDateOfBirth, setSelectedDateOfBirth] = useState<Date | null>(
+    null
+  );
   const handleDateChangeOfBirth = (selectedDates: Date[]) => {
     // Assuming you only need the first selected date
     setSelectedDateOfBirth(selectedDates[0]);
@@ -75,7 +77,8 @@ const AddNewTeam = () => {
   };
 
   // ServiceDate
-  const [selectedDateOfService, setSelectedDateOfService] = useState<Date | null>(null);
+  const [selectedDateOfService, setSelectedDateOfService] =
+    useState<Date | null>(null);
   const handleDateChangeOfService = (selectedDates: Date[]) => {
     // Assuming you only need the first selected date
     setSelectedDateOfService(selectedDates[0]);
@@ -83,9 +86,7 @@ const AddNewTeam = () => {
 
   const [selectedGender, setSelectedGender] = useState<string>("");
   // This function is triggered when the select gender
-  const handleSelectGender = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  const handleSelectGender = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     setSelectedGender(value);
   };
@@ -101,9 +102,7 @@ const AddNewTeam = () => {
 
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   // This function is triggered when the select Status
-  const handleSelectStatus = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  const handleSelectStatus = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     setSelectedStatus(value);
   };
@@ -126,7 +125,7 @@ const AddNewTeam = () => {
     setSelectedContractType(value);
   };
 
-  const [createTeam] = useAddNewTeamMutation()
+  const [createTeam] = useAddNewTeamMutation();
 
   const initialTeam = {
     firstName: "",
@@ -155,6 +154,9 @@ const AddNewTeam = () => {
     salary: "",
     IdFileBase64String: "",
     IdFileExtension: "",
+    avatar: "",
+    avatarExtension: "",
+    avatarBase64String: "",
   };
 
   const [team, setTeam] = useState(initialTeam);
@@ -186,6 +188,9 @@ const AddNewTeam = () => {
     salary,
     IdFileBase64String,
     IdFileExtension,
+    avatar,
+    avatarExtension,
+    avatarBase64String,
   } = team;
 
   const onChangeTeam = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -214,25 +219,44 @@ const AddNewTeam = () => {
     }
   };
 
-  const onSubmitTeam = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
-team["birth_date"]=selectedDateOfBirth?.toDateString()!;
-team["nationality"]=seletedCountry1?.countryName!;
-team["gender"]=selectedGender
-team["marital_status"]=selectedCivilStatus
-team["id_card_date"]=selectedLegalCard?.toDateString()!
-team["service_date"]=selectedDateOfService?.toDateString()!
-team["statusTeam"]=selectedStatus
-team["access_level"]=selectedAccessLevel
-team["contract_type"]=selectedContractType
-      createTeam(team).then(() => notifySuccess())
-        .then(() => navigate("/team"))
-    } catch (error) {
-      notifyError(error)
+  // Avatar
+  const handleAvatarUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = (
+      document.getElementById("avatarBase64String") as HTMLFormElement
+    ).files[0];
+    if (file) {
+      const { base64Data, extension } = await convertToBase64(file);
+      const leagalCard = base64Data + "." + extension;
+      setTeam({
+        ...team,
+        avatar: leagalCard,
+        avatarBase64String: base64Data,
+        avatarExtension: extension,
+      });
     }
   };
 
+  const onSubmitTeam = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      team["birth_date"] = selectedDateOfBirth?.toDateString()!;
+      team["nationality"] = seletedCountry1?.countryName!;
+      team["gender"] = selectedGender;
+      team["marital_status"] = selectedCivilStatus;
+      team["id_card_date"] = selectedLegalCard?.toDateString()!;
+      team["service_date"] = selectedDateOfService?.toDateString()!;
+      team["statusTeam"] = selectedStatus;
+      team["access_level"] = selectedAccessLevel;
+      team["contract_type"] = selectedContractType;
+      createTeam(team)
+        .then(() => notifySuccess())
+        .then(() => navigate("/team"));
+    } catch (error) {
+      notifyError(error);
+    }
+  };
 
   return (
     <React.Fragment>
@@ -261,6 +285,52 @@ team["contract_type"]=selectedContractType
                 <Card.Body>
                   <div className="mb-3">
                     <Form className="tablelist-form" onSubmit={onSubmitTeam}>
+                      <Row>
+                        <div className="text-center mb-3">
+                          <div className="position-relative d-inline-block">
+                            <div className="position-absolute top-50 start-50 translate-middle">
+                              <label
+                                htmlFor="avatarBase64String"
+                                className="mb-0"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Select company logo"
+                                // style={{width: "0px"}}
+                              >
+                                <span className="avatar-xs d-inline-block">
+                                  <span className="avatar-title bg-light border rounded-circle text-muted cursor-pointer">
+                                    <i className="ri-image-fill"></i>
+                                  </span>
+                                </span>
+                              </label>
+                              <input
+                                className="form-control d-none"
+                                type="file"
+                                name="avatarBase64String"
+                                id="avatarBase64String"
+                                accept="image/*"
+                                onChange={(e) => handleAvatarUpload(e)}
+                                style={{ width: "210px", height: "120px" }}
+                              />
+                            </div>
+                            <div className="avatar-lg">
+                              <div className="avatar-title bg-light rounded-3">
+                                <img
+                                  src={`data:image/jpeg;base64, ${team.avatarBase64String}`}
+                                  alt={team.firstName}
+                                  id="avatarBase64String"
+                                  className="avatar-xl h-auto rounded-3 object-fit-cover"
+                                  style={{
+                                    width: "210px",
+                                    height: "120px",
+                                    zIndex: 5000,
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Row>
                       <Row>
                         <Row>
                           {/* First Name  == Done */}
@@ -316,9 +386,7 @@ team["contract_type"]=selectedContractType
                           {/* Address  == Done */}
                           <Col lg={2}>
                             <div className="mb-3">
-                              <Form.Label htmlFor="address">
-                                Address
-                              </Form.Label>
+                              <Form.Label htmlFor="address">Address</Form.Label>
                               <Form.Control
                                 type="text"
                                 name="address"
@@ -334,9 +402,7 @@ team["contract_type"]=selectedContractType
                           {/* Email  == Done */}
                           <Col lg={4}>
                             <div className="mb-3">
-                              <Form.Label htmlFor="email">
-                                Email
-                              </Form.Label>
+                              <Form.Label htmlFor="email">Email</Form.Label>
                               <Form.Control
                                 type="email"
                                 name="email"
@@ -350,9 +416,7 @@ team["contract_type"]=selectedContractType
                           {/* Phone  == Done */}
                           <Col lg={3}>
                             <div className="mb-3">
-                              <Form.Label htmlFor="phone">
-                                Phone
-                              </Form.Label>
+                              <Form.Label htmlFor="phone">Phone</Form.Label>
                               <Form.Control
                                 type="text"
                                 id="phone"
@@ -365,7 +429,7 @@ team["contract_type"]=selectedContractType
                           </Col>
                           {/*  Nationaity == Done */}
                           <Col lg={3}>
-                          <div className="mb-3">
+                            <div className="mb-3">
                               <Form.Label htmlFor="nationality">
                                 Nationality
                               </Form.Label>
@@ -373,9 +437,10 @@ team["contract_type"]=selectedContractType
                                 <Dropdown.Toggle
                                   as="input"
                                   style={{
-                                    backgroundImage: `url(${seletedCountry1.flagImg &&
+                                    backgroundImage: `url(${
+                                      seletedCountry1.flagImg &&
                                       seletedCountry1.flagImg
-                                      })`,
+                                    })`,
                                   }}
                                   className="form-control rounded-end flag-input form-select"
                                   placeholder="Select country"
@@ -425,16 +490,13 @@ team["contract_type"]=selectedContractType
                                 </Dropdown.Menu>
                               </Dropdown>
                             </div>
-                          </Col>                          
+                          </Col>
                         </Row>
                         <Row>
                           {/* Gender  == Done */}
                           <Col lg={3}>
                             <div className="mb-3">
-                              <label
-                                htmlFor="gender"
-                                className="form-label"
-                              >
+                              <label htmlFor="gender" className="form-label">
                                 Gender
                               </label>
                               <select
@@ -757,9 +819,7 @@ team["contract_type"]=selectedContractType
                                     <option value="">Contract</option>
                                     <option value="CDI">CDI</option>
                                     <option value="CDD">CDD</option>
-                                    <option value="Part Time">
-                                      Part Time
-                                    </option>
+                                    <option value="Part Time">Part Time</option>
                                   </select>
                                 </div>
                               </Col>
@@ -803,10 +863,7 @@ team["contract_type"]=selectedContractType
                             <Row>
                               <Col lg={3}>
                                 <div className="mb-3">
-                                  <label
-                                    htmlFor="login"
-                                    className="form-label"
-                                  >
+                                  <label htmlFor="login" className="form-label">
                                     Login
                                   </label>
                                   <Form.Control
@@ -842,7 +899,11 @@ team["contract_type"]=selectedContractType
                         </Col>
                         <Col lg={12}>
                           <div className="hstack gap-2 justify-content-end">
-                            <Button variant="primary" id="add-btn" type="submit">
+                            <Button
+                              variant="primary"
+                              id="add-btn"
+                              type="submit"
+                            >
                               Add Team
                             </Button>
                           </div>

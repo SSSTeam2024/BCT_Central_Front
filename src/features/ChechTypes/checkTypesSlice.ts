@@ -3,9 +3,10 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export interface CheckType {
   _id?: string;
   type: {
+    title: string;
     category: string;
     message: string;
-    checkType_images: string;
+    checkType_image: string;
   }[];
   duration: string;
 }

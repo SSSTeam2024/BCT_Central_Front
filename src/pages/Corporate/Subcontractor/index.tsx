@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Card, Col, Container, Modal, Row } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import { Link, useLocation } from "react-router-dom";
@@ -15,6 +15,9 @@ import Swal from "sweetalert2";
 const Subcontractors = () => {
   document.title = "Affiliates | Bouden Coach Travel";
   const { data: AllAffiliates = [] } = useGetAllAffiliatesQuery();
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [filteredSearchResults, setFilteredSearchResults] =
+    useState<any[]>(AllAffiliates);
   const [deleteVisitor] = useDeleteAffiliateMutation();
   const date = new Date();
   let randomstring = Math.random().toString(36).slice(0, 8);
@@ -125,11 +128,13 @@ const Subcontractors = () => {
       name: <span className="font-weight-bold fs-13">Name</span>,
       selector: (row: any) => row.name,
       sortable: true,
+      width: "131px",
     },
     {
       name: <span className="font-weight-bold fs-13">Email</span>,
       selector: (row: any) => row.email,
       sortable: true,
+      width: "109px",
     },
     {
       name: <span className="font-weight-bold fs-13">Phone</span>,
@@ -141,6 +146,7 @@ const Subcontractors = () => {
       name: <span className="font-weight-bold fs-13">Address</span>,
       selector: (row: any) => row.address,
       sortable: true,
+      width: "109px",
     },
     {
       name: <span className="font-weight-bold fs-13">Number of Fleet</span>,
@@ -164,6 +170,7 @@ const Subcontractors = () => {
         );
       },
       sortable: true,
+      width: "140px",
     },
     {
       name: <span className="font-weight-bold fs-13">Insurance Expiry</span>,
@@ -176,7 +183,7 @@ const Subcontractors = () => {
         );
       },
       sortable: true,
-      width: "140px",
+      width: "148px",
     },
     {
       name: <span className="font-weight-bold fs-13">Status</span>,
@@ -197,13 +204,13 @@ const Subcontractors = () => {
         }
       },
       sortable: true,
-      width: "100px",
+      width: "96px",
     },
     {
       name: <span className="font-weight-bold fs-13">Enquiry Date</span>,
       selector: (row: any) => row.enquiryDate,
       sortable: true,
-      width: "100px",
+      width: "95px",
     },
     {
       name: <span className="font-weight-bold fs-13">Action</span>,
@@ -213,21 +220,21 @@ const Subcontractors = () => {
           <li>
             <Link
               to="/affilaite_details"
-              className="badge badge-soft-info edit-item-btn  fs-16"
+              className="badge badge-soft-info edit-item-btn  fs-15"
               state={row}
             >
               <i className="ri-eye-line"></i>
             </Link>
           </li>
           {row.statusAffiliate === "Accepted" ? (
-            <span className="badge badge-soft-dark edit-item-btn  fs-16">
+            <span className="badge badge-soft-dark edit-item-btn  fs-15">
               <i className="ri-check-double-line"></i>
             </span>
           ) : (
             <li>
               <Link
                 to="#"
-                className="badge badge-soft-secondary edit-item-btn fs-16"
+                className="badge badge-soft-secondary edit-item-btn fs-15"
                 state={row}
                 onClick={() => tog_ModalAffiliateStatus()}
               >
@@ -263,7 +270,7 @@ const Subcontractors = () => {
           <li>
             <Link
               to="#"
-              className="badge badge-soft-success edit-item-btn  fs-16"
+              className="badge badge-soft-success edit-item-btn fs-15"
             >
               <i className="ri-edit-2-line"></i>
             </Link>
@@ -271,7 +278,7 @@ const Subcontractors = () => {
           <li>
             <Link
               to="#"
-              className="badge badge-soft-danger remove-item-btn  fs-16"
+              className="badge badge-soft-danger remove-item-btn fs-15"
               onClick={() => AlertDelete(row?._id!)}
             >
               <i className="ri-delete-bin-2-line"></i>
@@ -281,11 +288,30 @@ const Subcontractors = () => {
       ),
     },
   ];
+
+  useEffect(() => {
+    setFilteredSearchResults(
+      AllAffiliates.filter((row) => {
+        return (
+          row.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          row.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          row.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          row.phone?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          row.statusAffiliate.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      })
+    );
+  }, [searchQuery, AllAffiliates]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          <Breadcrumb title="Affiliates" pageTitle="Contacts" />
+          <Breadcrumb title="Affiliates" pageTitle="Accounts" />
           <Card id="shipmentsList">
             <Card.Header className="border-bottom-dashed">
               <Row className="g-3">
@@ -295,6 +321,8 @@ const Subcontractors = () => {
                       type="text"
                       className="form-control search"
                       placeholder="Search for something..."
+                      value={searchQuery}
+                      onChange={handleSearchChange}
                     />
                     <i className="ri-search-line search-icon"></i>
                   </div>
@@ -303,7 +331,11 @@ const Subcontractors = () => {
             </Card.Header>
             <Card.Body>
               <div className="table-responsive table-card">
-                <DataTable columns={columns} data={AllAffiliates} pagination />
+                <DataTable
+                  columns={columns}
+                  data={filteredSearchResults}
+                  pagination
+                />
               </div>
               <div className="noresult" style={{ display: "none" }}>
                 <div className="text-center py-4">
