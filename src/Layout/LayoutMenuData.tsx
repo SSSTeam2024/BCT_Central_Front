@@ -146,6 +146,8 @@ const Navdata = () => {
           icon: "mdi mdi-lightning-bolt",
           link: "/latest-quotes",
           parentId: "jobs",
+          badgeName: `${resultPendingQuotes.length}`,
+          badgeColor: "info",
         },
         {
           id: "AllQuotes",
@@ -153,8 +155,6 @@ const Navdata = () => {
           icon: "mdi mdi-history",
           link: "/pending-quotes",
           parentId: "jobs",
-          badgeName: `${resultPendingQuotes.length}`,
-          badgeColor: "info",
         },
         {
           id: "newQuote",
@@ -179,9 +179,9 @@ const Navdata = () => {
         },
         {
           id: "newQuote",
-          label: "Callbacks",
-          link: "/callbacks",
-          icon: "mdi mdi-phone",
+          label: "Cancelled Jobs",
+          link: "/cancelled-jobs",
+          icon: "mdi mdi-cancel",
           parentId: "jobs",
         },
         {

@@ -101,30 +101,10 @@ const Bookings = () => {
   const { data: AllQuotes = [] } = useGetAllQuoteQuery();
   const result = AllQuotes.filter(
     (bookings) =>
-      (bookings.progress === "Booked" &&
-        bookings.status === "Driver Allocated" &&
-        bookings?.type! === "One way") ||
-      (bookings.progress === "Booked" &&
-        bookings.status === "Vehicle Allocated" &&
-        bookings?.type! === "One way") ||
-      (bookings.progress === "Booked" &&
-        bookings.status === "Allocated" &&
-        bookings?.type! === "One way") ||
-      (bookings.progress === "Booked" &&
-        bookings.status === "Booked" &&
-        bookings?.type! === "One way") ||
-      (bookings.progress === "Accepted" &&
-        bookings.status === "Driver Allocated" &&
-        bookings?.type! === "One way") ||
-      (bookings.progress === "Accepted" &&
-        bookings.status === "Vehicle Allocated" &&
-        bookings?.type! === "One way") ||
-      (bookings.progress === "Accepted" &&
-        bookings.status === "Allocated" &&
-        bookings?.type! === "One way") ||
-      (bookings.progress === "Accepted" &&
-        bookings.status === "Booked" &&
-        bookings?.type! === "One way")
+      bookings.progress !== "New" &&
+      bookings.progress !== "Completed" &&
+      bookings.progress !== "Cancel" &&
+      bookings?.type! === "One way"
   );
 
   const privateHiredJobs = result.filter(

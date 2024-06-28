@@ -484,9 +484,20 @@ const ProgramList = () => {
 
   const onChangeUnitPrice = (event: React.ChangeEvent<HTMLInputElement>) => {
     setQuoteUnitPrice(parseInt(event.target.value));
-    setContractTotalPrice(
-      parseInt(event.target.value) * programLocation?.state?.workDates.length
-    );
+    if (programLocation?.state?.school_id === null) {
+      setContractTotalPrice(
+        parseInt(event.target.value) *
+          programLocation?.state?.workDates.length *
+          programLocation?.state?.employees_groups.length
+      );
+    }
+    if (programLocation?.state?.company_id === null) {
+      setContractTotalPrice(
+        parseInt(event.target.value) *
+          programLocation?.state?.workDates.length *
+          programLocation?.state?.students_groups.length
+      );
+    }
   };
   const [selectedInvoiceFrequency, setSelectedInvoiceFrequency] =
     useState<string>("");
@@ -607,6 +618,11 @@ const ProgramList = () => {
   };
 
   function tog_Action() {
+    if (programLocation.state.unit_price !== "") {
+      // setQuoteUnitPrice(Number(programLocation.state.unit_price));
+      // setContractTotalPrice(Number(programLocation.state.total_price));
+      setSelectedInvoiceFrequency(programLocation.state.invoiceFrequency);
+    }
     setmodal_Action(!modal_Action);
     handleResponseMsgSubmit();
   }
@@ -835,7 +851,8 @@ const ProgramList = () => {
                       name="unit_price"
                       id="unit_price"
                       placeholder="£ 00.00"
-                      defaultValue={programLocation?.state?.unit_price!}
+                      // onChange={onChangeUnitPrice}
+                      value={programLocation?.state?.unit_price!}
                       readOnly
                     />
                   </Col>

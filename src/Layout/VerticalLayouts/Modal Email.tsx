@@ -13,6 +13,8 @@ import {
   useSendNewEmailMutation,
 } from "features/Emails/emailSlice";
 import { useAddNewEmailSentMutation } from "features/emailSent/emailSentSlice";
+import { useGetQuoteByIdQuery } from "features/Quotes/quoteSlice";
+import axios from "axios";
 
 interface ChildProps {
   setmodal_Email: React.Dispatch<React.SetStateAction<boolean>>;
@@ -111,24 +113,64 @@ const ModalEmail: React.FC<ChildProps> = ({ setmodal_Email, modal_Email }) => {
 
   const onSubmitSendNewEmail = async (queue: any) => {
     try {
-      const emailData = {
-        newEmail: queue.newEmail!,
-        subject: queue.subject,
-        body: queue.body,
-        file: queue.file,
-        sender: queue.sender,
-        name: queue.name,
-      };
-      await sendNewEmailMutation(emailData);
-      await saveEmailSentMutation({
-        date: currentDate.toDateString(),
-        subjectEmail: queue.subject,
-        from: queue.sender,
-        to: queue.newEmail!,
-      });
-      await deleteEmailQueue(queue?._id!);
-      notifySuccess();
-      setmodal_Email(!modal_Email);
+      let id = "";
+      if (queue.quote_Id !== undefined) {
+        axios
+          .get(
+            `${process.env.REACT_APP_BASE_URL}/api/quote/getQuoteById/${queue.quote_Id}`
+          )
+          .then(async (res: any) => {
+            id = res.quote_ref;
+
+            const emailData = {
+              newEmail: queue.newEmail!,
+              subject: queue.subject,
+              body: queue.body,
+              file: queue.file,
+              sender: queue.sender,
+              name: queue.name,
+              quote_Id: queue.quote_Id,
+            };
+            console.log(emailData);
+            await sendNewEmailMutation(emailData);
+
+            await saveEmailSentMutation({
+              date: currentDate.toDateString(),
+              subjectEmail: queue.subject,
+              from: queue.sender,
+              to: queue.newEmail!,
+              quoteID: id,
+            });
+            await deleteEmailQueue(queue?._id!);
+            notifySuccess();
+            setmodal_Email(!modal_Email);
+          });
+      } else {
+        id = "";
+
+        const emailData = {
+          newEmail: queue.newEmail!,
+          subject: queue.subject,
+          body: queue.body,
+          file: queue.file,
+          sender: queue.sender,
+          name: queue.name,
+          quote_Id: queue.quote_Id,
+        };
+        console.log(emailData);
+        await sendNewEmailMutation(emailData);
+
+        await saveEmailSentMutation({
+          date: currentDate.toDateString(),
+          subjectEmail: queue.subject,
+          from: queue.sender,
+          to: queue.newEmail!,
+          quoteID: id,
+        });
+        await deleteEmailQueue(queue?._id!);
+        notifySuccess();
+        setmodal_Email(!modal_Email);
+      }
     } catch (error) {
       notifyError(error);
     }

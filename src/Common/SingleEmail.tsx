@@ -10,7 +10,7 @@ import {
   useGetVisitorByEmailQuery,
 } from "features/Visitor/visitorSlice";
 import { useAddNewEmailQueueMutation } from "features/EmailQueue/emailQueueSlice";
-import { useGetAllQuotesByVisitorIdQuery } from "features/Quotes/quoteSlice";
+import { useGetAllQuotesByVisitorEmailQuery } from "features/Quotes/quoteSlice";
 
 interface ChildProps {
   data: string;
@@ -75,7 +75,7 @@ const SingleEmail: React.FC<ChildProps> = ({
         }
         return false;
       });
-      setFilteredEmails(AllVisitors);
+      setFilteredEmails(filtered);
     }
   }, [inputValue, AllVisitors, selectedEmail]);
 
@@ -101,8 +101,10 @@ const SingleEmail: React.FC<ChildProps> = ({
     setFilteredEmails([]); // Hide the list
   };
 
-  const { data: allQuoteByVisitorId = [] } =
-    useGetAllQuotesByVisitorIdQuery(selectedVisitor);
+  const { data: allQuoteByVisitorId = [] } = useGetAllQuotesByVisitorEmailQuery(
+    selectedEmail!
+  );
+
   const oneWayQuoteByVisitorId = allQuoteByVisitorId.filter(
     (quote) => quote.type === "One way"
   );

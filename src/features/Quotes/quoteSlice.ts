@@ -130,6 +130,11 @@ export interface CancelQuote {
   status: string;
 }
 
+export interface UpdateQuoteProgress {
+  quoteId: string;
+  progress: string;
+}
+
 export interface AddAffiliateToWhiteList {
   id_Quote: string;
   white_list?: string[];
@@ -163,7 +168,8 @@ export const quoteSlice = createApi({
     "AcceptAssignedAffiliate",
     "AddAffiliateToWhiteList",
     "DeleteAffiliateFromWhiteList",
-    "DeleteWhiteList"
+    "DeleteWhiteList",
+    "UpdateQuoteProgress"
   ],
   endpoints(builder) {
     return {
@@ -173,7 +179,7 @@ export const quoteSlice = createApi({
         },
         providesTags: ["Quote"],
       }),
-      getQuoteById: builder.query<Quote, number | void>({
+      getQuoteById: builder.query<Quote, number | void | string>({
         query: (_id) => ({
           url: `/getQuoteById/${_id}`,
           method: "GET",
@@ -195,9 +201,9 @@ export const quoteSlice = createApi({
         }),
         providesTags: ["Quote"],
       }),
-      getAllQuotesByVisitorId: builder.query<Quote[], string>({
+      getAllQuotesByVisitorEmail: builder.query<Quote[], string>({
       query: (_id) =>({
-          url: `/getAllQuotesByVisitorId/${_id}`,
+          url: `/getAllQuotesByVisitorEmail/${_id}`,
           method: "GET",
       }),
       providesTags: ["Quote"],
@@ -376,5 +382,5 @@ export const {
   useDeleteAffiliateFromWhiteListMutation,
   useDeleteWhiteListMutation,
   useGetQuotesByReferenceQuery,
-  useGetAllQuotesByVisitorIdQuery
+  useGetAllQuotesByVisitorEmailQuery
 } = quoteSlice;

@@ -126,7 +126,10 @@ const PendingQuotes = () => {
   const { data: AllQuotes = [] } = useGetAllQuoteQuery();
 
   const result = AllQuotes.filter(
-    (bookings) => bookings.progress === "New" && bookings?.type! === "One way"
+    (bookings) =>
+      bookings.progress === "New" &&
+      bookings?.type! === "One way" &&
+      bookings.manual_cost !== undefined
   );
 
   const filteredResult = result.filter(

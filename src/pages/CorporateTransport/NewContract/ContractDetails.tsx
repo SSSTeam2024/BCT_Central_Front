@@ -213,15 +213,15 @@ const ContractDetails: React.FC = () => {
                   <Col lg={12}>
                     <Card.Body className="p-4">
                       <Row className="g-3">
-                        <Col lg={3} className="col-6">
+                        <Col lg={2} className="col-6">
                           <p className="text-muted mb-2 text-uppercase fw-semibold fs-14">
                             Contract No
                           </p>
                           <h5 className="fs-15 mb-0">
-                            #TTB<span id="invoice-no">441477</span>
+                            <span id="invoice-no">{contract.contractRef}</span>
                           </h5>
                         </Col>
-                        <Col lg={3} className="col-6">
+                        <Col lg={2} className="col-6">
                           <p className="text-muted mb-2 text-uppercase fw-semibold fs-14">
                             Start Date
                           </p>
@@ -232,7 +232,17 @@ const ContractDetails: React.FC = () => {
                             </span>{" "}
                           </h5>
                         </Col>
-
+                        <Col lg={2} className="col-6">
+                          <p className="text-muted mb-2 text-uppercase fw-semibold fs-14">
+                            End Date
+                          </p>
+                          <h5 className="fs-15 mb-0">
+                            <span id="invoice-date">
+                              {" "}
+                              {contract.idProgram.droppOff_date}
+                            </span>{" "}
+                          </h5>
+                        </Col>
                         <Col lg={3} className="col-6">
                           <p className="text-muted mb-2 text-uppercase fw-semibold fs-14">
                             Contract Status
@@ -419,7 +429,7 @@ const ContractDetails: React.FC = () => {
 
                             <section>
                               <h5>4. Payment Terms</h5>
-                              <p className="text-muted fw-medium mb-2 fs-16">
+                              <p className="text-muted fw-medium fs-16">
                                 <b>4.1 Rates and Payment Structure</b>
                                 The Client agrees to pay the Service Provider
                                 according to the following rates: [Specify
@@ -438,7 +448,7 @@ const ContractDetails: React.FC = () => {
                       <div className="table-container">
                         <Table className="table-borderless table-nowrap align-middle mb-0 w-25">
                           <tbody>
-                            <tr>
+                            {/* <tr>
                               <th>Your Contract Start on :</th>
                               <td className="text-start">
                                 {contract.idProgram.pickUp_date} .
@@ -449,16 +459,16 @@ const ContractDetails: React.FC = () => {
                               <td className="text-start">
                                 {contract.idProgram.droppOff_date} .
                               </td>
-                            </tr>
+                            </tr> */}
                             <tr>
                               <th>Working Days</th>
                               <td className="text-start">
                                 <span className="fw-bold text-secondary">
-                                  {contract.idProgram.workDates.length} :
+                                  {contract.idProgram.workDates.length}
                                 </span>{" "}
-                                <span>
+                                {/* <span>
                                   {contract.idProgram.workDates.join(" / ")}
-                                </span>
+                                </span> */}
                               </td>
                               {/* <td className="text-start"></td> */}
                             </tr>

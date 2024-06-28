@@ -15,6 +15,8 @@ const NewEmail = () => {
 
   const { data: AllEmails = [] } = useGetAllEmailQuery();
   const [show, setShow] = useState<boolean>(false);
+  const [showCompany, setShowCompany] = useState<boolean>(false);
+  const [showSchool, setShowSchool] = useState<boolean>(false);
 
   const [data, setData] = useState("");
 
@@ -64,6 +66,40 @@ const NewEmail = () => {
                             </div>
                           </Link>
                         </div>
+                        {/* <div className="d-flex">
+                          <div className="flex-shrink-0">
+                            {showCompany === false ? (
+                              <i className="ri-arrow-right-s-line text-dark fs-16"></i>
+                            ) : (
+                              <i className="ri-arrow-down-s-line text-dark fs-16"></i>
+                            )}
+                          </div>
+                          <Link
+                            to="#"
+                            onClick={() => setShowCompany(!showCompany)}
+                          >
+                            <div className="flex-grow-1 ms-2 text-dark">
+                              For Company
+                            </div>
+                          </Link>
+                        </div>
+                        <div className="d-flex">
+                          <div className="flex-shrink-0">
+                            {showSchool === false ? (
+                              <i className="ri-arrow-right-s-line text-dark fs-16"></i>
+                            ) : (
+                              <i className="ri-arrow-down-s-line text-dark fs-16"></i>
+                            )}
+                          </div>
+                          <Link
+                            to="#"
+                            onClick={() => setShowSchool(!showSchool)}
+                          >
+                            <div className="flex-grow-1 ms-2 text-dark">
+                              For Schools
+                            </div>
+                          </Link>
+                        </div> */}
                         {show && (
                           <div>
                             <ul>
@@ -79,6 +115,36 @@ const NewEmail = () => {
                             </ul>
                           </div>
                         )}
+                        {/* {showCompany && (
+                          <div>
+                            <ul>
+                              {AllEmails.map((email) => (
+                                <Link
+                                  to="#"
+                                  className="text-dark"
+                                  onClick={() => handleEmailClick(email.body)}
+                                >
+                                  <li key={email?._id!}>{email.name}</li>
+                                </Link>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {showSchool && (
+                          <div>
+                            <ul>
+                              {AllEmails.map((email) => (
+                                <Link
+                                  to="#"
+                                  className="text-dark"
+                                  onClick={() => handleEmailClick(email.body)}
+                                >
+                                  <li key={email?._id!}>{email.name}</li>
+                                </Link>
+                              ))}
+                            </ul>
+                          </div>
+                        )} */}
                       </Tab.Pane>
                       <Tab.Pane eventKey="profile1">
                         <ul>

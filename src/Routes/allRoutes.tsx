@@ -86,6 +86,7 @@ import ContractDetails from "pages/CorporateTransport/NewContract/ContractDetail
 import AffilaiteDetails from "pages/Corporate/Subcontractor/AffiliateDetails";
 import NewEmail from "pages/Messages/NewEmail";
 import EmailsSent from "pages/Messages/EmailsSent";
+import CancelledJobs from "pages/CancelledJobs";
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: <Dashboard /> },
@@ -98,7 +99,7 @@ const authProtectedRoutes = [
   //? Tracking
   { path: "/map-tracking", component: <Maptracking /> },
   { path: "/delays&changes", component: <Delayschanges /> },
-
+  { path: "/cancelled-jobs", component: <CancelledJobs /> },
   { path: "/site-settings", component: <SiteSettings /> },
 
   { path: "/new-suggested-route", component: <AddProgramm /> },

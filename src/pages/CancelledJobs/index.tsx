@@ -31,8 +31,8 @@ interface Column {
   width?: string;
 }
 
-const LatestQuotes = () => {
-  document.title = "Latest Quotes | Bouden Coach Travel";
+const CancelledJobs = () => {
+  document.title = "Cancelled Jobs| Bouden Coach Travel";
 
   const whiteListLocation = useLocation();
 
@@ -126,7 +126,8 @@ const LatestQuotes = () => {
   const { data: AllQuotes = [] } = useGetAllQuoteQuery();
 
   const result = AllQuotes.filter(
-    (bookings) => bookings.progress === "New" && bookings?.type! === "One way"
+    (bookings) =>
+      bookings.progress === "Cancel" && bookings?.type! === "One way"
   );
 
   const filteredResult = result.filter(
@@ -514,7 +515,7 @@ const LatestQuotes = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-          <Breadcrumb title="Latest Quotes" pageTitle="Jobs" />
+          <Breadcrumb title="Cancelled Jobs" pageTitle="Jobs" />
           <Col lg={12}>
             <Card>
               <Card.Body>
@@ -632,8 +633,6 @@ const LatestQuotes = () => {
                 <DataTable
                   columns={filteredColumns}
                   data={result.reverse()}
-                  selectableRows
-                  onSelectedRowsChange={handleChange}
                   pagination
                   customStyles={customTableStyles}
                 />
@@ -831,4 +830,4 @@ const LatestQuotes = () => {
     </React.Fragment>
   );
 };
-export default LatestQuotes;
+export default CancelledJobs;
