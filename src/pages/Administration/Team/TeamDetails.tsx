@@ -4,45 +4,16 @@ import {
   Card,
   Col,
   Container,
-  Dropdown,
   Form,
-  Image,
   Modal,
   Nav,
   Row,
   Tab,
-  Table,
 } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
-import profilebgImg from "../../../assets/images/profile-bg.jpg";
-import companyImg3 from "../../../assets/images/companies/img-3.png";
-import Flatpickr from "react-flatpickr";
-import avatar1 from "../../../assets/images/users/avatar-1.jpg";
-import SimpleBar from "simplebar-react";
-import productsImg1 from "../../../assets/images/products/img-1.png";
-import productsImg4 from "../../../assets/images/products/img-4.png";
-import productsImg5 from "../../../assets/images/products/img-5.png";
-import productsImg6 from "../../../assets/images/products/img-6.png";
-import productsImg7 from "../../../assets/images/products/img-7.png";
-import productsImg8 from "../../../assets/images/products/img-8.png";
-import productsImg9 from "../../../assets/images/products/img-9.png";
-import productsImg11 from "../../../assets/images/products/img-11.png";
-import productsImg14 from "../../../assets/images/products/img-14.png";
-import productsImg15 from "../../../assets/images/products/img-15.png";
-import { Link } from "react-router-dom";
-import country from "Common/country";
 import { Document, Page } from "react-pdf";
 import { pdfjs } from "react-pdf";
 import "@react-pdf-viewer/core/lib/styles/index.css";
-
-const bookmarkProduct = (e: any) => {
-  const ele = e.target.closest("button");
-  if (ele.classList.contains("active")) {
-    ele.classList.remove("active");
-  } else {
-    ele.classList.add("active");
-  }
-};
 
 const TeamDetails = () => {
   document.title = "Team Details | Bouden Coach Travel";
@@ -575,7 +546,7 @@ const TeamDetails = () => {
               ></div>
               <div>
                 <Document
-                  file={`${process.env.REACT_APP_BASE_URL}/teamFiles/${LocationTeam.state.id_file}`}
+                  file={`${process.env.REACT_APP_BASE_URL}/teamFiles/idsFiles/${LocationTeam.state.id_file}`}
                   onLoadSuccess={onDocumentLoadSuccess}
                 >
                   <Page pageNumber={1} />
