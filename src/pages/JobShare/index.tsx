@@ -124,7 +124,10 @@ const JobShare = () => {
   }, [selectedFromDate]);
 
   const { data: AllQuotes = [] } = useGetAllQuoteQuery();
-  const result = AllQuotes.filter((bookings) => bookings.progress === "New");
+  const result = AllQuotes.filter(
+    (bookings) =>
+      bookings.progress === "New" && bookings.white_list?.length !== 0
+  );
   const filteredResult = result.filter(
     (quotes) =>
       quotes.date === selectedFromDate &&

@@ -8,10 +8,13 @@ import {
   Row,
   Table,
 } from "react-bootstrap";
-import { useLocation } from "react-router-dom";
 import { pdfjs } from "react-pdf";
-import "@react-pdf-viewer/core/lib/styles/index.css";
+import { useLocation } from "react-router-dom";
 import { Document, Page } from "react-pdf";
+import "@react-pdf-viewer/core/lib/styles/index.css";
+
+// Set the workerSrc to point to the pdf.worker.js file
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const CompanyDetails = () => {
   document.title = "Company Details | Bouden Coach Travel";

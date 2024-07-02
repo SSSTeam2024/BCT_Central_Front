@@ -607,7 +607,13 @@ const ProgramList = () => {
         prev_status.push(newResponseStatus);
       }
       sendResponse["program_status"] = prev_status;
-      sendResponse["invoiceFrequency"] = selectedInvoiceFrequency;
+      if (programLocation.state.invoiceFrequency === "") {
+        sendResponse["invoiceFrequency"] = selectedInvoiceFrequency;
+      } else {
+        sendResponse["invoiceFrequency"] =
+          programLocation.state.invoiceFrequency;
+      }
+
       handleResponseMsgSubmit();
       sendResponseMutation(sendResponse)
         .then(() => notifySuccess())
@@ -618,13 +624,15 @@ const ProgramList = () => {
   };
 
   function tog_Action() {
-    if (programLocation.state.unit_price !== "") {
-      // setQuoteUnitPrice(Number(programLocation.state.unit_price));
-      // setContractTotalPrice(Number(programLocation.state.total_price));
-      setSelectedInvoiceFrequency(programLocation.state.invoiceFrequency);
-    }
+    // if (programLocation.state.unit_price !== "") {
+    //   // setQuoteUnitPrice(Number(programLocation.state.unit_price));
+    //   // setContractTotalPrice(Number(programLocation.state.total_price));
+    // }
     setmodal_Action(!modal_Action);
     handleResponseMsgSubmit();
+    // if (programLocation.state.invoiceFrequency !== "") {
+    //   setSelectedInvoiceFrequency(programLocation.state.invoiceFrequency);
+    // }
   }
 
   return (

@@ -316,7 +316,7 @@ const Bookings = () => {
           row?.id_group_student?.groupName!
         ),
       sortable: true,
-      width: "120px",
+      width: "240px",
     },
     {
       name: <span className="font-weight-bold fs-13">Pick Up</span>,

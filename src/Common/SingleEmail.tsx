@@ -10,20 +10,30 @@ import {
   useGetVisitorByEmailQuery,
 } from "features/Visitor/visitorSlice";
 import { useAddNewEmailQueueMutation } from "features/EmailQueue/emailQueueSlice";
-import { useGetAllQuotesByVisitorEmailQuery } from "features/Quotes/quoteSlice";
+import {
+  useGetAllQuotesByCompanyEmailQuery,
+  useGetAllQuotesBySchoolEmailQuery,
+  useGetAllQuotesByVisitorEmailQuery,
+} from "features/Quotes/quoteSlice";
+import { useGetAllCompanyQuery } from "features/Company/companySlice";
+import { useGetAllSchoolsQuery } from "features/Schools/schools";
 
 interface ChildProps {
   data: string;
   setData: React.Dispatch<React.SetStateAction<string>>;
   checkedCheckbox: string;
+  category: string;
 }
 const SingleEmail: React.FC<ChildProps> = ({
   data,
   setData,
   checkedCheckbox,
+  category,
 }) => {
   const user = useSelector((state: RootState) => selectCurrentUser(state));
   const { data: AllVisitors = [] } = useGetAllVisitorsQuery();
+  const { data: AllCompanies = [] } = useGetAllCompanyQuery();
+  const { data: AllSchools = [] } = useGetAllSchoolsQuery();
   const notifySuccess = () => {
     Swal.fire({
       position: "center",
@@ -65,19 +75,45 @@ const SingleEmail: React.FC<ChildProps> = ({
       setFilteredEmails([]);
     } else {
       const uniqueEmails = new Set();
-      const filtered = AllVisitors.filter((visitor) => {
-        const emailMatches = visitor.email
-          .toLowerCase()
-          .includes(inputValue.toLowerCase());
-        if (emailMatches && !uniqueEmails.has(visitor.email)) {
-          uniqueEmails.add(visitor.email);
-          return true;
-        }
-        return false;
-      });
-      setFilteredEmails(filtered);
+      if (category === "School") {
+        const filtered = AllSchools.filter((school) => {
+          const emailMatches = school.email
+            .toLowerCase()
+            .includes(inputValue.toLowerCase());
+          if (emailMatches && !uniqueEmails.has(school.email)) {
+            uniqueEmails.add(school.email);
+            return true;
+          }
+          return false;
+        });
+        setFilteredEmails(filtered);
+      } else if (category === "Company") {
+        const filtered = AllCompanies.filter((company) => {
+          const emailMatches = company.email
+            .toLowerCase()
+            .includes(inputValue.toLowerCase());
+          if (emailMatches && !uniqueEmails.has(company.email)) {
+            uniqueEmails.add(company.email);
+            return true;
+          }
+          return false;
+        });
+        setFilteredEmails(filtered);
+      } else {
+        const filtered = AllVisitors.filter((visitor) => {
+          const emailMatches = visitor.email
+            .toLowerCase()
+            .includes(inputValue.toLowerCase());
+          if (emailMatches && !uniqueEmails.has(visitor.email)) {
+            uniqueEmails.add(visitor.email);
+            return true;
+          }
+          return false;
+        });
+        setFilteredEmails(filtered);
+      }
     }
-  }, [inputValue, AllVisitors, selectedEmail]);
+  }, [inputValue, AllVisitors, AllSchools, AllCompanies, selectedEmail]);
 
   const handleInputChange = (event: any) => {
     setInputValue(event.target.value);
@@ -101,13 +137,23 @@ const SingleEmail: React.FC<ChildProps> = ({
     setFilteredEmails([]); // Hide the list
   };
 
-  const { data: allQuoteByVisitorId = [] } = useGetAllQuotesByVisitorEmailQuery(
-    selectedEmail!
-  );
+  const { data: allQuoteByVisitorEmail = [] } =
+    useGetAllQuotesByVisitorEmailQuery(selectedEmail!);
 
-  const oneWayQuoteByVisitorId = allQuoteByVisitorId.filter(
+  const { data: allQuoteBySchoolEmail = [] } =
+    useGetAllQuotesBySchoolEmailQuery(selectedEmail!);
+
+  const { data: allQuoteByCompanyEmail = [] } =
+    useGetAllQuotesByCompanyEmailQuery(selectedEmail!);
+
+  const oneWayQuoteByVisitorEmail = allQuoteByVisitorEmail.filter(
     (quote) => quote.type === "One way"
   );
+
+  const oneWayQuoteBySchoolEmail = allQuoteBySchoolEmail.filter(
+    (quote) => quote.type === "One way"
+  );
+
   const currentDate = new Date();
 
   const { data: oneVisitor } = useGetVisitorByEmailQuery(selectedEmail!);
@@ -141,11 +187,10 @@ const SingleEmail: React.FC<ChildProps> = ({
         body: data,
         file: OneAttachment?.attachment!,
         sender: user?.email,
-        name: oneVisitor?.name!,
+        name: category,
         quote_Id: selectedQuote,
         date_email: currentDate.toDateString(),
       };
-      console.log("updatedEmailData", updatedEmailData);
       newEmailQueueMutation(updatedEmailData)
         .then(() => notifySuccess())
         .then(() => setData(""));
@@ -191,14 +236,14 @@ const SingleEmail: React.FC<ChildProps> = ({
           </Col>
           <Col lg={1}></Col>
           <Col lg={1}>
-            {oneWayQuoteByVisitorId.length === 0 ? (
+            {oneWayQuoteByVisitorEmail.length === 0 ? (
               ""
             ) : (
               <Form.Label htmlFor="quote">
                 <span className="text-primary fw-bold">
-                  {oneWayQuoteByVisitorId.length}
+                  {oneWayQuoteByVisitorEmail.length}
                 </span>{" "}
-                {oneWayQuoteByVisitorId.length === 1 ? (
+                {oneWayQuoteByVisitorEmail.length === 1 ? (
                   <span>Quote</span>
                 ) : (
                   <span>Quotes</span>
@@ -207,20 +252,54 @@ const SingleEmail: React.FC<ChildProps> = ({
             )}
           </Col>
           <Col lg={4}>
-            <select
-              className="form-select text-muted"
-              onChange={handleSelectedQuoteByVisitorId}
-            >
-              <option value="">Select Quote</option>
-              {allQuoteByVisitorId.map((quote) => {
-                if (quote.type === "One way")
-                  return (
-                    <option value={quote?._id!}>
-                      Ref: {quote.quote_ref} / {quote.date}
-                    </option>
-                  );
-              })}
-            </select>
+            {category === "Visitor" && (
+              <select
+                className="form-select text-muted"
+                onChange={handleSelectedQuoteByVisitorId}
+              >
+                <option value="">Select Quote</option>
+                {allQuoteByVisitorEmail.map((quote) => {
+                  if (quote.type === "One way")
+                    return (
+                      <option value={quote?._id!}>
+                        Ref: {quote.quote_ref} / {quote.date}
+                      </option>
+                    );
+                })}
+              </select>
+            )}
+            {category === "School" && (
+              <select
+                className="form-select text-muted"
+                onChange={handleSelectedQuoteByVisitorId}
+              >
+                <option value="">Select Quote</option>
+                {allQuoteBySchoolEmail.map((quote) => {
+                  if (quote.type === "One way")
+                    return (
+                      <option value={quote?._id!}>
+                        Ref: {quote.quote_ref} / {quote.date}
+                      </option>
+                    );
+                })}
+              </select>
+            )}
+            {category === "Company" && (
+              <select
+                className="form-select text-muted"
+                onChange={handleSelectedQuoteByVisitorId}
+              >
+                <option value="">Select Quote</option>
+                {allQuoteByCompanyEmail.map((quote) => {
+                  if (quote.type === "One way")
+                    return (
+                      <option value={quote?._id!}>
+                        Ref: {quote.quote_ref} / {quote.date}
+                      </option>
+                    );
+                })}
+              </select>
+            )}
           </Col>
         </Row>
         <Row className="mb-2">

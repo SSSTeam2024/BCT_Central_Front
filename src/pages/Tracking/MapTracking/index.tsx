@@ -56,7 +56,7 @@ const Maptracking = (props: any) => {
   ];
   const [markers, setMarkers] = useState<any[]>([]);
   const [routeCoordinates, setRouteCoordinates] = useState<any[]>([]);
-  const URL = "http://localhost:8800"; //=== 'production' ? undefined : 'http://localhost:8800';
+  const URL = "http://57.128.184.217:3000"; //=== 'production' ? undefined : 'http://localhost:8800';
   const socket = io(URL);
 
   useEffect(() => {

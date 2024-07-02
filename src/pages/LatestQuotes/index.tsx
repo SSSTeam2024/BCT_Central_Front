@@ -18,6 +18,7 @@ import {
   useDeleteQuoteMutation,
   useGetAllQuoteQuery,
   useSurveyAffilaitesMutation,
+  useUpdateProgressMutation,
 } from "features/Quotes/quoteSlice";
 import Swal from "sweetalert2";
 import { useGetAllAffiliatesQuery } from "features/Affiliate/affiliateSlice";
@@ -137,6 +138,8 @@ const LatestQuotes = () => {
       quotes.date === selectedFromDate &&
       quotes?.dropoff_date! <= selectedToDate
   );
+
+  const [updateQuoteProgress] = useUpdateProgressMutation();
 
   const [isChecked, setIsChecked] = useState<boolean>(false);
   const [selectedRow, setSelectedRow] = useState<any>();
@@ -410,7 +413,10 @@ const LatestQuotes = () => {
       })
       .then((result: any) => {
         if (result.isConfirmed) {
-          deleteQuote(selectedRow[0]._id);
+          updateQuoteProgress({
+            quote_id: selectedRow[0]._id,
+            progress: "Deleted",
+          });
           setIsChecked(!isChecked);
           swalWithBootstrapButtons.fire(
             "Deleted !",
@@ -506,7 +512,7 @@ const LatestQuotes = () => {
       surveyAffiliateToQuote["id_Quote"] = selectedRow[0]!._id;
       surveyAffiliateToQuote["white_list"] = selectedValues;
       await surveyAffiliate(surveyAffiliateToQuote);
-      navigate("/pending-quotes");
+      navigate("/job-share");
       notifySuccess();
     } catch (error) {
       notifyError(error);

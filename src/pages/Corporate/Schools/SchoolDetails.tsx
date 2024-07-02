@@ -1,32 +1,10 @@
 import React from "react";
-import {
-  Button,
-  Card,
-  Col,
-  Container,
-  Dropdown,
-  Form,
-  Row,
-  Table,
-} from "react-bootstrap";
+import { Card, Col, Container, Row, Table } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
-
-import { Link } from "react-router-dom";
-
-const bookmarkProduct = (e: any) => {
-  const ele = e.target.closest("button");
-  if (ele.classList.contains("active")) {
-    ele.classList.remove("active");
-  } else {
-    ele.classList.add("active");
-  }
-};
 
 const SchoolDetails = () => {
   document.title = "School Details | Bouden Coach Travel";
   const LocationSchool = useLocation();
-
-  console.log(LocationSchool.state);
 
   return (
     <React.Fragment>
@@ -39,7 +17,7 @@ const SchoolDetails = () => {
                   <Col lg={3}>
                     <div className="profile-user-img position-relative">
                       <img
-                        src={`${process.env.REACT_APP_BASE_URL}/schoolFiles/logoImages/${LocationSchool.state.id_file}`}
+                        src={`${process.env.REACT_APP_BASE_URL}/schoolFiles/${LocationSchool.state.id_file}`}
                         alt=""
                         className="rounded"
                       />

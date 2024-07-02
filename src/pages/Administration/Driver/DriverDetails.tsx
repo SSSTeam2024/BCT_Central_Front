@@ -1,25 +1,14 @@
 import React, { useState } from "react";
-import {
-  Button,
-  Card,
-  Col,
-  Dropdown,
-  Container,
-  Row,
-  Table,
-  Modal,
-  Tab,
-  Nav,
-} from "react-bootstrap";
+import { Button, Card, Col, Row, Table, Modal } from "react-bootstrap";
 import { Document, Page } from "react-pdf";
 import { pdfjs } from "react-pdf";
 
-import { Link, useLocation } from "react-router-dom";
-import { Worker, Viewer } from "@react-pdf-viewer/core";
+import { useLocation } from "react-router-dom";
+
 import "@react-pdf-viewer/core/lib/styles/index.css";
-// Import Images
-import img1 from "assets/images/users/avatar-1.jpg";
-// Set the workerSrc property
+
+// Set the workerSrc to point to the pdf.worker.js file
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const DriverDetails = () => {
   const driverLocation = useLocation();
@@ -43,10 +32,6 @@ const DriverDetails = () => {
   const [modal_PVCModals, setmodal_PVCModals] = useState<boolean>(false);
   function tog_PVCModals() {
     setmodal_PVCModals(!modal_PVCModals);
-  }
-
-  if (pdfjs.GlobalWorkerOptions) {
-    pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
   }
 
   const [numPages, setNumPages] = useState<number | null>(null);

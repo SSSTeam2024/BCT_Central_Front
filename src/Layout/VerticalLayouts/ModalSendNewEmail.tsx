@@ -23,7 +23,7 @@ const ModalSendNewEmail = () => {
   const handleCheckboxChange = (attachmentId: any) => {
     setCheckedCheckbox(attachmentId);
   };
-
+  const [category, setCategory] = useState<string>("");
   return (
     <React.Fragment>
       <Row>
@@ -123,6 +123,7 @@ const ModalSendNewEmail = () => {
                   <Tab.Pane eventKey="home1">
                     <SingleEmail
                       data={data}
+                      category={category}
                       setData={setData}
                       checkedCheckbox={checkedCheckbox!}
                     />

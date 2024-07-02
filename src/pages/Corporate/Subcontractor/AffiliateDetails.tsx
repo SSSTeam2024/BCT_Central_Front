@@ -1,18 +1,7 @@
-import React, { useMemo, useState } from "react";
-import {
-  Button,
-  Card,
-  Col,
-  Container,
-  Dropdown,
-  Form,
-  Image,
-  Modal,
-  Row,
-} from "react-bootstrap";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { Card, Col, Container, Image, Modal, Row } from "react-bootstrap";
+import { useLocation } from "react-router-dom";
 import img4 from "assets/images/small/img-4.jpg";
-
 import { Document, Page } from "react-pdf";
 import { pdfjs } from "react-pdf";
 import "@react-pdf-viewer/core/lib/styles/index.css";

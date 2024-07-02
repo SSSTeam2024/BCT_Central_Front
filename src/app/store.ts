@@ -40,6 +40,7 @@ import { attachmentSlice } from "features/Attachments/attachmentSlice";
 import { emailSentSlice } from "features/emailSent/emailSentSlice";
 import { shortCodeSlice } from "features/ShortCode/shortCodeSlice";
 import { emailQueueSlice } from "features/EmailQueue/emailQueueSlice";
+import { feedbackSlice } from "features/FeedBack/feedBackSlice";
 
 export const store = configureStore({
   reducer: {
@@ -75,6 +76,7 @@ export const store = configureStore({
     [emailSentSlice.reducerPath]: emailSentSlice.reducer,
     [shortCodeSlice.reducerPath]: shortCodeSlice.reducer,
     [emailQueueSlice.reducerPath]: emailQueueSlice.reducer,
+    [feedbackSlice.reducerPath]: feedbackSlice.reducer,
     auth: authSlice,
     Layout: LayoutReducer,
     ForgetPassword: ForgetPasswordReducer,
@@ -114,7 +116,8 @@ export const store = configureStore({
       attachmentSlice.middleware,
       emailSentSlice.middleware,
       shortCodeSlice.middleware,
-      emailQueueSlice.middleware
+      emailQueueSlice.middleware,
+      feedbackSlice.middleware
     ]);
   },
 });

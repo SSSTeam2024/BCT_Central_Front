@@ -131,7 +131,7 @@ export interface CancelQuote {
 }
 
 export interface UpdateQuoteProgress {
-  quoteId: string;
+  quote_id: string;
   progress: string;
 }
 
@@ -208,6 +208,20 @@ export const quoteSlice = createApi({
       }),
       providesTags: ["Quote"],
     }),
+    getAllQuotesBySchoolEmail: builder.query<Quote[], string>({
+      query: (_id) =>({
+          url: `/getAllQuotesBySchoolEmail/${_id}`,
+          method: "GET",
+      }),
+      providesTags: ["Quote"],
+    }),
+    getAllQuotesByCompanyEmail: builder.query<Quote[], string>({
+      query: (_id) =>({
+          url: `/getAllQuotesByCompanyEmail/${_id}`,
+          method: "GET",
+      }),
+      providesTags: ["Quote"],
+    }),
       addSendBookEmail: builder.mutation<void, BookEmail>({
         query({
           id_visitor,
@@ -269,6 +283,16 @@ export const quoteSlice = createApi({
           };
         },
         invalidatesTags: ["Quote", "CancelQuote"],
+      }),
+      updateProgress: builder.mutation<void, UpdateQuoteProgress>({
+        query({ quote_id, progress }) {
+          return {
+            url: "/updateProgress",
+            method: "POST",
+            body: { quote_id, progress },
+          };
+        },
+        invalidatesTags: ["Quote", "UpdateQuoteProgress"],
       }),
       addVehicleToQuote: builder.mutation<void, AssignVehicleToQuote>({
         query({ quote_id, id_vehicle }) {
@@ -382,5 +406,8 @@ export const {
   useDeleteAffiliateFromWhiteListMutation,
   useDeleteWhiteListMutation,
   useGetQuotesByReferenceQuery,
-  useGetAllQuotesByVisitorEmailQuery
+  useGetAllQuotesByVisitorEmailQuery,
+  useGetAllQuotesBySchoolEmailQuery,
+  useGetAllQuotesByCompanyEmailQuery,
+  useUpdateProgressMutation
 } = quoteSlice;

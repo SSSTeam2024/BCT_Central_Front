@@ -14,10 +14,10 @@ const NewEmail = () => {
   const { data: AllAttachments = [] } = useGetAllAttachmentsQuery();
 
   const { data: AllEmails = [] } = useGetAllEmailQuery();
-  const [show, setShow] = useState<boolean>(false);
+  const [showVisitor, setShowVisitor] = useState<boolean>(false);
   const [showCompany, setShowCompany] = useState<boolean>(false);
   const [showSchool, setShowSchool] = useState<boolean>(false);
-
+  const [category, setCategory] = useState<string>("");
   const [data, setData] = useState("");
 
   const [checkedCheckbox, setCheckedCheckbox] = useState(null);
@@ -52,99 +52,142 @@ const NewEmail = () => {
                     </Nav>
                     <Tab.Content className="text-muted">
                       <Tab.Pane eventKey="home1">
-                        <div className="d-flex">
-                          <div className="flex-shrink-0">
-                            {show === false ? (
-                              <i className="ri-arrow-right-s-line text-dark fs-16"></i>
-                            ) : (
-                              <i className="ri-arrow-down-s-line text-dark fs-16"></i>
-                            )}
-                          </div>
-                          <Link to="#" onClick={() => setShow(!show)}>
-                            <div className="flex-grow-1 ms-2 text-dark">
-                              For Customer
+                        <div
+                          className="d-flex"
+                          style={{ flexDirection: "column" }}
+                        >
+                          <div className="d-flex">
+                            {" "}
+                            {/* className="d-flex bg-info bg-opacity-50" */}
+                            <div className="flex-shrink-0">
+                              {showVisitor === false ? (
+                                <i className="ri-arrow-right-s-line text-dark fs-16"></i>
+                              ) : (
+                                <i className="ri-arrow-down-s-line text-dark fs-16"></i>
+                              )}
                             </div>
-                          </Link>
+                            <Link
+                              to="#"
+                              onClick={() => {
+                                setShowVisitor(!showVisitor);
+                                setShowCompany(false);
+                                setShowSchool(false);
+                              }}
+                            >
+                              <div className="flex-grow-1 ms-2 text-dark">
+                                For Customer
+                              </div>
+                            </Link>
+                          </div>
+                          {showVisitor && (
+                            <div>
+                              <ul>
+                                {AllEmails.map((email) => (
+                                  <Link
+                                    to="#"
+                                    className="text-dark"
+                                    onClick={() => {
+                                      handleEmailClick(email.body);
+                                      setCategory("Visitor");
+                                    }}
+                                  >
+                                    <li key={email?._id!}>{email.name}</li>
+                                  </Link>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
                         </div>
-                        {/* <div className="d-flex">
-                          <div className="flex-shrink-0">
-                            {showCompany === false ? (
-                              <i className="ri-arrow-right-s-line text-dark fs-16"></i>
-                            ) : (
-                              <i className="ri-arrow-down-s-line text-dark fs-16"></i>
-                            )}
-                          </div>
-                          <Link
-                            to="#"
-                            onClick={() => setShowCompany(!showCompany)}
-                          >
-                            <div className="flex-grow-1 ms-2 text-dark">
-                              For Company
+                        <div
+                          className="d-flex"
+                          style={{ flexDirection: "column" }}
+                        >
+                          <div className="d-flex">
+                            {" "}
+                            {/* className="d-flex bg-info bg-opacity-50" */}
+                            <div className="flex-shrink-0">
+                              {showCompany === false ? (
+                                <i className="ri-arrow-right-s-line text-dark fs-16"></i>
+                              ) : (
+                                <i className="ri-arrow-down-s-line text-dark fs-16"></i>
+                              )}
                             </div>
-                          </Link>
+                            <Link
+                              to="#"
+                              onClick={() => {
+                                setShowCompany(!showCompany);
+                                setShowVisitor(false);
+                                setShowSchool(false);
+                              }}
+                            >
+                              <div className="flex-grow-1 ms-2 text-dark">
+                                For Company
+                              </div>
+                            </Link>
+                          </div>
+                          {showCompany && (
+                            <div>
+                              <ul>
+                                {AllEmails.map((email) => (
+                                  <Link
+                                    to="#"
+                                    className="text-dark"
+                                    onClick={() => {
+                                      handleEmailClick(email.body);
+                                      setCategory("Company");
+                                    }}
+                                  >
+                                    <li key={email?._id!}>{email.name}</li>
+                                  </Link>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
                         </div>
-                        <div className="d-flex">
-                          <div className="flex-shrink-0">
-                            {showSchool === false ? (
-                              <i className="ri-arrow-right-s-line text-dark fs-16"></i>
-                            ) : (
-                              <i className="ri-arrow-down-s-line text-dark fs-16"></i>
-                            )}
-                          </div>
-                          <Link
-                            to="#"
-                            onClick={() => setShowSchool(!showSchool)}
-                          >
-                            <div className="flex-grow-1 ms-2 text-dark">
-                              For Schools
+                        <div
+                          className="d-flex"
+                          style={{ flexDirection: "column" }}
+                        >
+                          <div className="d-flex">
+                            <div className="flex-shrink-0">
+                              {showSchool === false ? (
+                                <i className="ri-arrow-right-s-line text-dark fs-16"></i>
+                              ) : (
+                                <i className="ri-arrow-down-s-line text-dark fs-16"></i>
+                              )}
                             </div>
-                          </Link>
-                        </div> */}
-                        {show && (
-                          <div>
-                            <ul>
-                              {AllEmails.map((email) => (
-                                <Link
-                                  to="#"
-                                  className="text-dark"
-                                  onClick={() => handleEmailClick(email.body)}
-                                >
-                                  <li key={email?._id!}>{email.name}</li>
-                                </Link>
-                              ))}
-                            </ul>
+                            <Link
+                              to="#"
+                              onClick={() => {
+                                setShowSchool(!showSchool);
+                                setShowCompany(false);
+                                setShowVisitor(false);
+                              }}
+                            >
+                              <div className="flex-grow-1 ms-2 text-dark">
+                                For Schools
+                              </div>
+                            </Link>
                           </div>
-                        )}
-                        {/* {showCompany && (
-                          <div>
-                            <ul>
-                              {AllEmails.map((email) => (
-                                <Link
-                                  to="#"
-                                  className="text-dark"
-                                  onClick={() => handleEmailClick(email.body)}
-                                >
-                                  <li key={email?._id!}>{email.name}</li>
-                                </Link>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        {showSchool && (
-                          <div>
-                            <ul>
-                              {AllEmails.map((email) => (
-                                <Link
-                                  to="#"
-                                  className="text-dark"
-                                  onClick={() => handleEmailClick(email.body)}
-                                >
-                                  <li key={email?._id!}>{email.name}</li>
-                                </Link>
-                              ))}
-                            </ul>
-                          </div>
-                        )} */}
+                          {showSchool && (
+                            <div>
+                              <ul>
+                                {AllEmails.map((email) => (
+                                  <Link
+                                    to="#"
+                                    className="text-dark"
+                                    onClick={() => {
+                                      handleEmailClick(email.body);
+                                      setCategory("School");
+                                    }}
+                                  >
+                                    <li key={email?._id!}>{email.name}</li>
+                                  </Link>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
                       </Tab.Pane>
                       <Tab.Pane eventKey="profile1">
                         <ul>
@@ -195,6 +238,7 @@ const NewEmail = () => {
                         <SingleEmail
                           data={data}
                           setData={setData}
+                          category={category}
                           checkedCheckbox={checkedCheckbox!}
                         />
                       </Tab.Pane>

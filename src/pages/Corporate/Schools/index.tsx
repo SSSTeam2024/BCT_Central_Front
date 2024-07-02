@@ -71,7 +71,7 @@ const Schools = () => {
             <div className="d-flex align-items-center gap-2">
               <div className="flex-shrink-0">
                 <img
-                  src={`${process.env.REACT_APP_BASE_URL}/schoolFiles/logoImages/${cellProps.id_file}`}
+                  src={`${process.env.REACT_APP_BASE_URL}/schoolFiles/${cellProps.id_file}`}
                   alt=""
                   className="avatar-xs rounded-circle user-profile-img"
                   id="photos"
