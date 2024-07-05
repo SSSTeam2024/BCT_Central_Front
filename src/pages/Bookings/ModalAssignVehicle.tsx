@@ -105,7 +105,7 @@ const ModalAssignVehicle: React.FC<VehicleProps> = ({
     Swal.fire({
       position: "center",
       icon: "success",
-      title: "Assign Done successfully",
+      title: "Assign Vehicle Done successfully",
       showConfirmButton: false,
       timer: 2500,
     });

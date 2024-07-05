@@ -153,43 +153,23 @@ const Newquote = () => {
               <Row>
                 <Col lg={6}>
                   <Card>
-                    <div className="d-flex align-items-center p-2">
+                    <div className="d-flex align-items-center p-1">
                       <div className="flex-shrink-0 me-3">
                         <div className="avatar-sm">
-                          <div className="avatar-title rounded-circle bg-light text-secondary fs-20">
+                          <div className="avatar-title rounded-circle bg-light text-secondary fs-24">
                             <i className="ph ph-quotes"></i>
                           </div>
                         </div>
                       </div>
                       <div className="flex-grow-1 hstack gap-2">
-                        <h5 className="card-title mb-1">
-                          Quote n°: {quoteLocation.state?.quote_ref!}
-                        </h5>
+                        <h4>Quote n°: {quoteLocation.state?.quote_ref!}</h4>
                         <span className="badge bg-danger">
-                          {quoteLocation.state.status}
+                          {quoteLocation.state.progress}
                         </span>
                       </div>
-                      {/* <div className="hstack gap-2 justify-content-end">
-                        <Button
-                          variant="success"
-                          id="add-btn"
-                          className="btn-sm"
-                          type="submit"
-                        >
-                          Save & Send
-                        </Button>
-                        <Button
-                          variant="info"
-                          id="add-btn"
-                          className="btn-sm"
-                          type="submit"
-                        >
-                          Quick Save
-                        </Button>
-                      </div> */}
                     </div>
                     <Card.Header>
-                      <div className="d-flex align-items-center p-1">
+                      <div className="d-flex align-items-center">
                         <div className="flex-shrink-0 me-3">
                           <div className="avatar-sm">
                             <div className="avatar-title rounded-circle bg-light text-primary fs-20">
@@ -363,7 +343,7 @@ const Newquote = () => {
                       <div className="mb-1">
                         <Row>
                           <Card.Header>
-                            <div className="d-flex align-items-center p-1">
+                            <div className="d-flex align-items-center">
                               <div className="flex-shrink-0 me-3">
                                 <div className="avatar-sm">
                                   <div className="avatar-title rounded-circle bg-light text-primary fs-20">
@@ -377,21 +357,21 @@ const Newquote = () => {
                             </div>
                             <Row>
                               <Col lg={3}>
-                                <div className="mb-3">
+                                <div className="mb-2">
                                   <label
                                     htmlFor="passengers_number"
                                     className="form-label"
                                   >
                                     Passengers number
                                   </label>
-                                  <h4>
+                                  <h5>
                                     {quoteLocation.state.passengers_number}
-                                  </h4>
+                                  </h5>
                                 </div>
                               </Col>
                               {/* Vehicle Type  == Done */}
                               <Col lg={3}>
-                                <div className="mb-3">
+                                <div className="mb-2">
                                   <label
                                     htmlFor="vehicle_type"
                                     className="form-label"
@@ -403,19 +383,19 @@ const Newquote = () => {
                               </Col>
                               {/* Luggage Details  == Done */}
                               <Col lg={3}>
-                                <div className="mb-3">
+                                <div className="mb-2">
                                   <label
                                     htmlFor="luggage_details"
                                     className="form-label"
                                   >
                                     Luggage Details
                                   </label>
-                                  <h4>{quoteLocation.state.luggage_details}</h4>
+                                  <h5>{quoteLocation.state.luggage_details}</h5>
                                 </div>
                               </Col>
                               {/* Luggage Details  == Done */}
                               <Col lg={3}>
-                                <div className="mb-3">
+                                <div className="mb-2">
                                   <label
                                     htmlFor="journey_type"
                                     className="form-label"
@@ -435,7 +415,7 @@ const Newquote = () => {
                         <div className="mb-1">
                           <Row>
                             <Card.Header>
-                              <div className="d-flex align-items-center p-1">
+                              <div className="d-flex align-items-center">
                                 <div className="flex-shrink-0 me-3">
                                   <div className="avatar-sm">
                                     <div className="avatar-title rounded-circle bg-light text-primary fs-20">
@@ -618,22 +598,30 @@ const Newquote = () => {
                         <h5>Journey 01</h5>
                         <table border={1}>
                           <tr>
-                            <td>Collection</td>
-                            <td>Destination</td>
-                            <td>Pickup Date</td>
-                            <td>Pickup Time</td>
+                            <th className="border-end border-dark">
+                              Collection
+                            </th>
+                            <th className="border-end border-dark">
+                              Destination
+                            </th>
+                            <th className="border-end border-dark">
+                              Pickup Date
+                            </th>
+                            <th>Pickup Time</th>
                           </tr>
-                          <tr>
-                            <td>
+                          <tr className="border-top border-dark">
+                            <td className="border-end border-dark">
                               {quotesByReference[0]?.start_point?.placeName!}
                             </td>
-                            <td>
+                            <td className="border-end border-dark">
                               {
                                 quotesByReference[0]?.destination_point
                                   ?.placeName!
                               }
                             </td>
-                            <td>{quotesByReference[0]?.date!}</td>
+                            <td className="border-end border-dark">
+                              {quotesByReference[0]?.date!}
+                            </td>
                             <td>{quotesByReference[0]?.pickup_time!}</td>
                           </tr>
                         </table>
@@ -644,16 +632,32 @@ const Newquote = () => {
                             <h5>Journey 02</h5>
                             <table border={1}>
                               <tr>
-                                <td>Collection</td>
-                                <td>Destination</td>
-                                <td>Pickup Date</td>
-                                <td>Pickup Time</td>
+                                <th className="border-end border-dark">
+                                  Collection
+                                </th>
+                                <th className="border-end border-dark">
+                                  Destination
+                                </th>
+                                <th className="border-end border-dark">
+                                  Pickup Date
+                                </th>
+                                <th className="border-end border-dark">
+                                  Pickup Time
+                                </th>
                               </tr>
-                              <tr>
-                                <td>{quote?.start_point?.placeName!}</td>
-                                <td>{quote?.destination_point?.placeName!}</td>
-                                <td>{quote?.date!}</td>
-                                <td>{quote?.pickup_time!}</td>
+                              <tr className="border-top border-dark">
+                                <th className="border-end border-dark">
+                                  {quote?.start_point?.placeName!}
+                                </th>
+                                <th className="border-end border-dark">
+                                  {quote?.destination_point?.placeName!}
+                                </th>
+                                <th className="border-end border-dark">
+                                  {quote?.date!}
+                                </th>
+                                <th className="border-end border-dark">
+                                  {quote?.pickup_time!}
+                                </th>
                               </tr>
                             </table>
                           </Row>

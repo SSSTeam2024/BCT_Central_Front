@@ -9,9 +9,71 @@ import {
   useGetAllQuoteQuery,
 } from "features/Quotes/quoteSlice";
 import Swal from "sweetalert2";
+import Select from "react-select";
+
+interface Column {
+  name: JSX.Element;
+  selector: (cell: Quote | any) => JSX.Element | any;
+  sortable: boolean;
+  width?: string;
+}
 
 const DeletedJobs = () => {
   document.title = " Deleted Jobs | Bouden Coach Travel";
+
+  const customTableStyles = {
+    rows: {
+      style: {
+        minHeight: "72px",
+        border: "1px solid #ddd",
+      },
+    },
+    headCells: {
+      style: {
+        paddingLeft: "8px",
+        paddingRight: "8px",
+        border: "1px solid #ddd",
+      },
+    },
+    cells: {
+      style: {
+        paddingLeft: "8px",
+        paddingRight: "8px",
+        border: "1px solid #ddd",
+      },
+    },
+  };
+  const customStyles = {
+    control: (styles: any, { isFocused }: any) => ({
+      ...styles,
+      minHeight: "41px",
+      borderColor: isFocused ? "#4b93ff" : "#e9ebec",
+      boxShadow: isFocused ? "0 0 0 1px #4b93ff" : styles.boxShadow,
+      ":hover": {
+        borderColor: "#4b93ff",
+      },
+    }),
+    multiValue: (styles: any, { data }: any) => {
+      return {
+        ...styles,
+        backgroundColor: "#4b93ff",
+      };
+    },
+    multiValueLabel: (styles: any, { data }: any) => ({
+      ...styles,
+      backgroundColor: "#4b93ff",
+      color: "white",
+    }),
+    multiValueRemove: (styles: any, { data }: any) => ({
+      ...styles,
+      color: "white",
+      backgroundColor: "#4b93ff",
+      ":hover": {
+        backgroundColor: "#4b93ff",
+        color: "white",
+      },
+    }),
+  };
 
   const { data: allJobs = [] } = useGetAllQuoteQuery();
   const allDeletedJobs = allJobs.filter(
@@ -271,6 +333,40 @@ const DeletedJobs = () => {
     },
   ];
 
+  const optionColumnsTable = [
+    { value: "Quote ID", label: "Quote ID" },
+    { value: "Vehicle Type", label: "Vehicle Type" },
+    { value: "Date", label: "Date" },
+    { value: "Pax", label: "Pax" },
+    { value: "Pick Up", label: "Pick Up" },
+    { value: "Destination", label: "Destination" },
+    { value: "Progress", label: "Progress" },
+    { value: "Status", label: "Status" },
+    { value: "Price", label: "Price" },
+    { value: "Passenger Name", label: "Passenger Name" },
+    { value: "Arrival Date", label: "Arrival Date" },
+    { value: "Mobile", label: "Mobile" },
+    { value: "Email", label: "Email" },
+    { value: "Enquiry Date", label: "Enquiry Date" },
+    { value: "Account Name", label: "Account Name" },
+  ];
+
+  // State to store the selected option values
+  const [selectedColumnValues, setSelectedColumnValues] = useState<any[]>([]);
+
+  // Event handler to handle changes in selected options
+  const handleSelectValueColumnChange = (selectedOption: any) => {
+    // Extract values from selected options and update state
+    const values = selectedOption.map((option: any) => option.value);
+    setSelectedColumnValues(values);
+  };
+
+  // Filter out columns based on selected options
+  const filteredColumns = columns.filter(
+    (column: Column) =>
+      !selectedColumnValues.includes(column.name.props.children) // Ensure props.children is string
+  );
+
   const [isPrivateHiredChecked, setIsPrivateHiredChecked] = useState(false);
   const handlePrivateHiredCheckboxChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -389,6 +485,16 @@ const DeletedJobs = () => {
             <Card>
               <Card.Body>
                 <Row className="g-lg-2 g-4">
+                  <Col lg={3}>
+                    <Select
+                      closeMenuOnSelect={false}
+                      isMulti
+                      options={optionColumnsTable}
+                      styles={customStyles}
+                      onChange={handleSelectValueColumnChange}
+                      placeholder="Filter Columns"
+                    />
+                  </Col>
                   <Col sm={9} className="col-lg-auto">
                     <select
                       className="form-select text-muted"
@@ -398,7 +504,7 @@ const DeletedJobs = () => {
                       id="idPeriod"
                       onChange={handleSelectPeriod}
                     >
-                      <option value="all">All</option>
+                      <option value="all">All Days</option>
                       <option value="Today">Today</option>
                       <option value="Yesterday">Yesterday</option>
                       <option value="Last 7 Days">Last 7 Days</option>
@@ -431,7 +537,7 @@ const DeletedJobs = () => {
                       id="idStatus"
                       onChange={handleSelectStatus}
                     >
-                      <option value="all">All Status</option>
+                      <option value="all">All Progress</option>
                       <option value="New">New</option>
                       <option value="Pending">Pending</option>
                       <option value="Booked">Booked</option>
@@ -493,12 +599,13 @@ const DeletedJobs = () => {
                             onClick={() => AlertDelete()}
                           >
                             <i className="bi bi-trash-fill fs-20"></i> Delete
+                            Permanently
                           </Link>
                         </li>
                       </ul>
                     )}
                   </Col>
-                  <Col xxl={3} lg={6}>
+                  <Col lg={6} className="d-flex justify-content-end">
                     <div className="search-box">
                       <input
                         type="text"
@@ -515,11 +622,12 @@ const DeletedJobs = () => {
               </Card.Header>
               <Card.Body>
                 <DataTable
-                  columns={columns}
+                  columns={filteredColumns}
                   data={getFilteredJobs().reverse()}
                   pagination
                   selectableRows
                   onSelectedRowsChange={handleChange}
+                  customStyles={customTableStyles}
                 />
               </Card.Body>
             </Card>

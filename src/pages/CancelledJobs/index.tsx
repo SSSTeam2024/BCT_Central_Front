@@ -11,7 +11,6 @@ import {
 } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import Breadcrumb from "Common/BreadCrumb";
-import Flatpickr from "react-flatpickr";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Quote,
@@ -36,24 +35,23 @@ const CancelledJobs = () => {
 
   const whiteListLocation = useLocation();
 
-  //  Internally, customStyles will deep merges your customStyles with the default styling.
   const customTableStyles = {
     rows: {
       style: {
-        minHeight: "72px", // override the row height
+        minHeight: "72px",
         border: "1px solid #ddd",
       },
     },
     headCells: {
       style: {
-        paddingLeft: "8px", // override the cell padding for head cells
+        paddingLeft: "8px",
         paddingRight: "8px",
         border: "1px solid #ddd",
       },
     },
     cells: {
       style: {
-        paddingLeft: "8px", // override the cell padding for data cells
+        paddingLeft: "8px",
         paddingRight: "8px",
         border: "1px solid #ddd",
       },
@@ -61,6 +59,15 @@ const CancelledJobs = () => {
   };
 
   const customStyles = {
+    control: (styles: any, { isFocused }: any) => ({
+      ...styles,
+      minHeight: "41px",
+      borderColor: isFocused ? "#4b93ff" : "#e9ebec",
+      boxShadow: isFocused ? "0 0 0 1px #4b93ff" : styles.boxShadow,
+      ":hover": {
+        borderColor: "#4b93ff",
+      },
+    }),
     multiValue: (styles: any, { data }: any) => {
       return {
         ...styles,
@@ -71,7 +78,6 @@ const CancelledJobs = () => {
       ...styles,
       backgroundColor: "#4b93ff",
       color: "white",
-      //    borderRadius: "50px"
     }),
     multiValueRemove: (styles: any, { data }: any) => ({
       ...styles,
@@ -84,44 +90,11 @@ const CancelledJobs = () => {
     }),
   };
 
-  const [showAffiliates, setShowAffiliates] = useState<boolean>(false);
-
-  // From Date
-  // Inside your functional component
-  const [selectedFromDate, setSelectedFromDate] = useState<string>(() => {
-    // Get current date
-    const currentDate = new Date();
-    // Format it to match your dateFormat option
-    const formattedDate = currentDate.toISOString().split("T")[0];
-    // Return the formatted date as the default value
-    return formattedDate;
-  });
-
-  const handleFromDateChange = (selectedDates: Date[]) => {
-    const formattedDate = selectedDates[0].toISOString().split("T")[0];
-    setSelectedFromDate(formattedDate);
-  };
-
-  // To Date
-  // const [selectedToDate, setSelectedToDate] = useState<Date | null>(newDate);
-  const [selectedToDate, setSelectedToDate] = useState<string>(() => {
-    // Get current date
-    const currentDate = new Date();
-    // Format it to match your dateFormat option
-    currentDate.setDate(currentDate.getDate() + 15);
-    const formattedDate = currentDate.toISOString().split("T")[0];
-    // Return the formatted date as the default value
-    return formattedDate;
-  });
-  const handleToDateChange = (selectedDates: Date[]) => {
-    const formattedDate = selectedDates[0].toISOString().split("T")[0];
-    setSelectedToDate(formattedDate);
-  };
-
-  // Log selectedFromDate whenever it changes
-  useEffect(() => {
-    console.log(selectedFromDate);
-  }, [selectedFromDate]);
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [isPrivateHiredChecked, setIsPrivateHiredChecked] = useState(false);
+  const [isContractChecked, setIsContractChecked] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { data: AllQuotes = [] } = useGetAllQuoteQuery();
 
@@ -130,32 +103,18 @@ const CancelledJobs = () => {
       bookings.progress === "Cancel" && bookings?.type! === "One way"
   );
 
-  const filteredResult = result.filter(
-    (quotes) =>
-      quotes.date === selectedFromDate &&
-      quotes?.dropoff_date! <= selectedToDate
+  const privateHiredJobs = result.filter(
+    (privateHired) => privateHired?.category === "Private"
   );
-
-  const [isChecked, setIsChecked] = useState<boolean>(false);
-  const [selectedRow, setSelectedRow] = useState<any>();
-  const handleChange = ({ selectedRows }: { selectedRows: Quote }) => {
-    setIsChecked(!isChecked);
-    setSelectedRow(selectedRows);
-  };
+  const contractJobs = result.filter(
+    (contract) => contract?.category === "Regular"
+  );
 
   const columns: Column[] = [
     {
       name: <span className="font-weight-bold fs-13">Quote ID</span>,
       selector: (cell: Quote) => {
-        return (
-          <span>
-            <Link to={`/new-quote/${cell?._id!}`} state={cell}>
-              <span className="text-info">
-                <u>{cell?.quote_ref!}</u>
-              </span>
-            </Link>
-          </span>
-        );
+        return <span className="text-info">{cell?.quote_ref!}</span>;
       },
       sortable: true,
     },
@@ -199,13 +158,13 @@ const CancelledJobs = () => {
       name: <span className="font-weight-bold fs-13">Pick Up</span>,
       selector: (row: any) => row.start_point?.placeName!,
       sortable: true,
-      width: "270px",
+      width: "245px",
     },
     {
       name: <span className="font-weight-bold fs-13">Destination</span>,
       selector: (row: any) => row.destination_point?.placeName!,
       sortable: true,
-      width: "270px",
+      width: "245px",
     },
     {
       name: <span className="font-weight-bold fs-13">Progress</span>,
@@ -214,7 +173,7 @@ const CancelledJobs = () => {
           case "New":
             return <span className="badge bg-danger"> {cell.progress} </span>;
           case "Accepted":
-            return <span className="badge bg-danger"> New </span>;
+            return <span className="badge bg-success"> {cell.progress} </span>;
           case "Cancel":
             return <span className="badge bg-dark"> {cell.progress} </span>;
           case "Created":
@@ -228,9 +187,11 @@ const CancelledJobs = () => {
     },
     {
       name: <span className="font-weight-bold fs-13">Status</span>,
-      selector: (row: any) => <span className="badge bg-danger"> New </span>,
+      selector: (row: any) => (
+        <span className="badge bg-danger"> {row.status} </span>
+      ),
       sortable: true,
-      width: "80px",
+      width: "133px",
     },
     {
       name: <span className="font-weight-bold fs-13">Passenger Name</span>,
@@ -306,15 +267,7 @@ const CancelledJobs = () => {
     },
     {
       name: <span className="font-weight-bold fs-13">Affiliate</span>,
-      selector: (row: any) => (
-        <Link
-          to="#"
-          onClick={() => setShowAffiliates(!showAffiliates)}
-          state={row}
-        >
-          {row?.white_list?.length}
-        </Link>
-      ),
+      selector: (row: any) => <span>No Affiliate</span>,
       sortable: true,
     },
     {
@@ -386,129 +339,108 @@ const CancelledJobs = () => {
       !selectedColumnValues.includes(column.name.props.children) // Ensure props.children is string
   );
 
-  const [deleteQuote] = useDeleteQuoteMutation();
-  const swalWithBootstrapButtons = Swal.mixin({
-    customClass: {
-      confirmButton: "btn btn-success",
-      cancelButton: "btn btn-danger",
-    },
-    buttonsStyling: false,
-  });
-
-  const AlertDelete = async () => {
-    swalWithBootstrapButtons
-      .fire({
-        title: "Are you sure?",
-        text: "You won't be able to go back?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes, delete it !",
-        cancelButtonText: "No, cancel !",
-        reverseButtons: true,
-      })
-      .then((result: any) => {
-        if (result.isConfirmed) {
-          deleteQuote(selectedRow[0]._id);
-          setIsChecked(!isChecked);
-          swalWithBootstrapButtons.fire(
-            "Deleted !",
-            "Quote is deleted.",
-            "success"
-          );
-        } else if (
-          /* Read more about handling dismissals below */
-          result.dismiss === Swal.DismissReason.cancel
-        ) {
-          swalWithBootstrapButtons.fire("Canceled", "Quote is safe :)", "info");
-        }
-      });
+  // This function is triggered when the select Period
+  const handleSelectPeriod = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedPeriod(value);
   };
 
-  const notifySuccess = () => {
-    Swal.fire({
-      position: "center",
-      icon: "success",
-      title: "Assign Done successfully",
-      showConfirmButton: false,
-      timer: 2500,
-    });
+  // This function is triggered when the select Status
+  const handleSelectStatus = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedStatus(value);
   };
 
-  const notifyError = (err: any) => {
-    Swal.fire({
-      position: "center",
-      icon: "error",
-      title: `Sothing Wrong, ${err}`,
-      showConfirmButton: false,
-      timer: 2500,
-    });
-  };
-
-  const navigate = useNavigate();
-  const [modal_SurveyAffiliate, setModalSurveyAffiliate] =
-    useState<boolean>(false);
-  const tog_ModalSurveyAffiliate = () => {
-    setModalSurveyAffiliate(!modal_SurveyAffiliate);
-  };
-  const { data: AllAffiliates = [] } = useGetAllAffiliatesQuery();
-  const completeAffiliate = AllAffiliates.filter(
-    (affiliates) => affiliates.statusAffiliate === "Accepted"
-  );
-  const options = completeAffiliate.map((affiliate) => ({
-    value: affiliate?._id!,
-    label: affiliate.name,
-  }));
-
-  // State to store the selected option values
-  const [selectedValues, setSelectedValues] = useState<any[]>([]);
-  // Event handler to handle changes in selected options
-  const handleSelectValueChange = (selectedOption: any) => {
-    let whiteList: any[] = [];
-
-    // Extract values from selected options and update state
-    const values = selectedOption.map((option: any) =>
-      whiteList.push({
-        id: option.value,
-        noteAcceptJob: "",
-        price: "",
-        jobStatus: "",
-      })
-    );
-    setSelectedValues(whiteList);
-  };
-
-  const [surveyAffiliate] = useSurveyAffilaitesMutation();
-
-  const initialSurveyJob = {
-    id_Quote: "",
-    white_list: [""],
-  };
-
-  const [surveyAffiliateToQuote, setSurveyAffiliateToQuote] =
-    useState(initialSurveyJob);
-
-  const { id_Quote, white_list } = surveyAffiliateToQuote;
-
-  const onChangeSurveyAffiliate = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSurveyAffiliateToQuote((prevState) => ({
-      ...prevState,
-      [e.target.id]: e.target.value,
-    }));
-  };
-
-  const onSubmitSurveyAffiliate = async (
-    e: React.FormEvent<HTMLFormElement>
+  const handlePrivateHiredCheckboxChange = (
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    e.preventDefault();
-    try {
-      surveyAffiliateToQuote["id_Quote"] = selectedRow[0]!._id;
-      surveyAffiliateToQuote["white_list"] = selectedValues;
-      await surveyAffiliate(surveyAffiliateToQuote);
-      navigate("/pending-quotes");
-      notifySuccess();
-    } catch (error) {
-      notifyError(error);
+    setIsPrivateHiredChecked(event.target.checked);
+  };
+
+  const handleContractCheckboxChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setIsContractChecked(event.target.checked);
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const getFilteredJobs = () => {
+    let filteredJobs = [];
+
+    if (isPrivateHiredChecked && isContractChecked) {
+      filteredJobs = result;
+    } else if (isPrivateHiredChecked) {
+      filteredJobs = privateHiredJobs;
+    } else if (isContractChecked) {
+      filteredJobs = contractJobs;
+    } else {
+      filteredJobs = result;
     }
+
+    if (searchTerm) {
+      filteredJobs = filteredJobs.filter(
+        (job: any) =>
+          job?.quote_ref!.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          job.vehicle_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          job.start_point.placeName
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          job.destination_point.placeName
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          job.id_visitor.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (selectedStatus && selectedStatus !== "all") {
+      filteredJobs = filteredJobs.filter(
+        (job) => job.status === selectedStatus
+      );
+    }
+
+    if (selectedPeriod && selectedPeriod !== "all") {
+      const now = new Date();
+      const filterByDate = (jobDate: any) => {
+        const date = new Date(jobDate);
+        switch (selectedPeriod) {
+          case "Today":
+            return date.toDateString() === now.toDateString();
+          case "Yesterday":
+            const yesterday = new Date(now);
+            yesterday.setDate(now.getDate() - 1);
+            return date.toDateString() === yesterday.toDateString();
+          case "Last 7 Days":
+            const lastWeek = new Date(now);
+            lastWeek.setDate(now.getDate() - 7);
+            return date >= lastWeek;
+          case "Last 30 Days":
+            const lastMonth = new Date(now);
+            lastMonth.setDate(now.getDate() - 30);
+            return date >= lastMonth;
+          case "This Month":
+            return (
+              date.getMonth() === now.getMonth() &&
+              date.getFullYear() === now.getFullYear()
+            );
+          case "Last Month":
+            const lastMonthStart = new Date(
+              now.getFullYear(),
+              now.getMonth() - 1,
+              1
+            );
+            const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+            return date >= lastMonthStart && date <= lastMonthEnd;
+          default:
+            return true;
+        }
+      };
+      filteredJobs = filteredJobs.filter((job) => filterByDate(job.date));
+    }
+
+    return filteredJobs;
   };
 
   return (
@@ -520,13 +452,14 @@ const CancelledJobs = () => {
             <Card>
               <Card.Body>
                 <Row className="g-lg-2 g-4">
-                  <Col lg={4}>
+                  <Col lg={3}>
                     <Select
                       closeMenuOnSelect={false}
                       isMulti
                       options={optionColumnsTable}
                       styles={customStyles}
-                      onChange={handleSelectValueColumnChange} // Set the onChange event handler
+                      onChange={handleSelectValueColumnChange}
+                      placeholder="Filter Columns"
                     />
                   </Col>
                   <Col sm={9} className="col-lg-auto">
@@ -534,10 +467,11 @@ const CancelledJobs = () => {
                       className="form-select text-muted"
                       data-choices
                       data-choices-search-false
-                      name="choices-single-default"
-                      id="idStatus"
+                      name="days"
+                      id="idDays"
+                      onChange={handleSelectPeriod}
                     >
-                      <option value="all">All</option>
+                      <option value="all">All Days</option>
                       <option value="Today">Today</option>
                       <option value="Yesterday">Yesterday</option>
                       <option value="Last 7 Days">Last 7 Days</option>
@@ -546,66 +480,78 @@ const CancelledJobs = () => {
                       <option value="Last Month">Last Month</option>
                     </select>
                   </Col>
-                  {/* <Col lg={2}>
-                    <Flatpickr
-                      className="form-control flatpickr-input"
-                      placeholder={selectedFromDate}
-                      options={{
-                        dateFormat: "d M, Y",
-                      }}
-                      defaultValue={selectedFromDate}
-                      onChange={handleFromDateChange}
-                    />
-                  </Col> */}
-                  {/* <Col lg={2}>
-                    <Flatpickr
-                      className="form-control flatpickr-input"
-                      placeholder={selectedToDate}
-                      options={{
-                        dateFormat: "d M, Y",
-                      }}
-                      defaultValue={selectedToDate}
-                      onChange={handleToDateChange}
-                    />
-                  </Col> */}
+                  <Col sm={9} className="col-lg-auto">
+                    <select
+                      className="form-select text-muted"
+                      data-choices
+                      data-choices-search-false
+                      name="choices-single-default"
+                      id="idStatus"
+                      onChange={handleSelectStatus}
+                    >
+                      <option value="all">All Status</option>
+                      <option value="Canceled By Client">
+                        Canceled By Client
+                      </option>
+                      <option value="Called off By Client">
+                        Called off By Client
+                      </option>
+                      <option value="Canceled By Admin">
+                        Canceled By Admin
+                      </option>
+                      <option value="Called off By Admin">
+                        Called off By Admin
+                      </option>
+                    </select>
+                  </Col>
+                  <Col className="d-flex align-items-center">
+                    <div className="form-check form-check-inline">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="inlineCheckbox1"
+                        value="option1"
+                        checked={isPrivateHiredChecked}
+                        onChange={handlePrivateHiredCheckboxChange}
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor="inlineCheckbox1"
+                      >
+                        Private Hire
+                      </label>
+                    </div>
+                    <div className="form-check form-check-inline">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="inlineCheckbox2"
+                        value="option2"
+                        checked={isContractChecked}
+                        onChange={handleContractCheckboxChange}
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor="inlineCheckbox2"
+                      >
+                        Contract
+                      </label>
+                    </div>
+                  </Col>
                 </Row>
               </Card.Body>
             </Card>
             <Card>
               <Card.Header className="border-bottom-dashed">
                 <Row>
-                  <Col lg={2} className="mb-2">
-                    {isChecked && (
-                      <ul className="hstack gap-2 list-unstyled mb-0">
-                        <li>
-                          <Link
-                            to="#"
-                            className="badge badge-soft-secondary remove-item-btn fs-16"
-                            state={selectedRow}
-                            onClick={() => tog_ModalSurveyAffiliate()}
-                          >
-                            <i className="bi bi-send-check fs-18"></i> Push Job
-                          </Link>
-                        </li>
-                        <li>
-                          <Link
-                            to="#"
-                            className="badge badge-soft-danger edit-item-btn fs-16"
-                            onClick={() => AlertDelete()}
-                          >
-                            <i className="bi bi-trash-fill fs-20"></i> Delete
-                          </Link>
-                        </li>
-                      </ul>
-                    )}
-                  </Col>
-                  <Col lg={2}></Col>
-                  <Col lg={8}>
-                    <div className="search-box w-50">
+                  <Col lg={12} className="d-flex justify-content-end">
+                    <div className="search-box">
                       <input
                         type="text"
                         className="form-control search"
                         placeholder="Search for something..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
                       />
                       <i className="ri-search-line search-icon"></i>
                     </div>
@@ -632,7 +578,7 @@ const CancelledJobs = () => {
               <Card.Body>
                 <DataTable
                   columns={filteredColumns}
-                  data={result.reverse()}
+                  data={getFilteredJobs().reverse()}
                   pagination
                   customStyles={customTableStyles}
                 />
@@ -640,192 +586,6 @@ const CancelledJobs = () => {
             </Card>
           </Col>
         </Container>
-        <Modal
-          className="fade zoomIn"
-          size="lg"
-          show={modal_SurveyAffiliate}
-          onHide={() => {
-            tog_ModalSurveyAffiliate();
-          }}
-          centered
-        >
-          <Modal.Header className="px-4 pt-4" closeButton>
-            <h5 className="modal-title fs-18" id="exampleModalLabel">
-              Push Job
-            </h5>
-          </Modal.Header>
-          <Modal.Body className="p-4">
-            <div
-              id="alert-error-msg"
-              className="d-none alert alert-danger py-2"
-            ></div>
-            <Form className="tablelist-form" onSubmit={onSubmitSurveyAffiliate}>
-              <Row>
-                <Col lg={12} className="d-flex justify-content-center">
-                  <div className="mb-3">
-                    <Col lg={12}>
-                      <Form.Label htmlFor="vehicle_type">Affiliate</Form.Label>
-                    </Col>
-                    <Col lg={12}>
-                      <small className="text-muted">
-                        You can choose one or many affiliates.
-                      </small>
-                    </Col>
-                    <Col lg={12}>
-                      <div className="mb-3">
-                        <Select
-                          closeMenuOnSelect={false}
-                          // defaultValue={[options[1]]}
-                          isMulti
-                          options={options}
-                          styles={customStyles}
-                          onChange={handleSelectValueChange} // Set the onChange event handler
-                        />
-                      </div>
-                    </Col>
-                  </div>
-                </Col>
-              </Row>
-              <Row>
-                <Col lg={12}>
-                  <div className="hstack gap-2 justify-content-end">
-                    <Button
-                      className="btn-soft-danger"
-                      onClick={() => {
-                        tog_ModalSurveyAffiliate();
-                      }}
-                      data-bs-dismiss="modal"
-                    >
-                      <i className="ri-close-line align-bottom me-1"></i> Close
-                    </Button>
-                    <Button
-                      className="btn-soft-info"
-                      id="add-btn"
-                      type="submit"
-                      onClick={() => {
-                        tog_ModalSurveyAffiliate();
-                      }}
-                    >
-                      <i className="ri-send-plane-line align-bottom me-1"></i>
-                      Push
-                    </Button>
-                  </div>
-                </Col>
-              </Row>
-            </Form>
-          </Modal.Body>
-        </Modal>
-        <Offcanvas
-          show={showAffiliates}
-          onHide={() => setShowAffiliates(!showAffiliates)}
-          placement="end"
-        >
-          <Offcanvas.Header closeButton>
-            <Offcanvas.Title>Affiliates Details</Offcanvas.Title>
-          </Offcanvas.Header>
-          <Offcanvas.Body>
-            <div className="mt-3">
-              {whiteListLocation?.state?.white_list?.map(
-                (affiliate: any, index: number) => (
-                  <SimpleBar>
-                    <div
-                      className="p-3 border-bottom border-bottom-dashed"
-                      key={index}
-                    >
-                      <table>
-                        <tr>
-                          <td>
-                            {affiliate.jobStatus === "Refused" ? (
-                              <span className="badge bg-danger">
-                                {affiliate.jobStatus}
-                              </span>
-                            ) : (
-                              <span className="badge bg-info">
-                                {affiliate.jobStatus}
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <h6>Price :</h6>{" "}
-                          </td>
-                          <td>
-                            <span className="badge bg-info">
-                              £ {affiliate?.price!}
-                            </span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <h6>Name :</h6>{" "}
-                          </td>
-                          <td>
-                            <i>{affiliate?.id?.name!}</i>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <h6>Phone : </h6>
-                          </td>
-                          <td>
-                            <i>{affiliate?.id?.phone}</i>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <h6>Email : </h6>
-                          </td>
-                          <td>
-                            <i>{affiliate?.id?.email}</i>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <h6>Area of Coverage: </h6>
-                          </td>
-                          <td>
-                            <ul>
-                              {affiliate?.id?.coverageArea!.map(
-                                (area: any, index: number) => (
-                                  <li key={index}>{area?.placeName!}</li>
-                                )
-                              )}
-                            </ul>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <h6>Fleet: </h6>
-                          </td>
-                          <td>
-                            <ul>
-                              {affiliate?.id?.vehicles!.map(
-                                (vehicle: any, index: number) => (
-                                  <li key={index}>{vehicle?.type!}</li>
-                                )
-                              )}
-                            </ul>
-                          </td>
-                        </tr>
-                        <tr>
-                          {affiliate?.noteAcceptJob! === undefined ||
-                          affiliate?.noteAcceptJob! === "" ? (
-                            ""
-                          ) : (
-                            <div className="alert alert-warning" role="alert">
-                              <b>{affiliate?.noteAcceptJob!}</b>
-                            </div>
-                          )}
-                        </tr>
-                      </table>
-                    </div>
-                  </SimpleBar>
-                )
-              )}
-            </div>
-          </Offcanvas.Body>
-        </Offcanvas>
       </div>
     </React.Fragment>
   );

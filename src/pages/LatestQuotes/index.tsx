@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Container,
   Row,
@@ -7,15 +7,12 @@ import {
   Modal,
   Form,
   Button,
-  Offcanvas,
 } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import Breadcrumb from "Common/BreadCrumb";
-import Flatpickr from "react-flatpickr";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Quote,
-  useDeleteQuoteMutation,
   useGetAllQuoteQuery,
   useSurveyAffilaitesMutation,
   useUpdateProgressMutation,
@@ -23,7 +20,11 @@ import {
 import Swal from "sweetalert2";
 import { useGetAllAffiliatesQuery } from "features/Affiliate/affiliateSlice";
 import Select from "react-select";
-import SimpleBar from "simplebar-react";
+
+// import jsPDF from "jspdf";
+// import "jspdf-autotable";
+// import * as XLSX from "xlsx";
+// import { saveAs } from "file-saver";
 
 interface Column {
   name: JSX.Element;
@@ -35,26 +36,23 @@ interface Column {
 const LatestQuotes = () => {
   document.title = "Latest Quotes | Bouden Coach Travel";
 
-  const whiteListLocation = useLocation();
-
-  //  Internally, customStyles will deep merges your customStyles with the default styling.
   const customTableStyles = {
     rows: {
       style: {
-        minHeight: "72px", // override the row height
+        minHeight: "72px",
         border: "1px solid #ddd",
       },
     },
     headCells: {
       style: {
-        paddingLeft: "8px", // override the cell padding for head cells
+        paddingLeft: "8px",
         paddingRight: "8px",
         border: "1px solid #ddd",
       },
     },
     cells: {
       style: {
-        paddingLeft: "8px", // override the cell padding for data cells
+        paddingLeft: "8px",
         paddingRight: "8px",
         border: "1px solid #ddd",
       },
@@ -62,6 +60,15 @@ const LatestQuotes = () => {
   };
 
   const customStyles = {
+    control: (styles: any, { isFocused }: any) => ({
+      ...styles,
+      minHeight: "41px",
+      borderColor: isFocused ? "#4b93ff" : "#e9ebec",
+      boxShadow: isFocused ? "0 0 0 1px #4b93ff" : styles.boxShadow,
+      ":hover": {
+        borderColor: "#4b93ff",
+      },
+    }),
     multiValue: (styles: any, { data }: any) => {
       return {
         ...styles,
@@ -72,7 +79,6 @@ const LatestQuotes = () => {
       ...styles,
       backgroundColor: "#4b93ff",
       color: "white",
-      //    borderRadius: "50px"
     }),
     multiValueRemove: (styles: any, { data }: any) => ({
       ...styles,
@@ -85,58 +91,14 @@ const LatestQuotes = () => {
     }),
   };
 
-  const [showAffiliates, setShowAffiliates] = useState<boolean>(false);
-
-  // From Date
-  // Inside your functional component
-  const [selectedFromDate, setSelectedFromDate] = useState<string>(() => {
-    // Get current date
-    const currentDate = new Date();
-    // Format it to match your dateFormat option
-    const formattedDate = currentDate.toISOString().split("T")[0];
-    // Return the formatted date as the default value
-    return formattedDate;
-  });
-
-  const handleFromDateChange = (selectedDates: Date[]) => {
-    const formattedDate = selectedDates[0].toISOString().split("T")[0];
-    setSelectedFromDate(formattedDate);
-  };
-
-  // To Date
-  // const [selectedToDate, setSelectedToDate] = useState<Date | null>(newDate);
-  const [selectedToDate, setSelectedToDate] = useState<string>(() => {
-    // Get current date
-    const currentDate = new Date();
-    // Format it to match your dateFormat option
-    currentDate.setDate(currentDate.getDate() + 15);
-    const formattedDate = currentDate.toISOString().split("T")[0];
-    // Return the formatted date as the default value
-    return formattedDate;
-  });
-  const handleToDateChange = (selectedDates: Date[]) => {
-    const formattedDate = selectedDates[0].toISOString().split("T")[0];
-    setSelectedToDate(formattedDate);
-  };
-
-  // Log selectedFromDate whenever it changes
-  useEffect(() => {
-    console.log(selectedFromDate);
-  }, [selectedFromDate]);
-
   const { data: AllQuotes = [] } = useGetAllQuoteQuery();
 
   const result = AllQuotes.filter(
     (bookings) =>
       bookings.progress === "New" &&
       bookings?.type! === "One way" &&
-      bookings.manual_cost === undefined
-  );
-
-  const filteredResult = result.filter(
-    (quotes) =>
-      quotes.date === selectedFromDate &&
-      quotes?.dropoff_date! <= selectedToDate
+      bookings.manual_cost === undefined &&
+      bookings?.white_list!.length === 0
   );
 
   const [updateQuoteProgress] = useUpdateProgressMutation();
@@ -153,13 +115,11 @@ const LatestQuotes = () => {
       name: <span className="font-weight-bold fs-13">Quote ID</span>,
       selector: (cell: Quote) => {
         return (
-          <span>
-            <Link to={`/new-quote/${cell?._id!}`} state={cell}>
-              <span className="text-info">
-                <u>{cell?.quote_ref!}</u>
-              </span>
-            </Link>
-          </span>
+          <Link to={`/new-quote/${cell?.quote_ref!}`} state={cell}>
+            <span className="text-info">
+              <u>{cell?.quote_ref!}</u>
+            </span>
+          </Link>
         );
       },
       sortable: true,
@@ -311,15 +271,7 @@ const LatestQuotes = () => {
     },
     {
       name: <span className="font-weight-bold fs-13">Affiliate</span>,
-      selector: (row: any) => (
-        <Link
-          to="#"
-          onClick={() => setShowAffiliates(!showAffiliates)}
-          state={row}
-        >
-          {row?.white_list?.length}
-        </Link>
-      ),
+      selector: (row: any) => <span>No Affiliate</span>,
       sortable: true,
     },
     {
@@ -365,14 +317,20 @@ const LatestQuotes = () => {
 
   const optionColumnsTable = [
     { value: "Quote ID", label: "Quote ID" },
-    { value: "Go Date", label: "Go Date" },
+    { value: "Vehicle Type", label: "Vehicle Type" },
+    { value: "Date", label: "Date" },
     { value: "Pax", label: "Pax" },
-    { value: "Group", label: "Group" },
     { value: "Pick Up", label: "Pick Up" },
     { value: "Destination", label: "Destination" },
     { value: "Progress", label: "Progress" },
     { value: "Status", label: "Status" },
     { value: "Price", label: "Price" },
+    { value: "Passenger Name", label: "Passenger Name" },
+    { value: "Arrival Date", label: "Arrival Date" },
+    { value: "Mobile", label: "Mobile" },
+    { value: "Email", label: "Email" },
+    { value: "Enquiry Date", label: "Enquiry Date" },
+    { value: "Account Name", label: "Account Name" },
   ];
 
   // State to store the selected option values
@@ -391,7 +349,6 @@ const LatestQuotes = () => {
       !selectedColumnValues.includes(column.name.props.children) // Ensure props.children is string
   );
 
-  const [deleteQuote] = useDeleteQuoteMutation();
   const swalWithBootstrapButtons = Swal.mixin({
     customClass: {
       confirmButton: "btn btn-success",
@@ -455,10 +412,13 @@ const LatestQuotes = () => {
   const navigate = useNavigate();
   const [modal_SurveyAffiliate, setModalSurveyAffiliate] =
     useState<boolean>(false);
+
   const tog_ModalSurveyAffiliate = () => {
     setModalSurveyAffiliate(!modal_SurveyAffiliate);
   };
+
   const { data: AllAffiliates = [] } = useGetAllAffiliatesQuery();
+
   const completeAffiliate = AllAffiliates.filter(
     (affiliates) => affiliates.statusAffiliate === "Accepted"
   );
@@ -519,6 +479,115 @@ const LatestQuotes = () => {
     }
   };
 
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("");
+  // This function is triggered when the select Period
+  const handleSelectPeriod = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedPeriod(value);
+  };
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const getFilteredJobs = () => {
+    let filteredJobs = result;
+
+    if (searchTerm) {
+      filteredJobs = filteredJobs.filter(
+        (job: any) =>
+          job?.quote_ref!.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          job.vehicle_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          job.start_point.placeName
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          job.destination_point.placeName
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          job.id_visitor.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (selectedPeriod && selectedPeriod !== "all") {
+      const now = new Date();
+      const filterByDate = (jobDate: any) => {
+        const date = new Date(jobDate);
+        switch (selectedPeriod) {
+          case "Today":
+            return date.toDateString() === now.toDateString();
+          case "Yesterday":
+            const yesterday = new Date(now);
+            yesterday.setDate(now.getDate() - 1);
+            return date.toDateString() === yesterday.toDateString();
+          case "Last 7 Days":
+            const lastWeek = new Date(now);
+            lastWeek.setDate(now.getDate() - 7);
+            return date >= lastWeek && now >= date;
+          case "Last 30 Days":
+            const lastMonth = new Date(now);
+            lastMonth.setDate(now.getDate() - 30);
+            return date >= lastMonth && now >= date;
+          case "This Month":
+            return (
+              date.getMonth() === now.getMonth() &&
+              date.getFullYear() === now.getFullYear()
+            );
+          case "Last Month":
+            const lastMonthStart = new Date(
+              now.getFullYear(),
+              now.getMonth() - 1,
+              1
+            );
+            const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+            return date >= lastMonthStart && date <= lastMonthEnd;
+          default:
+            return true;
+        }
+      };
+      filteredJobs = filteredJobs.filter((job) => filterByDate(job.date));
+    }
+
+    return filteredJobs;
+  };
+
+  // const columnsPdf = filteredColumns;
+  // const data = getFilteredJobs().reverse();
+
+  // const exportPDF = () => {
+  //   const doc = new jsPDF();
+  //   const tableColumn = columnsPdf.map((col) => col.name.props.children);
+  //   const tableRows = data.map((row) =>
+  //     columnsPdf.map((col) => {
+  //       const value = col.selector(row);
+  //       if (React.isValidElement(value)) {
+  //         // Type assertion to React.ReactElement to access props
+  //         const element = value as React.ReactElement;
+  //         return element.props.children || "";
+  //       }
+  //       return value !== null && value !== undefined ? value.toString() : "";
+  //     })
+  //   );
+
+  //   doc.autoTable({
+  //     head: [tableColumn],
+  //     body: tableRows,
+  //   });
+
+  //   doc.save("table.pdf");
+  // };
+
+  // const exportExcel = () => {
+  //   const worksheet = XLSX.utils.json_to_sheet(data);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+  //   XLSX.writeFile(workbook, "Latest Quotes.xlsx");
+  // };
+
+  // const printTable = () => {
+  //   window.print();
+  // };
+
   return (
     <React.Fragment>
       <div className="page-content">
@@ -534,7 +603,8 @@ const LatestQuotes = () => {
                       isMulti
                       options={optionColumnsTable}
                       styles={customStyles}
-                      onChange={handleSelectValueColumnChange} // Set the onChange event handler
+                      onChange={handleSelectValueColumnChange}
+                      placeholder="Filter Columns"
                     />
                   </Col>
                   <Col sm={9} className="col-lg-auto">
@@ -544,8 +614,9 @@ const LatestQuotes = () => {
                       data-choices-search-false
                       name="choices-single-default"
                       id="idStatus"
+                      onChange={handleSelectPeriod}
                     >
-                      <option value="all">All</option>
+                      <option value="all">All Days</option>
                       <option value="Today">Today</option>
                       <option value="Yesterday">Yesterday</option>
                       <option value="Last 7 Days">Last 7 Days</option>
@@ -554,35 +625,13 @@ const LatestQuotes = () => {
                       <option value="Last Month">Last Month</option>
                     </select>
                   </Col>
-                  {/* <Col lg={2}>
-                    <Flatpickr
-                      className="form-control flatpickr-input"
-                      placeholder={selectedFromDate}
-                      options={{
-                        dateFormat: "d M, Y",
-                      }}
-                      defaultValue={selectedFromDate}
-                      onChange={handleFromDateChange}
-                    />
-                  </Col> */}
-                  {/* <Col lg={2}>
-                    <Flatpickr
-                      className="form-control flatpickr-input"
-                      placeholder={selectedToDate}
-                      options={{
-                        dateFormat: "d M, Y",
-                      }}
-                      defaultValue={selectedToDate}
-                      onChange={handleToDateChange}
-                    />
-                  </Col> */}
                 </Row>
               </Card.Body>
             </Card>
             <Card>
               <Card.Header className="border-bottom-dashed">
                 <Row>
-                  <Col lg={2} className="mb-2">
+                  <Col lg={6} className="mb-2">
                     {isChecked && (
                       <ul className="hstack gap-2 list-unstyled mb-0">
                         <li>
@@ -607,40 +656,51 @@ const LatestQuotes = () => {
                       </ul>
                     )}
                   </Col>
-                  <Col lg={2}></Col>
-                  <Col lg={8}>
-                    <div className="search-box w-50">
+                  <Col lg={6} className="d-flex justify-content-end">
+                    <div className="search-box">
                       <input
                         type="text"
                         className="form-control search"
                         placeholder="Search for something..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
                       />
                       <i className="ri-search-line search-icon"></i>
                     </div>
                   </Col>
-                  {/* <Col lg={4} className="d-flex justify-content-end">
-                    <div
-                      className="btn-group btn-group-sm mt-2"
-                      role="group"
-                      aria-label="Basic example"
+                  {/* <Col lg={1}>
+                    <button
+                      type="button"
+                      className="btn btn-danger btn-sm"
+                      onClick={exportPDF}
                     >
-                      <button type="button" className="btn btn-outline-dark">
-                        Excel
-                      </button>
-                      <button type="button" className="btn btn-outline-dark">
-                        PDF
-                      </button>
-                      <button type="button" className="btn btn-outline-dark">
-                        Print
-                      </button>
-                    </div>
+                      <i className="bi bi-filetype-pdf fs-20"></i>
+                    </button>
+                  </Col>
+                  <Col lg={1}>
+                    <button
+                      type="button"
+                      className="btn btn-darken-success btn-sm"
+                      onClick={exportExcel}
+                    >
+                      <i className="bi bi-file-earmark-excel fs-20"></i>
+                    </button>
+                  </Col>
+                  <Col lg={1}>
+                    <button
+                      type="button"
+                      className="btn btn-info btn-sm"
+                      onClick={printTable}
+                    >
+                      <i className="bi bi-printer fs-20"></i>
+                    </button>
                   </Col> */}
                 </Row>
               </Card.Header>
               <Card.Body>
                 <DataTable
                   columns={filteredColumns}
-                  data={result.reverse()}
+                  data={getFilteredJobs().reverse()}
                   selectableRows
                   onSelectedRowsChange={handleChange}
                   pagination
@@ -725,117 +785,6 @@ const LatestQuotes = () => {
             </Form>
           </Modal.Body>
         </Modal>
-        <Offcanvas
-          show={showAffiliates}
-          onHide={() => setShowAffiliates(!showAffiliates)}
-          placement="end"
-        >
-          <Offcanvas.Header closeButton>
-            <Offcanvas.Title>Affiliates Details</Offcanvas.Title>
-          </Offcanvas.Header>
-          <Offcanvas.Body>
-            <div className="mt-3">
-              {whiteListLocation?.state?.white_list?.map(
-                (affiliate: any, index: number) => (
-                  <SimpleBar>
-                    <div
-                      className="p-3 border-bottom border-bottom-dashed"
-                      key={index}
-                    >
-                      <table>
-                        <tr>
-                          <td>
-                            {affiliate.jobStatus === "Refused" ? (
-                              <span className="badge bg-danger">
-                                {affiliate.jobStatus}
-                              </span>
-                            ) : (
-                              <span className="badge bg-info">
-                                {affiliate.jobStatus}
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <h6>Price :</h6>{" "}
-                          </td>
-                          <td>
-                            <span className="badge bg-info">
-                              £ {affiliate?.price!}
-                            </span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <h6>Name :</h6>{" "}
-                          </td>
-                          <td>
-                            <i>{affiliate?.id?.name!}</i>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <h6>Phone : </h6>
-                          </td>
-                          <td>
-                            <i>{affiliate?.id?.phone}</i>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <h6>Email : </h6>
-                          </td>
-                          <td>
-                            <i>{affiliate?.id?.email}</i>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <h6>Area of Coverage: </h6>
-                          </td>
-                          <td>
-                            <ul>
-                              {affiliate?.id?.coverageArea!.map(
-                                (area: any, index: number) => (
-                                  <li key={index}>{area?.placeName!}</li>
-                                )
-                              )}
-                            </ul>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <h6>Fleet: </h6>
-                          </td>
-                          <td>
-                            <ul>
-                              {affiliate?.id?.vehicles!.map(
-                                (vehicle: any, index: number) => (
-                                  <li key={index}>{vehicle?.type!}</li>
-                                )
-                              )}
-                            </ul>
-                          </td>
-                        </tr>
-                        <tr>
-                          {affiliate?.noteAcceptJob! === undefined ||
-                          affiliate?.noteAcceptJob! === "" ? (
-                            ""
-                          ) : (
-                            <div className="alert alert-warning" role="alert">
-                              <b>{affiliate?.noteAcceptJob!}</b>
-                            </div>
-                          )}
-                        </tr>
-                      </table>
-                    </div>
-                  </SimpleBar>
-                )
-              )}
-            </div>
-          </Offcanvas.Body>
-        </Offcanvas>
       </div>
     </React.Fragment>
   );

@@ -10,7 +10,6 @@ import {
 } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import Breadcrumb from "Common/BreadCrumb";
-import Flatpickr from "react-flatpickr";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Quote,
@@ -19,6 +18,7 @@ import {
   useAssignDriverAndVehicleToQuoteMutation,
   useDeleteQuoteMutation,
   useGetAllQuoteQuery,
+  useUpdateProgressMutation,
   useUpdateStatusQuoteToCancelMutation,
 } from "features/Quotes/quoteSlice";
 import ModalAssignVehicle from "./ModalAssignVehicle";
@@ -28,10 +28,7 @@ import {
   useGetDriverByIDQuery,
 } from "features/Driver/driverSlice";
 import { useGetAllVehiclesQuery } from "features/Vehicles/vehicleSlice";
-import {
-  useFetchAffiliateByIdQuery,
-  useGetAllAffiliatesQuery,
-} from "features/Affiliate/affiliateSlice";
+import { useGetAllAffiliatesQuery } from "features/Affiliate/affiliateSlice";
 
 import Select from "react-select";
 
@@ -44,30 +41,38 @@ interface Column {
 
 const Bookings = () => {
   document.title = "Bookings | Bouden Coach Travel";
-  //  Internally, customStyles will deep merges your customStyles with the default styling.
   const customTableStyles = {
     rows: {
       style: {
-        minHeight: "72px", // override the row height
+        minHeight: "72px",
         border: "1px solid #ddd",
       },
     },
     headCells: {
       style: {
-        paddingLeft: "8px", // override the cell padding for head cells
+        paddingLeft: "8px",
         paddingRight: "8px",
         border: "1px solid #ddd",
       },
     },
     cells: {
       style: {
-        paddingLeft: "8px", // override the cell padding for data cells
+        paddingLeft: "8px",
         paddingRight: "8px",
         border: "1px solid #ddd",
       },
     },
   };
   const customStyles = {
+    control: (styles: any, { isFocused }: any) => ({
+      ...styles,
+      minHeight: "41px",
+      borderColor: isFocused ? "#4b93ff" : "#e9ebec",
+      boxShadow: isFocused ? "0 0 0 1px #4b93ff" : styles.boxShadow,
+      ":hover": {
+        borderColor: "#4b93ff",
+      },
+    }),
     multiValue: (styles: any, { data }: any) => {
       return {
         ...styles,
@@ -78,7 +83,6 @@ const Bookings = () => {
       ...styles,
       backgroundColor: "#4b93ff",
       color: "white",
-      //    borderRadius: "50px"
     }),
     multiValueRemove: (styles: any, { data }: any) => ({
       ...styles,
@@ -104,15 +108,10 @@ const Bookings = () => {
       bookings.progress !== "New" &&
       bookings.progress !== "Completed" &&
       bookings.progress !== "Cancel" &&
-      bookings?.type! === "One way"
+      bookings?.type! === "One way" &&
+      bookings?.progress! !== "Deleted"
   );
 
-  const privateHiredJobs = result.filter(
-    (privateHired) => privateHired?.category === "Private"
-  );
-  const contractJobs = result.filter(
-    (contract) => contract?.category === "Regular"
-  );
   const [isChecked, setIsChecked] = useState<boolean>(false);
   const [selectedRow, setSelectedRow] = useState<any>();
   const handleChange = ({ selectedRows }: { selectedRows: Quote }) => {
@@ -134,30 +133,38 @@ const Bookings = () => {
   let filterdDrivers = AllDrivers.filter(
     (driver) => driver.driverStatus === "Active"
   );
-  let journeyOne = [];
-  let journeyTwo: any[] = [];
-  if (locationQuote!.state?.type! === "One way") {
-    journeyOne.push(locationQuote?.state!);
-  } else {
-    journeyTwo.push(
-      {
-        estimated_start_time: locationQuote?.state?.date!,
-        estimated_return_start_time: locationQuote?.state?.pickup_time!,
-        destination_point: locationQuote!.state?.destination_point!,
-        start_point: locationQuote?.state?.start_point!,
-      },
-      {
-        estimated_start_time:
-          locationQuote?.state?.estimated_return_start_time!,
-        estimated_return_start_time:
-          locationQuote?.state?.estimated_start_time!,
-        destination_point: locationQuote?.state?.start_point!,
-        start_point: locationQuote?.state?.destination_point!,
-      }
-    );
-  }
 
-  const notifySuccess = () => {
+  const notifySuccessAssignDriver = () => {
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: "Assign Driver Done successfully",
+      showConfirmButton: false,
+      timer: 2500,
+    });
+  };
+
+  const notifySuccessAssignVehicleAndDrvier = () => {
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: "Assign Vehicle & Driver Done successfully",
+      showConfirmButton: false,
+      timer: 2500,
+    });
+  };
+
+  const notifySuccessCancel = () => {
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: "Job Cancelled Done successfully",
+      showConfirmButton: false,
+      timer: 2500,
+    });
+  };
+
+  const notifySuccessPushToAffiliate = () => {
     Swal.fire({
       position: "center",
       icon: "success",
@@ -183,6 +190,8 @@ const Bookings = () => {
     const value = event.target.value;
     setSelectedVehicle(value);
   };
+
+  const [updateQuoteProgress] = useUpdateProgressMutation();
 
   let { data: oneDriver } = useGetDriverByIDQuery(selectVehicle);
 
@@ -215,7 +224,7 @@ const Bookings = () => {
       assignDriverToDriver["id_driver"] = selectVehicle;
       assignDriverToQuoteMutation(assignDriverToDriver)
         .then(() => navigate("/bookings"))
-        .then(() => notifySuccess());
+        .then(() => notifySuccessAssignDriver());
     } catch (error) {
       notifyError(error);
     }
@@ -339,9 +348,9 @@ const Bookings = () => {
           case "Accepted":
             return <span className="badge bg-success"> {cell.progress} </span>;
           case "Refused":
-            return <span className="badge bg-info"> {cell.progress} </span>;
-          default:
             return <span className="badge bg-danger"> {cell.progress} </span>;
+          default:
+            return <span className="badge bg-info"> {cell.progress} </span>;
         }
       },
       sortable: true,
@@ -485,7 +494,8 @@ const Bookings = () => {
 
   const optionColumnsTable = [
     { value: "Quote ID", label: "Quote ID" },
-    { value: "Go Date", label: "Go Date" },
+    { value: "Vehicle Type", label: "Vehicle Type" },
+    { value: "Date", label: "Date" },
     { value: "Pax", label: "Pax" },
     { value: "Group", label: "Group" },
     { value: "Pick Up", label: "Pick Up" },
@@ -493,6 +503,12 @@ const Bookings = () => {
     { value: "Progress", label: "Progress" },
     { value: "Status", label: "Status" },
     { value: "Price", label: "Price" },
+    { value: "Passenger Name", label: "Passenger Name" },
+    { value: "Arrival Date", label: "Arrival Date" },
+    { value: "Mobile", label: "Mobile" },
+    { value: "Email", label: "Email" },
+    { value: "Enquiry Date", label: "Enquiry Date" },
+    { value: "Account Name", label: "Account Name" },
   ];
 
   // State to store the selected option values
@@ -547,7 +563,10 @@ const Bookings = () => {
       })
       .then((result: any) => {
         if (result.isConfirmed) {
-          deleteQuote(selectedRow[0]._id);
+          updateQuoteProgress({
+            quote_id: selectedRow[0]._id,
+            progress: "Deleted",
+          });
           setIsChecked(!isChecked);
           swalWithBootstrapButtons.fire(
             "Deleted !",
@@ -624,7 +643,7 @@ const Bookings = () => {
         selectDriverWhenAssignDriverAndVehicle;
       assignDriverAndVehicleToQuoteMutation(assignDriverAndVehicleToQuoteState)
         .then(() => navigate("/bookings"))
-        .then(() => notifySuccess())
+        .then(() => notifySuccessAssignVehicleAndDrvier())
         .then(() => setIsChecked(!isChecked));
     } catch (error) {
       notifyError(error);
@@ -661,7 +680,7 @@ const Bookings = () => {
       updateStatusToCancel["status"] = selectedCancelCause;
       updateStatusQuoteToCancelMutation(updateStatusToCancel)
         .then(() => navigate("/bookings"))
-        .then(() => notifySuccess());
+        .then(() => notifySuccessCancel());
     } catch (error) {
       notifyError(error);
     }
@@ -751,13 +770,120 @@ const Bookings = () => {
       assignAffiliateToQuoteStatus["pushedDate"] = date.toDateString();
       assignAffiliateToQuote(assignAffiliateToQuoteStatus)
         .then(() => navigate("/current-push-jobs"))
-        .then(() => notifySuccess());
+        .then(() => notifySuccessPushToAffiliate());
     } catch (error) {
       notifyError(error);
     }
   };
 
-  const { data: OneAffiliate } = useFetchAffiliateByIdQuery(selectAffiliate);
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("");
+  // This function is triggered when the select Period
+  const handleSelectPeriod = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedPeriod(value);
+  };
+
+  const [selectedPayment, setSelectedPayment] = useState<string>("");
+  // This function is triggered when the select Payment
+  const handleSelectPayment = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedPayment(value);
+  };
+
+  const [selectedProgress, setSelectedProgress] = useState<string>("");
+  // This function is triggered when the select Progress
+  const handleSelectProgress = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const value = event.target.value;
+    setSelectedProgress(value);
+  };
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const getFilteredJobs = () => {
+    let filteredJobs = result;
+    if (searchTerm) {
+      filteredJobs = filteredJobs.filter(
+        (job: any) =>
+          job?.quote_ref?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          job.vehicle_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          job.start_point.placeName
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          job.destination_point.placeName
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          job?.id_visitor?.name
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (selectedPeriod && selectedPeriod !== "all") {
+      const now = new Date();
+      const filterByDate = (jobDate: any) => {
+        const date = new Date(jobDate);
+        switch (selectedPeriod) {
+          case "Today":
+            return date.toDateString() === now.toDateString();
+          case "Yesterday":
+            const yesterday = new Date(now);
+            yesterday.setDate(now.getDate() - 1);
+            return date.toDateString() === yesterday.toDateString();
+          case "Last 7 Days":
+            const lastWeek = new Date(now);
+            lastWeek.setDate(now.getDate() - 7);
+            return date >= lastWeek && now >= date;
+          case "Last 30 Days":
+            const lastMonth = new Date(now);
+            lastMonth.setDate(now.getDate() - 30);
+            return date >= lastMonth && now >= date;
+          case "This Month":
+            return (
+              date.getMonth() === now.getMonth() &&
+              date.getFullYear() === now.getFullYear()
+            );
+          case "Last Month":
+            const lastMonthStart = new Date(
+              now.getFullYear(),
+              now.getMonth() - 1,
+              1
+            );
+            const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+            return date >= lastMonthStart && date <= lastMonthEnd;
+          default:
+            return true;
+        }
+      };
+      filteredJobs = filteredJobs.filter((job) => filterByDate(job.date));
+    }
+
+    // if (selectedPayment && selectedPayment !== "all") {
+    //   filteredJobs = filteredJobs.filter(
+    //     (job) => job.payment_status === selectedPayment
+    //   );
+    // }
+
+    if (selectedProgress && selectedProgress !== "all") {
+      filteredJobs = filteredJobs.filter(
+        (job) => job.progress === selectedProgress
+      );
+    }
+
+    if (isPrivateHiredChecked) {
+      filteredJobs = filteredJobs.filter((job) => job.category === "Private");
+    }
+
+    if (isContractChecked) {
+      filteredJobs = filteredJobs.filter((job) => job.category === "Regular");
+    }
+
+    return filteredJobs;
+  };
 
   return (
     <React.Fragment>
@@ -767,14 +893,15 @@ const Bookings = () => {
           <Col lg={12}>
             <Card>
               <Card.Body>
-                <Row className="g-lg-2 g-4">
-                  <Col lg={4}>
+                <Row className="g-lg-1 g-3">
+                  <Col lg={3}>
                     <Select
                       closeMenuOnSelect={false}
                       isMulti
                       options={optionColumnsTable}
                       styles={customStyles}
-                      onChange={handleSelectValueColumnChange} // Set the onChange event handler
+                      onChange={handleSelectValueColumnChange}
+                      placeholder="Filter Columns"
                     />
                   </Col>
                   <Col sm={9} className="col-lg-auto">
@@ -782,14 +909,31 @@ const Bookings = () => {
                       className="form-select text-muted"
                       data-choices
                       data-choices-search-false
-                      name="choices-single-default"
-                      id="idStatus"
+                      name="Period"
+                      id="idPeriod"
+                      onChange={handleSelectPeriod}
+                    >
+                      <option value="all">All Days</option>
+                      <option value="Today">Today</option>
+                      <option value="Yesterday">Yesterday</option>
+                      <option value="Last 7 Days">Last 7 Days</option>
+                      <option value="Last 30 Days">Last 30 Days</option>
+                      <option defaultValue="This Month">This Month</option>
+                      <option value="Last Month">Last Month</option>
+                    </select>
+                  </Col>
+                  <Col sm={9} className="col-lg-auto">
+                    <select
+                      className="form-select text-muted"
+                      data-choices
+                      data-choices-search-false
+                      name="Payment"
+                      id="idPayment"
+                      onChange={handleSelectPayment}
                     >
                       <option value="all">All Payment</option>
-                      <option value="Today">Not paid</option>
-                      <option value="Yesterday">Part paid</option>
-                      <option value="Last 7 Days">Paid</option>
-                      <option value="Last 30 Days">Pay Cash</option>
+                      <option value="Part Paid">Part Paid</option>
+                      <option value="Paid">Paid</option>
                     </select>
                   </Col>
                   <Col sm={9} className="col-lg-auto">
@@ -797,47 +941,16 @@ const Bookings = () => {
                       className="form-select text-muted"
                       data-choices
                       data-choices-search-false
-                      name="choices-single-default"
-                      id="idStatus"
+                      name="Progress"
+                      id="idProgress"
+                      onChange={handleSelectProgress}
                     >
                       <option value="all">All Progress</option>
-                      <option value="Today">Accepted</option>
-                      <option value="Yesterday">Allocated</option>
-                      <option value="Last 7 Days">Confirmed</option>
-                      <option value="Last 30 Days">Ended</option>
-                      <option value="Today">In Progress</option>
-                      <option value="Yesterday">Internal Job</option>
-                      <option value="Last 7 Days">New</option>
-                      <option value="Today">On route</option>
-                      <option value="Yesterday">On site</option>
-                      <option value="Last 7 Days">Under bid</option>
+                      <option value="Accepted">Accepted</option>
+                      <option value="On Route">On route</option>
+                      <option value="On site">On site</option>
+                      <option value="Picked Up">Picked Up</option>
                     </select>
-                  </Col>
-                  <Col sm={9} className="col-lg-auto">
-                    <select
-                      className="form-select text-muted"
-                      data-choices
-                      data-choices-search-false
-                      name="choices-single-default"
-                      id="idStatus"
-                    >
-                      <option value="all">All Priority</option>
-                      <option value="Today">1</option>
-                      <option value="Yesterday">2</option>
-                      <option value="Last 7 Days">3</option>
-                      <option value="Last 30 Days">4</option>
-                      <option value="Today">5</option>
-                    </select>
-                  </Col>
-                  <Col lg={2}>
-                    <Flatpickr
-                      className="form-control flatpickr-input"
-                      placeholder="Select Date"
-                      options={{
-                        mode: "range",
-                        dateFormat: "d M, Y",
-                      }}
-                    />
                   </Col>
                   <Col className="d-flex align-items-center">
                     <div className="form-check form-check-inline">
@@ -872,28 +985,14 @@ const Bookings = () => {
                         Contract
                       </label>
                     </div>
-                    <div className="form-check form-check-inline">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id="inlineCheckbox3"
-                        value="option3"
-                      />
-                      <label
-                        className="form-check-label"
-                        htmlFor="inlineCheckbox3"
-                      >
-                        Non Invoiced
-                      </label>
-                    </div>
                   </Col>
                 </Row>
               </Card.Body>
             </Card>
             <Card id="shipmentsList">
               <Card.Header className="border-bottom-dashed">
-                <Row className="g-3">
-                  <Col lg={6} className="d-flex justify-content-start">
+                <Row>
+                  <Col lg={9} className="d-flex justify-content-start">
                     {isChecked ? (
                       <ul className="hstack gap-2 list-unstyled mb-0">
                         <li>
@@ -941,17 +1040,19 @@ const Bookings = () => {
                       ""
                     )}
                   </Col>
-                  <Col lg={3} className="d-flex justify-content-center">
+                  <Col lg={3} className="d-flex justify-content-end">
                     <div className="search-box">
                       <input
                         type="text"
                         className="form-control search"
                         placeholder="Search for something..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
                       />
                       <i className="ri-search-line search-icon"></i>
                     </div>
                   </Col>
-                  <Col lg={2} className="d-flex justify-content-end">
+                  {/* <Col lg={2} className="d-flex justify-content-end">
                     <div
                       className="btn-group btn-group-sm mt-2"
                       role="group"
@@ -967,38 +1068,18 @@ const Bookings = () => {
                         Print
                       </button>
                     </div>
-                  </Col>
+                  </Col> */}
                 </Row>
               </Card.Header>
               <Card.Body>
-                {isPrivateHiredChecked && !isContractChecked ? (
-                  <DataTable
-                    columns={filteredColumns}
-                    data={privateHiredJobs}
-                    selectableRows
-                    pagination
-                    onSelectedRowsChange={handleChange}
-                    customStyles={customTableStyles}
-                  />
-                ) : !isPrivateHiredChecked && isContractChecked ? (
-                  <DataTable
-                    columns={filteredColumns}
-                    data={contractJobs}
-                    pagination
-                    selectableRows
-                    onSelectedRowsChange={handleChange}
-                    customStyles={customTableStyles}
-                  />
-                ) : (
-                  <DataTable
-                    columns={filteredColumns}
-                    data={result}
-                    pagination
-                    selectableRows
-                    onSelectedRowsChange={handleChange}
-                    customStyles={customTableStyles}
-                  />
-                )}
+                <DataTable
+                  columns={filteredColumns}
+                  data={getFilteredJobs().reverse()}
+                  pagination
+                  selectableRows
+                  onSelectedRowsChange={handleChange}
+                  customStyles={customTableStyles}
+                />
               </Card.Body>
             </Card>
           </Col>
@@ -1019,25 +1100,6 @@ const Bookings = () => {
             </Modal.Header>
             <Modal.Body className="p-4">
               <Card>
-                {/* <Card.Header>
-                  <div className="d-flex align-items-center p-1">
-                    <div className="flex-shrink-0 me-3">
-                      <div className="avatar-sm">
-                        <div className="avatar-title rounded-circle bg-light text-primary fs-24">
-                          <i className="mdi mdi-map-marker-path"></i>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex-grow-1">
-                      <h4 className="mb-1">Journey</h4>
-                    </div>
-                  </div>
-                  {locationQuote?.state?.type! === "One way" ? (
-                    <DataTable columns={columns1} data={journeyOne} />
-                  ) : (
-                    <DataTable columns={columns1} data={journeyTwo} />
-                  )}
-                </Card.Header> */}
                 <Card.Header>
                   <div className="d-flex align-items-center p-1">
                     <div className="flex-shrink-0 me-3">
