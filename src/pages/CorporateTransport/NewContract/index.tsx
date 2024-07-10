@@ -20,7 +20,7 @@ import Swal from "sweetalert2";
 import Flatpickr from "react-flatpickr";
 
 const NewContract = () => {
-  document.title = "Contract | Bouden Coach Travel";
+  document.title = "Contracts | Bouden Coach Travel";
   const { data: AllContracts = [] } = useGetAllContractsQuery();
   const navigate = useNavigate();
 
@@ -339,7 +339,7 @@ const NewContract = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-          <Breadcrumb title="Contract" pageTitle="Finance" />
+          <Breadcrumb title="Contracts" pageTitle="Suggested Routes" />
           <Col lg={12}>
             <Card id="shipmentsList">
               <Card.Header className="border-bottom-dashed">
@@ -376,8 +376,8 @@ const NewContract = () => {
                       onClick={() => tog_AddContract()}
                       className="add-btn"
                     >
-                      <i className="ph ph-file-plus me-1 align-middle"></i> Add
-                      Contract
+                      <i className="ph ph-file-plus me-1 align-middle fs-18"></i>{" "}
+                      New Contract
                     </Button>
                   </Col>
                 </Row>

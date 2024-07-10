@@ -1,81 +1,77 @@
 import React, { useState } from "react";
-import {
-  Form,
-  Row,
-  Card,
-  Col,
-  Button,
-  Modal,
-} from "react-bootstrap";
+import { Form, Row, Card, Col, Button, Modal } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import { Link } from "react-router-dom";
-import { useAddNewLuggageMutation, useDeleteLuggageMutation, useGetAllLuggageQuery } from "features/luggage/luggageSlice";
+import {
+  useAddNewLuggageMutation,
+  useDeleteLuggageMutation,
+  useGetAllLuggageQuery,
+} from "features/luggage/luggageSlice";
 import Swal from "sweetalert2";
 
 const LuggageTypes = () => {
-
-const {data = [] } = useGetAllLuggageQuery()
-const notifySuccess = () => {
-  Swal.fire({
-    position: "center",
-    icon: "success",
-    title: "Luggage is created successfully",
-    showConfirmButton: false,
-    timer: 2500,
-  });
-};
-
-const notifyError = (err: any) => {
-  Swal.fire({
-    position: "center",
-    icon: "error",
-    title: `Sothing Wrong, ${err}`,
-    showConfirmButton: false,
-    timer: 2500,
-  });
-};
-
-const [deleteLuggage] = useDeleteLuggageMutation();
-
-const swalWithBootstrapButtons = Swal.mixin({
-  customClass: {
-    confirmButton: "btn btn-success",
-    cancelButton: "btn btn-danger",
-  },
-  buttonsStyling: false,
-});
-
-const AlertDelete = async (_id: any) => {
-  swalWithBootstrapButtons
-    .fire({
-      title: "Are you sure?",
-      text: "You won't be able to go back?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, delete it !",
-      cancelButtonText: "No, cancel !",
-      reverseButtons: true,
-    })
-    .then((result) => {
-      if (result.isConfirmed) {
-        deleteLuggage(_id);
-        swalWithBootstrapButtons.fire(
-          "Deleted !",
-          "Luggage is deleted.",
-          "success"
-        );
-      } else if (
-        /* Read more about handling dismissals below */
-        result.dismiss === Swal.DismissReason.cancel
-      ) {
-        swalWithBootstrapButtons.fire(
-          "Canceled",
-          "Luggage is safe :)",
-          "info"
-        );
-      }
+  const { data = [] } = useGetAllLuggageQuery();
+  const notifySuccess = () => {
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: "Luggage is created successfully",
+      showConfirmButton: false,
+      timer: 2500,
     });
-};
+  };
+
+  const notifyError = (err: any) => {
+    Swal.fire({
+      position: "center",
+      icon: "error",
+      title: `Sothing Wrong, ${err}`,
+      showConfirmButton: false,
+      timer: 2500,
+    });
+  };
+
+  const [deleteLuggage] = useDeleteLuggageMutation();
+
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger",
+    },
+    buttonsStyling: false,
+  });
+
+  const AlertDelete = async (_id: any) => {
+    swalWithBootstrapButtons
+      .fire({
+        title: "Are you sure?",
+        text: "You won't be able to go back?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it !",
+        cancelButtonText: "No, cancel !",
+        reverseButtons: true,
+      })
+      .then((result) => {
+        if (result.isConfirmed) {
+          deleteLuggage(_id);
+          swalWithBootstrapButtons.fire(
+            "Deleted !",
+            "Luggage is deleted.",
+            "success"
+          );
+        } else if (
+          /* Read more about handling dismissals below */
+          result.dismiss === Swal.DismissReason.cancel
+        ) {
+          swalWithBootstrapButtons.fire(
+            "Canceled",
+            "Luggage is safe :)",
+            "info"
+          );
+        }
+      });
+  };
 
   const columns = [
     {
@@ -102,7 +98,11 @@ const AlertDelete = async (_id: any) => {
               </Link>
             </li>
             <li>
-              <Link to="#" className="badge badge-soft-danger remove-item-btn" onClick={()=>AlertDelete(row._id)}>
+              <Link
+                to="#"
+                className="badge badge-soft-danger remove-item-btn"
+                onClick={() => AlertDelete(row._id)}
+              >
                 <i className="ri-delete-bin-2-line"></i>
               </Link>
             </li>
@@ -121,7 +121,7 @@ const AlertDelete = async (_id: any) => {
 
   const initialLuggage = {
     description: "",
-    size: ""
+    size: "",
   };
 
   const [luggage, setLuggage] = useState(initialLuggage);
@@ -138,9 +138,9 @@ const AlertDelete = async (_id: any) => {
   const onSubmitLuggage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      createLuggage(luggage).then(() =>
-      notifySuccess()
-      ).then(()=> setLuggage(initialLuggage))
+      createLuggage(luggage)
+        .then(() => notifySuccess())
+        .then(() => setLuggage(initialLuggage));
     } catch (error) {
       notifyError(error);
     }
@@ -174,8 +174,8 @@ const AlertDelete = async (_id: any) => {
                     className="btn btn-primary"
                     onClick={() => tog_AddLuggage()}
                   >
-                    <i className="ri-roadster-line align-middle"></i>{" "}
-                    <span>Add New Luggage</span>
+                    <i className="ri-suitcase-2-line align-middle fs-16"></i>{" "}
+                    <span>New Luggage</span>
                   </button>
                 </div>
               </Col>
@@ -248,9 +248,14 @@ const AlertDelete = async (_id: any) => {
                   >
                     <i className="ri-close-line align-bottom me-1"></i> Close
                   </Button>
-                  <Button variant="primary" id="add-btn" type="submit" onClick={() => {
-                    tog_AddLuggage();
-                  }}>
+                  <Button
+                    variant="primary"
+                    id="add-btn"
+                    type="submit"
+                    onClick={() => {
+                      tog_AddLuggage();
+                    }}
+                  >
                     Add Luggage
                   </Button>
                 </div>

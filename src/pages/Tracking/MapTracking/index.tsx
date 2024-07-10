@@ -1,18 +1,14 @@
 import React, { useEffect, useState } from "react";
 import {
-  Button,
   Card,
   Col,
   Container,
   Row,
   Tab,
   Nav,
-  Form,
-  Image,
   Dropdown,
   Table,
 } from "react-bootstrap";
-import Breadcrumb from "Common/BreadCrumb";
 import {
   GoogleApiWrapper,
   Map,
@@ -20,24 +16,16 @@ import {
   InfoWindow,
   Polyline,
 } from "google-maps-react";
-import logoDark from "assets/images/logo-dark.png";
-import { Link } from "react-router-dom";
-import DataTable from "react-data-table-component";
 import { io } from "socket.io-client";
 import coach from "../../../assets/images/coach.png";
 import chauffeur from "../../../assets/images/chauffeur.png";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../app/store"; // Import your RootState interface
-import { selectCurrentUser } from "../../../features/Account/authSlice";
 import Swal from "sweetalert2";
 import axios from "axios";
-// import './google-map.scss';
+import { useGetAllDriverQuery } from "features/Driver/driverSlice";
 
 const LoadingContainer = () => <div>Loading...</div>;
 const Maptracking = (props: any) => {
-  document.title = "Tracking | Bouden Coach Travel";
-  const user = useSelector((state: RootState) => selectCurrentUser(state));
-  console.log("user id", user._id);
+  document.title = "Live Tracking | Bouden Coach Travel";
 
   const notify = (msg: string) => {
     Swal.fire({
@@ -45,46 +33,46 @@ const Maptracking = (props: any) => {
       icon: "success",
       title: msg,
       showConfirmButton: true,
-      //timer: 2000,
     });
   };
-
-  let path = [
-    { lat: 52.53121397525478, lng: -2.0343799253369403 },
-    { lat: 52.531403248085006, lng: -2.031837191253659 },
-    { lat: 52.5311095485165, lng: -2.0271594188472855 },
-  ];
+  const { data: AllDrivers = [] } = useGetAllDriverQuery();
+  let activeDrivers = AllDrivers.filter(
+    (driver) =>
+      driver.driverStatus !== "onVacation" && driver.driverStatus !== "Inactive"
+  );
   const [markers, setMarkers] = useState<any[]>([]);
   const [routeCoordinates, setRouteCoordinates] = useState<any[]>([]);
-  const URL = "http://57.128.184.217:3000"; //=== 'production' ? undefined : 'http://localhost:8800';
+  const URL = "http://57.128.184.217:3000"; //=== 'production' ? http://57.128.184.217:3000 : 'http://localhost:8800';
   const socket = io(URL);
 
   useEffect(() => {
-    socket.on("live-tracking-companies-listening", (socketData: any) => {
-      console.log("broadcasted trip", socketData);
+    //For Disconnected Drivers
+    socket.on("live-tracking-disconnection-listening", (quoteId: any) => {
+      let temparkers = [...markers];
+      const index = temparkers.findIndex(
+        (obj) => obj.details.details.id === quoteId
+      );
+      if (index !== -1) {
+        temparkers.splice(index, 1);
+      }
+      setMarkers(temparkers);
+    });
+    //For Active present drivers
+    socket.on("live-tracking-listening", (socketData: any) => {
       let tripExists = false;
       let counter = 0;
-
       let temparkers = [...markers];
-
-      console.log([...markers]);
-
       for (let element of temparkers) {
-        console.log("element", element);
         counter++;
-        if (element.details.trip_details._id === socketData.trip_details._id) {
-          console.log("tripExists");
-          if (socketData.trip_details.progress === "completed") {
+        if (element.details.details.id === socketData.details.id) {
+          if (socketData.details.progress === "Completed") {
             notify(
-              "Driver " +
-                socketData.details.id_driver.firstname +
-                " has completed this job"
+              "Driver " + socketData.details.driver + " has completed this job"
             );
           } else {
             element.details.position = socketData.position;
             element.positions.push(socketData.position);
           }
-          console.log("trip positions", socketData.position);
           setMarkers(temparkers);
           tripExists = true;
           break;
@@ -92,44 +80,33 @@ const Maptracking = (props: any) => {
       }
 
       if (counter === markers.length && tripExists === false) {
-        console.log("tripNotExists");
-        if (user._id === socketData.trip_details.company_id) {
-          temparkers.push({
-            details: socketData,
-            positions: [socketData.position],
-          });
-          setMarkers(temparkers);
-        }
+        // if (user._id === socketData.details.companyId) {
+        temparkers.push({
+          details: socketData,
+          positions: [socketData.position],
+        });
+        setMarkers(temparkers);
+        // }
       }
-
-      console.log(temparkers);
-      console.log(markers);
     });
 
-    // Clean up function to remove event listener when component unmounts
     return () => {
-      socket.disconnect(); // Disconnect the socket connection
+      socket.disconnect();
     };
   }, [markers]);
 
+  console.log("markers", markers);
   const drawPolyline = async (positions?: any) => {
-    console.log("Positions to be snapped", positions);
-
     let array = positions
       .map((position: any) => `${position.lat},${position.lng}`)
       .join("|");
 
-    console.log("To Be snapped array", array);
-
     try {
       const requestUrl = `https://roads.googleapis.com/v1/snapToRoads?path=${array}&key=${"AIzaSyBbORSZJBXcqDnY6BbMx_JSP0l_9HLQSkw"}&interpolate=true`;
-
-      console.log("Request URL:", requestUrl);
 
       const response: any = await axios.get(requestUrl);
 
       if (response) {
-        console.log("Response", response);
         const snappedPoints = response.snappedPoints.map((point: any) => ({
           lat: point.location.latitude,
           lng: point.location.longitude,
@@ -185,14 +162,7 @@ const Maptracking = (props: any) => {
         origin: fromPosition,
         destination: toPosition,
         travelMode: google.maps.TravelMode.DRIVING,
-        waypoints: waypts, //[
-        //   {
-        //     location: {
-        //       lat: 52.531403248085006,
-        //       lng: -2.031837191253659
-        //     },
-        //   },
-        // ],
+        waypoints: waypts,
       },
       (result, status) => {
         if (status === google.maps.DirectionsStatus.OK) {
@@ -207,538 +177,271 @@ const Maptracking = (props: any) => {
     );
   };
 
-  const [navList, setNavList] = useState(150);
-  function openMap() {
-    setNavList(50);
-  }
+  const [isPrivateHiredChecked, setIsPrivateHiredChecked] = useState(false);
+  const handlePrivateHiredCheckboxChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setIsPrivateHiredChecked(event.target.checked);
+  };
 
-  function closeMap() {
-    setNavList(150);
-  }
+  const [isContractChecked, setIsContractChecked] = useState(false);
+  const handleContractCheckboxChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setIsContractChecked(event.target.checked);
+  };
 
-  const columns = [
-    {
-      name: <span className="font-weight-bold fs-13">Quote ID</span>,
-      selector: (row: any) => row.srNo,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Name</span>,
-      selector: (row: any) => row.FixHeadId,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Collection</span>,
-      selector: (row: any) => <Link to="#!">{row.title}</Link>,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Destination</span>,
-      selector: (row: any) => row.user,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Price</span>,
-      selector: (row: any) => row.purchaseId,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Date</span>,
-      selector: (row: any) => row.assigned,
-      sortable: true,
-    },
-  ];
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("");
+  // This function is triggered when the select Period
+  const handleSelectPeriod = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedPeriod(value);
+  };
 
-  const columns2 = [
-    {
-      name: <span className="font-weight-bold fs-13">Quote ID</span>,
-      selector: (row: any) => row.srNo,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Name</span>,
-      selector: (row: any) => row.FixHeadId,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Collection</span>,
-      selector: (row: any) => row.title,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Destination</span>,
-      selector: (row: any) => row.user,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Price</span>,
-      selector: (row: any) => row.purchaseId,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Date</span>,
-      selector: (row: any) => row.assigned,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Action</span>,
-      sortable: true,
-      selector: (cell: any) => {
-        return (
-          <ul className="hstack gap-2 list-unstyled mb-0">
-            <li>
-              <Link
-                to="#"
-                className="badge badge-soft-success edit-item-btn"
-                onClick={() => openMap()}
-              >
-                <i className="ri-map-2-line" title="Map View"></i>
-              </Link>
-            </li>
-          </ul>
-        );
-      },
-    },
-  ];
+  const [selectedProgress, setSelectedProgress] = useState<string>("");
+  // This function is triggered when the select Progress
+  const handleSelectProgress = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const value = event.target.value;
+    setSelectedProgress(value);
+  };
 
-  const columns1 = [
-    {
-      name: <span className="font-weight-bold fs-13">Account</span>,
-      selector: (row: any) => row.srNo,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Pay Date</span>,
-      selector: (row: any) => row.FixHeadId,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Pay Method</span>,
-      selector: (row: any) => <Link to="#!">{row.title}</Link>,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Amount</span>,
-      selector: (row: any) => row.user,
-      sortable: true,
-    },
-  ];
+  const [selectedDriver, setSelectedDriver] = useState<string>("");
+  // This function is triggered when the select Driver
+  const handleSelectDriver = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedDriver(value);
+  };
 
-  const data = [
-    {
-      srNo: "86929",
-      FixHeadId: "Nicole Wojtynia",
-      purchaseId: "£195.00",
-      title: "Paget Primary School, 110 Paget Rd",
-      user: "Birmingham B24 0JP",
-      assigned: "2023-10-02 12:30:00",
-      createdBy: "Joseph Parker",
-      createDate: "03 Oct, 2021",
-      status: "Re-open",
-      priority: "High",
-    },
-    {
-      srNo: "86930",
-      FixHeadId: "Nicole Wojtynia",
-      purchaseId: "£195.00",
-      title: "Paget Primary School, 110 Paget Rd",
-      user: "Birmingham B24 0JP",
-      assigned: "2023-10-02 12:30:00",
-      createdBy: "Mary Rucker",
-      createDate: "05 Oct, 2021",
-      status: "On-Hold",
-      priority: "Medium",
-    },
-    {
-      srNo: "86931",
-      FixHeadId: "Nicole Wojtynia",
-      purchaseId: "£195.00",
-      title: "Paget Primary School, 110 Paget Rd",
-      user: "Birmingham B24 0JP",
-      assigned: "2023-10-02 12:30:00",
-      createdBy: "Tonya Noble",
-      createDate: "27 April, 2022",
-      status: "Closed",
-      priority: "Low",
-    },
-  ];
-  const data2 = [
-    {
-      srNo: "86929",
-      FixHeadId: "Nicole Wojtynia",
-      purchaseId: "£195.00",
-      title: "Paget Primary School, 110 Paget Rd",
-      user: "Birmingham B24 0JP",
-      assigned: "2023-10-02 12:30:00",
-      createdBy: "Joseph Parker",
-      createDate: "03 Oct, 2021",
-      status: "Re-open",
-      priority: "High",
-    },
-    {
-      srNo: "86930",
-      FixHeadId: "Nicole Wojtynia",
-      purchaseId: "£195.00",
-      title: "Paget Primary School, 110 Paget Rd",
-      user: "Birmingham B24 0JP",
-      assigned: "2023-10-02 12:30:00",
-      createdBy: "Mary Rucker",
-      createDate: "05 Oct, 2021",
-      status: "On-Hold",
-      priority: "Medium",
-    },
-    {
-      srNo: "86931",
-      FixHeadId: "Nicole Wojtynia",
-      purchaseId: "£195.00",
-      title: "Paget Primary School, 110 Paget Rd",
-      user: "Birmingham B24 0JP",
-      assigned: "2023-10-02 12:30:00",
-      createdBy: "Tonya Noble",
-      createDate: "27 April, 2022",
-      status: "Closed",
-      priority: "Low",
-    },
-  ];
-  const data1 = [
-    {
-      srNo: "Priya Naker",
-      FixHeadId: "06-03-2023",
-      title: "Bank Transfert",
-      user: "£4,620.00",
-      assigned: "2023-10-02 12:30:00",
-      createdBy: "Joseph Parker",
-      createDate: "03 Oct, 2021",
-      status: "Re-open",
-      priority: "High",
-    },
-  ];
+  const getFilteredJobs = () => {
+    let filteredJobs = markers;
 
-  const [activeVerticalTab, setactiveVerticalTab] = useState<number>(1);
-  const [isHovered, setHover] = useState(false);
-  const [navWidth, setNavWidth] = useState(150);
-  function openNav() {
-    setNavWidth(100);
-  }
+    if (selectedPeriod && selectedPeriod !== "all") {
+      const now = new Date();
+      const filterByDate = (jobDate: any) => {
+        const date = new Date(jobDate);
+        switch (selectedPeriod) {
+          case "Today":
+            return date.toDateString() === now.toDateString();
+          case "Yesterday":
+            const yesterday = new Date(now);
+            yesterday.setDate(now.getDate() - 1);
+            return date.toDateString() === yesterday.toDateString();
+          case "Last 7 Days":
+            const lastWeek = new Date(now);
+            lastWeek.setDate(now.getDate() - 7);
+            return date >= lastWeek && now >= date;
+          case "Last 30 Days":
+            const lastMonth = new Date(now);
+            lastMonth.setDate(now.getDate() - 30);
+            return date >= lastMonth && now >= date;
+          case "This Month":
+            return (
+              date.getMonth() === now.getMonth() &&
+              date.getFullYear() === now.getFullYear()
+            );
+          case "Last Month":
+            const lastMonthStart = new Date(
+              now.getFullYear(),
+              now.getMonth() - 1,
+              1
+            );
+            const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+            return date >= lastMonthStart && date <= lastMonthEnd;
+          default:
+            return true;
+        }
+      };
+      filteredJobs = filteredJobs.filter((job: any) =>
+        filterByDate(job.details.details.date)
+      );
+    }
 
-  function closeNav() {
-    setNavWidth(150);
-  }
+    if (selectedProgress && selectedProgress !== "all") {
+      filteredJobs = filteredJobs.filter(
+        (job: any) => job.details.details.progress === selectedProgress
+      );
+    }
 
-  const [changeColor, setChangeColor] = useState<boolean>(false);
+    if (selectedDriver && selectedDriver !== "all") {
+      filteredJobs = filteredJobs.filter(
+        (job: any) => job.details.details.driver?._id! === selectedDriver
+      );
+    }
 
-  // function for handleClick
-  const handleClick = () => {
-    setChangeColor(!changeColor);
+    if (isPrivateHiredChecked) {
+      filteredJobs = filteredJobs.filter(
+        (job: any) => job.details.details.category === "Private"
+      );
+    }
+
+    if (isContractChecked) {
+      filteredJobs = filteredJobs.filter(
+        (job: any) => job.details.details.category === "Regular"
+      );
+    }
+
+    return filteredJobs;
   };
 
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-          <Row>
-            {changeColor === false ? (
-              <Col lg={8}>
-                <Row>
-                  <Col lg={12}>
-                    <div className="card-body">
-                      <div
-                        id="gmaps-types"
-                        className="gmaps"
-                        style={{ position: "relative" }}
-                      >
-                        <Map
-                          google={props.google}
-                          zoom={13}
-                          style={{ height: "200%", width: `${navWidth}%` }}
-                          initialCenter={{ lat: 52.5244734, lng: -1.9857876 }}
-                        >
-                          {console.log("markers", markers)}
-                          {markers.map((marker, index) => (
-                            <InfoWindow
-                              key={index}
-                              position={{
-                                lat: marker.details.position.lat,
-                                lng: marker.details.position.lng,
-                              }} // Use the position of the first marker
-                              visible={true}
-                              pixelOffset={{ width: 0, height: -35 }}
-                            >
-                              <div style={{ textAlign: "center" }}>
-                                <img
-                                  src={chauffeur}
-                                  alt=""
-                                  style={{ width: "25px" }}
-                                />
-                                <span>
-                                  {" "}
-                                  {
-                                    marker.details.trip_details.id_driver
-                                      .firstname
-                                  }
-                                </span>
-                                <br />
-
-                                <span>
-                                  {marker.details.trip_details.id_vehicle.model}
-                                </span>
-                              </div>
-                            </InfoWindow>
-                          ))}
-                          {markers.map((marker, index) => (
-                            <Marker
-                              key={index}
-                              position={{
-                                lat: marker.details.position.lat,
-                                lng: marker.details.position.lng,
-                              }}
-                              icon={{
-                                url: coach,
-                                scaledSize: new window.google.maps.Size(35, 35), // Adjust the size of the icon
-                              }}
-                              onClick={() => {
-                                drawPolyline(marker.positions);
-                              }}
-                            />
-                          ))}
-                          <Polyline
-                            path={routeCoordinates}
-                            strokeColor="#FF1493"
-                            strokeOpacity={0.7}
-                            strokeWeight={7}
-                          />
-                        </Map>
-                        {navWidth === 100 ? (
-                          <button
-                            type="button"
-                            className="btn btn-danger btn-icon"
-                            onClick={() => closeNav()}
-                          >
-                            <i className="ri-close-line"></i>
-                          </button>
-                        ) : (
-                          ""
-                        )}
-                      </div>
-                      {isHovered && (
-                        <Dropdown
-                          style={{
-                            position: "absolute",
-                            top: "5px",
-                            right: "-365px",
-                          }}
-                        >
-                          <Dropdown.Toggle
-                            className="btn-icon btn btn-warning arrow-none btn-sm w-sm"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                          >
-                            <i className="ri-equalizer-line"></i>
-                          </Dropdown.Toggle>
-                          <Dropdown.Menu as="ul">
-                            <li>
-                              <Link className="dropdown-item" to="#">
-                                <i className="ph ph-users-four align-middle"></i>{" "}
-                                All Clients
-                              </Link>
-                            </li>
-                            <li>
-                              <Link className="dropdown-item" to="#">
-                                <i className="ph ph-check-circle align-middle"></i>{" "}
-                                All Status
-                              </Link>
-                            </li>
-                            <li>
-                              <Link className="dropdown-item" to="#">
-                                <i className="ph ph-clock-afternoon align-middle"></i>{" "}
-                                Delayed
-                              </Link>
-                            </li>
-                            <li>
-                              <Link className="dropdown-item" to="#">
-                                <i className="ph ph-arrow-clockwise align-middle"></i>{" "}
-                                Changing
-                              </Link>
-                            </li>
-                            <li>
-                              <Link className="dropdown-item" to="#">
-                                <i className="ph ph-map-pin align-middle"></i>{" "}
-                                On Site
-                              </Link>
-                            </li>
-                            <li>
-                              <Link className="dropdown-item" to="#">
-                                <i className="ph ph-thumbs-up align-middle"></i>{" "}
-                                Normal
-                              </Link>
-                            </li>
-                            <li>
-                              <Link className="dropdown-item" to="#">
-                                <i className="ph ph-checks align-middle"></i>{" "}
-                                Compeleted
-                              </Link>
-                            </li>
-                          </Dropdown.Menu>
-                        </Dropdown>
-                      )}
-                    </div>
-                  </Col>
-                </Row>
-              </Col>
-            ) : (
-              <div style={{ height: "200%", width: `${navList}%` }}>
-                {" "}
-                <DataTable columns={columns2} data={data2} pagination />
-              </div>
-            )}
-            {navList === 50 ? (
-              <Col lg={4}>
-                <Row>
-                  <Col lg={12}>
-                    <div
-                      className="card-body"
-                      onMouseOver={() => setHover(true)}
-                      onMouseLeave={() => setHover(false)}
+          <Card>
+            <Card.Body>
+              <Row>
+                <Col>
+                  <select
+                    className="form-select text-muted"
+                    data-choices
+                    data-choices-search-false
+                    name="Progress"
+                    id="idProgress"
+                    onChange={handleSelectProgress}
+                  >
+                    <option value="all">All Progress</option>
+                    <option value="Accepted">Accepted</option>
+                    <option value="On Route">On route</option>
+                    <option value="On site">On site</option>
+                    <option value="Picked Up">Picked Up</option>
+                  </select>
+                </Col>
+                <Col>
+                  <select
+                    className="form-select text-muted"
+                    data-choices
+                    data-choices-search-false
+                    name="Progress"
+                    id="idProgress"
+                    onChange={handleSelectDriver}
+                  >
+                    <option value="all">All Drivers</option>
+                    {activeDrivers.map((driver) => (
+                      <option value={driver?._id!} key={driver?._id!}>
+                        {driver.firstname} {driver.surname}
+                      </option>
+                    ))}
+                  </select>
+                </Col>
+                <Col className="d-flex align-items-center">
+                  <div className="form-check form-check-inline">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="inlineCheckbox1"
+                      value="option1"
+                      checked={isPrivateHiredChecked}
+                      onChange={handlePrivateHiredCheckboxChange}
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor="inlineCheckbox1"
                     >
-                      <div
-                        id="gmaps-types"
-                        className="gmaps"
-                        style={{ position: "relative" }}
+                      Private Hire
+                    </label>
+                  </div>
+                  <div className="form-check form-check-inline">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="inlineCheckbox2"
+                      value="option2"
+                      checked={isContractChecked}
+                      onChange={handleContractCheckboxChange}
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor="inlineCheckbox2"
+                    >
+                      Contract
+                    </label>
+                  </div>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+          <Row>
+            <Col lg={8}>
+              <Row>
+                <Col lg={12}>
+                  <div className="card-body">
+                    <div
+                      id="gmaps-types"
+                      className="gmaps"
+                      style={{ position: "relative" }}
+                    >
+                      <Map
+                        google={props.google}
+                        zoom={13}
+                        style={{ height: "220%", width: `151%` }}
+                        initialCenter={{ lat: 52.5244734, lng: -1.9857876 }}
                       >
-                        <Map
-                          google={props.google}
-                          zoom={13}
-                          style={{ height: "118%", width: "160%" }}
-                          initialCenter={{ lat: 52.5244734, lng: -1.9857876 }}
-                        >
-                          <Marker
-                            position={{ lat: 52.5471571, lng: -1.9042587 }}
-                          />
-                        </Map>
-                        <button
-                          type="button"
-                          className="btn btn-danger btn-icon"
-                          onClick={() => closeMap()}
-                        >
-                          <i className="ri-close-line"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </Col>
-                </Row>
-              </Col>
-            ) : (
-              ""
-            )}
-            {navWidth === 100 ? (
-              <Col xl={4}>
-                <Card style={{ height: "110%" }}>
-                  <Card.Header>
-                    <h3>Trip: 89089</h3>
-                  </Card.Header>
-                  <Card.Body>
-                    <Card>
-                      <Card.Body>
-                        <Tab.Container defaultActiveKey="home1">
-                          <Nav
-                            as="ul"
-                            variant="pills"
-                            className="nav-pills-custom nav-success mb-3 "
+                        {getFilteredJobs().map((marker, index) => (
+                          <InfoWindow
+                            key={index}
+                            position={{
+                              lat: marker.details.position.lat,
+                              lng: marker.details.position.lng,
+                            }} // Use the position of the first marker
+                            visible={true}
+                            pixelOffset={{ width: 0, height: -35 }}
                           >
-                            <Nav.Item as="li">
-                              <Nav.Link eventKey="home1">General</Nav.Link>
-                            </Nav.Item>
-                            <Nav.Item as="li">
-                              <Nav.Link eventKey="profile1">History</Nav.Link>
-                            </Nav.Item>
-                            <Nav.Item as="li">
-                              <Nav.Link eventKey="messages1">Payment</Nav.Link>
-                            </Nav.Item>
-                            <Nav.Item as="li">
-                              <Nav.Link eventKey="settings1">Contract</Nav.Link>
-                            </Nav.Item>
-                          </Nav>
-                          <Tab.Content className="text-muted">
-                            <Tab.Pane eventKey="home1">
-                              <Table className="table-borderless table-sm mb-0">
-                                <tbody>
-                                  <tr className="fw-bold">
-                                    <td>Driver:</td>
-                                    <td className="fw-medium">Andrew</td>
-                                  </tr>
-                                  <tr className="fw-bold">
-                                    <td>Vehicle</td>
-                                    <td className="fw-medium">415-778-3654</td>
-                                  </tr>
-                                  <tr className="fw-bold">
-                                    <td>Vehicle Type</td>
-                                    <td className="fw-medium">
-                                      10-16 Seat Standard Minibus
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td className="fw-bold">PickUp</td>
-                                    <td className="fw-medium">
-                                      Paget Primary School, 110 Paget Rd
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td className="fw-bold">Destination</td>
-                                    <td className="fw-medium">
-                                      Birmingham B24 0JP
-                                    </td>
-                                  </tr>
-                                  <tr className="fw-bold">
-                                    <td>Arrival Date</td>
-                                    <td className="fw-medium">
-                                      2023-12-13 17:30:00
-                                    </td>
-                                  </tr>
-                                  <tr className="fw-bold">
-                                    <td>Customer Name</td>
-                                    <td className="fw-medium">
-                                      Nicole Wojtynia
-                                    </td>
-                                  </tr>
-                                  <tr className="fw-bold">
-                                    <td>Status</td>
-                                    <td className="fw-medium">On road</td>
-                                  </tr>
-                                </tbody>
-                              </Table>
-                            </Tab.Pane>
-                            <Tab.Pane eventKey="profile1">
-                              <DataTable
-                                columns={columns}
-                                data={data}
-                                // pagination
+                            <div style={{ textAlign: "center" }}>
+                              <span>
+                                Quote ID: {marker.details.details?.quote_ref!}
+                              </span>
+                              <br />
+                              <img
+                                src={chauffeur}
+                                alt=""
+                                style={{ width: "25px" }}
                               />
-                            </Tab.Pane>
-                            <Tab.Pane eventKey="messages1">
-                              <DataTable
-                                columns={columns1}
-                                data={data1}
-                                // pagination
-                              />
-                            </Tab.Pane>
-                            <Tab.Pane eventKey="settings1">
-                              <div className="d-flex mt-2">
-                                <div className="flex-shrink-0">
-                                  <i className="ri-checkbox-circle-fill text-success"></i>
-                                </div>
-                                <div className="flex-grow-1 ms-2">Contract</div>
-                              </div>
-                            </Tab.Pane>
-                          </Tab.Content>
-                        </Tab.Container>
-                      </Card.Body>
-                    </Card>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ) : (
-              ""
-            )}
+                              <span>
+                                {" "}
+                                {marker.details.details.driver.firstname}{" "}
+                                {marker.details.details.driver.surname}
+                              </span>
+                              <br />
+
+                              <span>
+                                {
+                                  marker.details.details.vehicle
+                                    ?.registration_number!
+                                }
+                              </span>
+                            </div>
+                          </InfoWindow>
+                        ))}
+                        {getFilteredJobs().map((marker, index) => (
+                          <Marker
+                            key={index}
+                            position={{
+                              lat: marker.details.position.lat,
+                              lng: marker.details.position.lng,
+                            }}
+                            icon={{
+                              url: coach,
+                              scaledSize: new window.google.maps.Size(35, 35), // Adjust the size of the icon
+                            }}
+                            onClick={() => {
+                              drawPolyline(marker.positions);
+                            }}
+                          />
+                        ))}
+                        <Polyline
+                          path={routeCoordinates}
+                          strokeColor="#FF1493"
+                          strokeOpacity={0.7}
+                          strokeWeight={7}
+                        />
+                      </Map>
+                    </div>
+                  </div>
+                </Col>
+              </Row>
+            </Col>
           </Row>
         </Container>
       </div>

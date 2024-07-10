@@ -1,38 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
-import Breadcrumb from "Common/BreadCrumb";
-import { Link } from "react-router-dom";
+
 import Flatpickr from "react-flatpickr";
-import Dropzone from "react-dropzone";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import Select from "react-select";
 
 const AddNewSubcontractor = () => {
   document.title = "Create Affiliate | Bouden Coach Travel";
-
-  const [selectedFiles, setselectedFiles] = useState([]);
-
-  function handleAcceptedFiles(files: any) {
-    files.map((file: any) =>
-      Object.assign(file, {
-        preview: URL.createObjectURL(file),
-        formattedSize: formatBytes(file.size),
-      })
-    );
-    setselectedFiles(files);
-  }
-
-  /* Formats the size */
-  function formatBytes(bytes: any, decimals = 2) {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-  }
 
   const options = [
     { value: "Standard Saloon Car", label: "Standard Saloon Car" },

@@ -16,11 +16,13 @@ import Swal from "sweetalert2";
 // Import Contry Data
 import countryData from "Common/country";
 import { useAddNewDriverMutation } from "features/Driver/driverSlice";
+import { useGetAllVehiclesQuery } from "features/Vehicles/vehicleSlice";
 
-const AddNewDriver = () => {
-  document.title = "Create Driver | Bouden Coach Travel";
+const AddNewDefect = () => {
+  document.title = "New Defect | Bouden Coach Travel";
 
   const navigate = useNavigate();
+  const { data: AllVehicles = [] } = useGetAllVehiclesQuery();
   const notifySuccess = () => {
     Swal.fire({
       position: "center",
@@ -340,99 +342,48 @@ const AddNewDriver = () => {
           <Row>
             <Col lg={12}>
               <Card>
-                <Card.Header>
-                  <div className="d-flex align-items-center">
-                    <div className="flex-shrink-0 me-3">
-                      <div className="avatar-sm">
-                        <div className="avatar-title rounded-circle bg-light text-primary fs-20">
-                          <i className="bx bx-user"></i>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex-grow-1">
-                      <h5 className="card-title mb-1">Driver Information</h5>
-                    </div>
-                  </div>
-                </Card.Header>
                 <Card.Body>
                   <div className="mb-3">
                     <Form className="tablelist-form" onSubmit={onSubmitDriver}>
                       <Row>
                         <Row>
-                          <div className="text-center mb-3">
-                            <div className="position-relative d-inline-block">
-                              <div className="position-absolute top-50 start-50 translate-middle">
-                                <label
-                                  htmlFor="profile_image_base64_string"
-                                  className="mb-0"
-                                  data-bs-toggle="tooltip"
-                                  data-bs-placement="right"
-                                  title="Select company logo"
-                                  // style={{width: "0px"}}
-                                >
-                                  <span className="avatar-xs d-inline-block">
-                                    <span className="avatar-title bg-light border rounded-circle text-muted cursor-pointer">
-                                      <i className="ri-image-fill"></i>
-                                    </span>
-                                  </span>
-                                </label>
-                                <input
-                                  className="form-control d-none"
-                                  type="file"
-                                  name="profile_image_base64_string"
-                                  id="profile_image_base64_string"
-                                  accept="image/*"
-                                  onChange={(e) => handleFileUpload(e)}
-                                  style={{ width: "210px", height: "120px" }}
-                                />
-                              </div>
-                              <div className="avatar-lg">
-                                <div className="avatar-title bg-light rounded-3">
-                                  <img
-                                    src={`data:image/jpeg;base64, ${driver.profile_image_base64_string}`}
-                                    alt={driver.username}
-                                    id="profile_image_base64_string"
-                                    className="avatar-xl h-auto rounded-3 object-fit-cover"
-                                    style={{
-                                      width: "210px",
-                                      height: "120px",
-                                      zIndex: 5000,
-                                    }}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </Row>
-                        <Row>
-                          {/* First Name  == Done */}
-                          <Col lg={4}>
+                          {/* Vehicle  == Done */}
+                          <Col lg={3}>
                             <div className="mb-3">
-                              <Form.Label htmlFor="firstname">
-                                First Name
+                              <Form.Label htmlFor="driverStatus">
+                                Vehicle
                               </Form.Label>
-                              <Form.Control
-                                type="text"
-                                id="firstname"
-                                placeholder="Enter first name"
-                                onChange={onChangeDriver}
-                                value={driver.firstname}
-                              />
+                              <select
+                                className="form-select text-muted"
+                                name="driverStatus"
+                                id="driverStatus"
+                                onChange={handleSelectDriverStatus}
+                              >
+                                <option value="">Select</option>
+                                {AllVehicles.map((vehicle) => (
+                                  <option
+                                    value={vehicle.registration_number}
+                                    key={vehicle?._id!}
+                                  >
+                                    {vehicle.registration_number}
+                                  </option>
+                                ))}
+                              </select>
                             </div>
                           </Col>
                           {/* Last Name == Done */}
                           <Col lg={4}>
                             <div className="mb-3">
-                              <Form.Label htmlFor="surname">
-                                Last Name
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                id="surname"
-                                placeholder="Enter last name"
-                                onChange={onChangeDriver}
-                                value={driver.surname}
-                              />
+                              <Form.Label htmlFor="surname">Level</Form.Label>
+                              <select
+                                className="form-select text-muted"
+                                name="driverStatus"
+                                id="driverStatus"
+                                onChange={handleSelectDriverStatus}
+                              >
+                                <option value="">Select</option>
+                                <option>Medium</option>
+                              </select>
                             </div>
                           </Col>
                           {/* Birth_Date  == Done */}
@@ -559,85 +510,6 @@ const AddNewDriver = () => {
                                   </SimpleBar>
                                 </Dropdown.Menu>
                               </Dropdown>
-                            </div>
-                          </Col>
-                        </Row>
-                        <Row>
-                          {/* Address  == Done */}
-                          <Col lg={2}>
-                            <div className="mb-3">
-                              <Form.Label htmlFor="address">Address</Form.Label>
-                              <Form.Control
-                                type="text"
-                                id="address"
-                                placeholder="Enter address"
-                                onChange={onChangeDriver}
-                                value={driver.address}
-                              />
-                            </div>
-                          </Col>
-                          <Col lg={2}>
-                            <div className="mb-3">
-                              <Form.Label htmlFor="city">City</Form.Label>
-                              <Form.Control
-                                type="text"
-                                id="city"
-                                placeholder="Enter City"
-                                onChange={onChangeDriver}
-                                value={driver.city}
-                              />
-                            </div>
-                          </Col>
-                          <Col lg={2}>
-                            <div className="mb-3">
-                              <Form.Label htmlFor="state">State</Form.Label>
-                              <Form.Control
-                                type="text"
-                                id="state"
-                                placeholder="Enter State"
-                                onChange={onChangeDriver}
-                                value={driver.state}
-                              />
-                            </div>
-                          </Col>
-                          <Col lg={2}>
-                            <div className="mb-3">
-                              <Form.Label htmlFor="country">Country</Form.Label>
-                              <Form.Control
-                                type="text"
-                                id="country"
-                                placeholder="Enter Country"
-                                onChange={onChangeDriver}
-                                value={driver.country}
-                              />
-                            </div>
-                          </Col>
-                          <Col lg={2}>
-                            <div className="mb-3">
-                              <Form.Label htmlFor="postalcode">
-                                Postal Code
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                id="postalcode"
-                                placeholder="Enter Postal Code"
-                                onChange={onChangeDriver}
-                                value={driver.postalcode}
-                              />
-                            </div>
-                          </Col>
-                          <Col lg={2}>
-                            <div className="mb-3">
-                              <Form.Label htmlFor="language">
-                                Language
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                id="language"
-                                placeholder="Enter Language"
-                                onChange={onChangeDriver}
-                                value={driver.language}
-                              />
                             </div>
                           </Col>
                         </Row>
@@ -1119,4 +991,4 @@ const AddNewDriver = () => {
   );
 };
 
-export default AddNewDriver;
+export default AddNewDefect;

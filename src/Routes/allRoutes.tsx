@@ -87,6 +87,8 @@ import AffilaiteDetails from "pages/Corporate/Subcontractor/AffiliateDetails";
 import NewEmail from "pages/Messages/NewEmail";
 import EmailsSent from "pages/Messages/EmailsSent";
 import CancelledJobs from "pages/CancelledJobs";
+import Test from "pages/Test";
+import AddNewDefect from "pages/Administration/Vehicles/AddNewDefect";
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: <Dashboard /> },
@@ -94,6 +96,7 @@ const authProtectedRoutes = [
   { path: "/report-error", component: <ReportError /> },
   { path: "/user-manual", component: <UserManual /> },
   { path: "/defects-management", component: <DefectsManagement /> },
+  { path: "/new-vehicle-defect", component: <AddNewDefect /> },
   { path: "/contract/:name", component: <ContractDetails /> },
 
   //? Tracking
@@ -225,6 +228,7 @@ const authProtectedRoutes = [
 const publicRoutes = [
   // AuthenticationInner
   { path: "/login", component: <Login /> },
+  // { path: "/test", component: <Test /> },
   // { path: "/auth-pass-reset-basic", component: <PasswordReset /> },
   // { path: "/auth-pass-change-basic", component: <PasswordCreate /> },
   // { path: "/auth-success-msg-basic", component: <SuccessMessage /> },

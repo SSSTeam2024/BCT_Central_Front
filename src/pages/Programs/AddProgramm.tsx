@@ -126,8 +126,8 @@ interface stopTime {
   minutes: number;
 }
 
-const AddProgramm = (props: any) => {
-  document.title = "Program | Bouden Coach Travel";
+const AddProgramm = () => {
+  document.title = "New Suggested Route | Bouden Coach Travel";
   const { data: AllPassengersLimit = [] } =
     useGetAllPassengerAndLuggagesQuery();
 
@@ -1789,7 +1789,10 @@ const AddProgramm = (props: any) => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-          <Breadcrumb title="Program" pageTitle="Management" />
+          <Breadcrumb
+            title="New Suggested Route"
+            pageTitle="Suggested Routes"
+          />
           <Card className="overflow-auto" style={{ height: 850 }}>
             {/* <Card.Body className="form-steps">
               <Card> */}

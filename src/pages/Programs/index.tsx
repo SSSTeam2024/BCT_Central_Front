@@ -38,14 +38,12 @@ interface ResponseStatus {
 }
 
 const ProgramList = () => {
-  document.title = "List of Programs | Bouden Coach Travel";
+  document.title = "List of Suggested Routes | Bouden Coach Travel";
   const user = useSelector((state: RootState) => selectCurrentUser(state));
-  console.log(user);
   const [modal_Pickup, setmodal_Pickup] = useState<boolean>(false);
   const [modal_Destination, setmodal_Destination] = useState<boolean>(false);
   const [modal_Action, setmodal_Action] = useState<boolean>(false);
   const { data = [] } = useFetchProgrammsQuery();
-  console.log(data);
   function tog_Pickup() {
     setmodal_Pickup(!modal_Pickup);
   }
@@ -639,12 +637,15 @@ const ProgramList = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-          <Breadcrumb title="Programming" pageTitle="" />
+          <Breadcrumb
+            title="List of Suggested Routes"
+            pageTitle="Suggested Routes"
+          />
           <Col lg={12}>
             <Card>
               <Card.Body>
                 <Row className="g-3">
-                  <Col sm={9} className="col-lg-auto">
+                  <Col lg={2}>
                     <select
                       className="form-select text-muted"
                       data-choices
@@ -661,7 +662,7 @@ const ProgramList = () => {
                       <option value="Last Month">Last Month</option>
                     </select>
                   </Col>
-                  <Col xxl={3} lg={6}>
+                  <Col lg={2}>
                     <Flatpickr
                       className="form-control flatpickr-input"
                       placeholder="Select Date"
@@ -671,7 +672,7 @@ const ProgramList = () => {
                       }}
                     />
                   </Col>
-                  <Col xxl={2} lg={6}>
+                  <Col lg={2}>
                     <select
                       className="form-select text-muted"
                       data-choices
@@ -687,15 +688,14 @@ const ProgramList = () => {
                       <option value="Out Of Delivery">Out Of Delivery</option>
                     </select>
                   </Col>
-
-                  <Col lg={5} className="d-flex justify-content-end">
+                  <Col lg={6} className="d-flex justify-content-end">
                     <Button
                       variant="secondary"
                       onClick={() => tog_AddShippingModals()}
                       className="add-btn"
                     >
                       <i className="bi bi-plus-circle me-1 align-middle "></i>{" "}
-                      Add Program
+                      New Suggested Route
                     </Button>
                   </Col>
                 </Row>

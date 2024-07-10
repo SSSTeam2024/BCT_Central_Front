@@ -25,7 +25,7 @@ import img11 from "assets/images/brands/img-11.png";
 import img12 from "assets/images/brands/img-12.png";
 import img13 from "assets/images/brands/img-13.png";
 import img14 from "assets/images/brands/img-14.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const DefectsManagement = () => {
   document.title = " Defects Management | Bouden Coach Travel";
@@ -184,6 +184,12 @@ const DefectsManagement = () => {
         "Hi, I would also like a quote for the same journey on 16/12 for approx 12 with an 11am collection - 4pm return, & them 6pm that evening for 6pm drop off 11.30pm collection for approx 24 (these are just rough times & numbers at the moment to get an idea of costs)  Thank you in advance, ",
     },
   ];
+  const navigate = useNavigate();
+
+  function tog_AddNewDefect() {
+    navigate("/new-vehicle-defect");
+  }
+
   return (
     <React.Fragment>
       <div className="page-content">
@@ -193,7 +199,7 @@ const DefectsManagement = () => {
             <Card id="shipmentsList">
               <Card.Header className="border-bottom-dashed">
                 <Row className="g-3">
-                  <Col xxl={3} lg={6}>
+                  <Col lg={3}>
                     <div className="search-box">
                       <input
                         type="text"
@@ -203,7 +209,7 @@ const DefectsManagement = () => {
                       <i className="ri-search-line search-icon"></i>
                     </div>
                   </Col>
-                  <Col sm={9} className="col-lg-auto">
+                  <Col lg={3} className="col-lg-auto">
                     <select
                       className="form-select text-muted"
                       data-choices
@@ -217,7 +223,7 @@ const DefectsManagement = () => {
                       <option value="Last 7 Days">YT19ECE SCANIA</option>
                     </select>
                   </Col>
-                  <Col xxl={3} lg={6}>
+                  <Col lg={3}>
                     <select
                       className="form-select text-muted"
                       data-choices
@@ -231,6 +237,16 @@ const DefectsManagement = () => {
                       <option value="Last 7 Days">Work Shop</option>
                       <option value="Last 7 Days">Resolved</option>
                     </select>
+                  </Col>
+                  <Col lg={3} className="d-flex justify-content-end">
+                    <Button
+                      variant="secondary"
+                      onClick={() => tog_AddNewDefect()}
+                      className="add-btn"
+                    >
+                      <i className="bi bi-plus-circle me-1 align-middle "></i>{" "}
+                      New Suggested Route
+                    </Button>
                   </Col>
                 </Row>
               </Card.Header>
