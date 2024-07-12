@@ -1803,8 +1803,8 @@ const AddProgramm = () => {
                     <Tab.Pane eventKey="1">
                       <Row>
                         <Col lg={4}>
-                          <Row>
-                            <Col lg={2}>
+                          <Row className="gap-4">
+                            <Col lg={2} className="p-2">
                               <div className="form-check mb-2">
                                 <input
                                   className="form-check-input"
@@ -1822,7 +1822,7 @@ const AddProgramm = () => {
                                 </Form.Label>
                               </div>
                             </Col>
-                            <Col lg={2}>
+                            <Col lg={2} className="p-2">
                               <div className="form-check mb-2">
                                 <input
                                   className="form-check-input"

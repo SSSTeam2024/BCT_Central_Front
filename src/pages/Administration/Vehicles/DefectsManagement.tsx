@@ -1,42 +1,73 @@
 import React, { useState } from "react";
-import {
-  Container,
-  Dropdown,
-  Form,
-  Row,
-  Card,
-  Col,
-  Button,
-} from "react-bootstrap";
+import { Container, Row, Card, Col, Button, Offcanvas } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import Breadcrumb from "Common/BreadCrumb";
-import Flatpickr from "react-flatpickr";
-import img1 from "assets/images/brands/img-1.png";
-import img2 from "assets/images/brands/img-2.png";
-import img3 from "assets/images/brands/img-3.png";
-import img4 from "assets/images/brands/img-4.png";
-import img5 from "assets/images/brands/img-5.png";
-import img6 from "assets/images/brands/img-6.png";
-import img7 from "assets/images/brands/img-7.png";
-import img8 from "assets/images/brands/img-8.png";
-import img9 from "assets/images/brands/img-9.png";
-import img10 from "assets/images/brands/img-10.png";
-import img11 from "assets/images/brands/img-11.png";
-import img12 from "assets/images/brands/img-12.png";
-import img13 from "assets/images/brands/img-13.png";
-import img14 from "assets/images/brands/img-14.png";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  useDeleteDefectMutation,
+  useGetAllDefectsQuery,
+} from "features/Defects/defectSlice";
+import Swal from "sweetalert2";
+import { useGetAllVehiclesQuery } from "features/Vehicles/vehicleSlice";
 
 const DefectsManagement = () => {
   document.title = " Defects Management | Bouden Coach Travel";
-  const [modal_QuoteInfo, setmodal_QuoteInfo] = useState<boolean>(false);
-  function tog_QuoteInfo() {
-    setmodal_QuoteInfo(!modal_QuoteInfo);
-  }
+
+  const { data: AllDefects = [] } = useGetAllDefectsQuery();
+
+  const { data: AllVehicles = [] } = useGetAllVehiclesQuery();
+
+  const [deleteDefect] = useDeleteDefectMutation();
+
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger",
+    },
+    buttonsStyling: false,
+  });
+
+  const AlertDelete = async (_id: any) => {
+    swalWithBootstrapButtons
+      .fire({
+        title: "Are you sure?",
+        text: "You won't be able to go back?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it !",
+        cancelButtonText: "No, cancel !",
+        reverseButtons: true,
+      })
+      .then((result) => {
+        if (result.isConfirmed) {
+          deleteDefect(_id);
+          swalWithBootstrapButtons.fire(
+            "Deleted !",
+            "Defect is deleted.",
+            "success"
+          );
+        } else if (
+          /* Read more about handling dismissals below */
+          result.dismiss === Swal.DismissReason.cancel
+        ) {
+          swalWithBootstrapButtons.fire(
+            "Canceled",
+            "Defect is safe :)",
+            "info"
+          );
+        }
+      });
+  };
+
   const columns = [
     {
       name: <span className="font-weight-bold fs-13">Vehicle</span>,
-      selector: (row: any) => row.vehicles,
+      selector: (row: any) => row.vehicle,
+      sortable: true,
+    },
+    {
+      name: <span className="font-weight-bold fs-13">Date</span>,
+      selector: (row: any) => row?.date!,
       sortable: true,
     },
     {
@@ -62,133 +93,125 @@ const DefectsManagement = () => {
     },
     {
       name: <span className="font-weight-bold fs-13">Issue</span>,
-      selector: (row: any) => row.Issue,
+      selector: (row: any) => row.issue,
       sortable: true,
     },
     {
       name: <span className="font-weight-bold fs-13">Status</span>,
       selector: (cell: any) => {
-        switch (cell.status) {
+        switch (cell.defectStatus) {
           case "New":
-            return <span className="badge bg-danger"> {cell.status} </span>;
+            return (
+              <span className="badge bg-danger"> {cell.defectStatus} </span>
+            );
           case "Medium":
-            return <span className="badge bg-info"> {cell.status} </span>;
+            return <span className="badge bg-info"> {cell.defectStatus} </span>;
           case "Low":
-            return <span className="badge bg-success"> {cell.status} </span>;
+            return (
+              <span className="badge bg-success"> {cell.defectStatus} </span>
+            );
           default:
-            return <span className="badge bg-danger"> {cell.status} </span>;
+            return (
+              <span className="badge bg-danger"> {cell.defectStatus} </span>
+            );
         }
       },
       sortable: true,
     },
     {
       name: <span className="font-weight-bold fs-13">Notes</span>,
-      selector: (row: any) => row.Note,
+      selector: (row: any) => row.note,
       sortable: true,
     },
-  ];
-  const data = [
     {
-      Quote_ID: "89089",
-      driver: "No driver",
-      vehicletype: "10-16 Seat Standard Minibus",
-      vehicle: "No Vehicle",
-      Date: "21 Dec 2023",
-      Time: "18:00",
-      Pax: "7",
-      PickUp: "Dwyran, Wales LL61 6AX",
-      Destination: "BIRMINGHAM NEW STREET STATION",
-      Progress: "New",
-      PassengerName: "Erica",
-      Mobile: "07990547241",
-      Email: "erica7018@gmail.com",
-      Mileage: "37",
-      ArrivalDate: "24 Dec 2023 09:00",
-      Price: "£0.00",
-      Balance: "£0.00",
-      Contract: "None",
-      EnquiryDate: "10th Nov 2023",
-      Affiliate: "No affiliate",
-      Callback: "10th Nov 2023 14:29",
-      PaymentStatus: "Not Paid",
-      Status: "Pending",
-      AccountName: "N/A",
-      Notes: "The next day pick up point might be changing (within London)",
-      // FlightNum: "Joseph Parker",
-      // FlightArrival: "Alexis Clarke",
-      // FlightIn: "Joseph Parker",
-      // FlightOut: "03 Oct, 2021",
-      // ExternalReference: "Re-open",
-    },
-    {
-      Quote_ID: "90262",
-      driver: "No driver",
-      vehicletype: "53 Seat Standard Coach",
-      vehicle: "No Vehicle",
-      Date: "13 Dec 2023",
-      Time: "10:00",
-      Pax: "50",
-      PickUp:
-        "The Little Theatre Dover Street Leicester England LE1 6PT United Kingdom",
-      Destination: "Wigston Road Oadby Leicester LE2 5QF United Kingdom",
-      Progress: "New",
-      PassengerName: "Georgina illston",
-      Mobile: "07745090368",
-      Email: "Oadby-50plus@outlook.com",
-      Mileage: "26",
-      ArrivalDate: "Wed 13th Dec 2023 16:00",
-      Price: "£0.00",
-      Balance: "£0.00",
-      Contract: "N/A",
-      // FlightNum: "Joseph Parker",
-      // FlightArrival: "Alexis Clarke",
-      // FlightIn: "Joseph Parker",
-      // FlightOut: "03 Oct, 2021",
-      EnquiryDate: "Wed 2nd Aug 2023",
-      Affiliate: "N/A",
-      Callback: "Not set",
-      PaymentStatus: "Not Paid",
-      Status: "Pending",
-      AccountName: "N/A",
-      // ExternalReference: "Re-open",
-      Notes:
-        "We wondered if it would be possible to pick up from every ones homes or if this is not possible?",
-    },
-    {
-      Quote_ID: "86563",
-      driver: "No driver",
-      vehicletype: "29 Seat Standard Midi Coach",
-      vehicle: "No Vehicle",
-      Date: "15 Dec 2023",
-      Time: "09:30",
-      Pax: "24",
-      PickUp:
-        "Becketts Farm A435 Alcester Road Birmingham England B47 6AJ United Kingdom",
-      Destination: "ONeills Poplar Rd Solihull England B91 3AJ United Kingdom",
-      Progress: "New",
-      PassengerName: "Simon Ray",
-      Mobile: "07828250084",
-      Email: "simon@touchwoodbuilding.co.uk",
-      Mileage: "46",
-      ArrivalDate: "Fri 15th Dec 2023 19:00",
-      Price: "£450.00",
-      Balance: "£450.00",
-      Contract: "None",
-      EnquiryDate: "Tue 19th Sep 2023",
-      Affiliate: "No affiliate",
-      Callback: "Not Set",
-      PaymentStatus: "Not Paid",
-      Status: "Pending",
-      AccountName: "N/A",
-      Notes:
-        "Hi, I would also like a quote for the same journey on 16/12 for approx 12 with an 11am collection - 4pm return, & them 6pm that evening for 6pm drop off 11.30pm collection for approx 24 (these are just rough times & numbers at the moment to get an idea of costs)  Thank you in advance, ",
+      name: <span className="font-weight-bold fs-13">Action</span>,
+      sortable: true,
+
+      selector: (row: any) => {
+        return (
+          <ul className="hstack gap-2 list-unstyled mb-0">
+            <li>
+              <Link
+                to="#"
+                className="badge badge-soft-info edit-item-btn"
+                state={row}
+                onClick={() => setShowDetails(!showDetails)}
+              >
+                <i className="ri-eye-line"></i>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="#"
+                className="badge badge-soft-danger remove-item-btn"
+                onClick={() => AlertDelete(row._id)}
+              >
+                <i className="ri-delete-bin-2-line"></i>
+              </Link>
+            </li>
+          </ul>
+        );
+      },
     },
   ];
+
   const navigate = useNavigate();
 
   function tog_AddNewDefect() {
     navigate("/new-vehicle-defect");
   }
+
+  const [selectedVehicle, setSelectedVehicle] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showDetails, setShowDetails] = useState<boolean>(false);
+
+  const defectLocation = useLocation();
+
+  // This function is triggered when the select Vehicle
+  const handleSelectVehicle = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedVehicle(value);
+  };
+
+  // This function is triggered when the select Status
+  const handleSelectStatus = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedStatus(value);
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const getFilteredDefects = () => {
+    let filteredJobs = AllDefects;
+
+    if (searchTerm) {
+      filteredJobs = filteredJobs.filter(
+        (job: any) =>
+          job?.vehicle!.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          job.issue.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          job.level.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          job.defectStatus.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          job.note.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (selectedStatus && selectedStatus !== "all") {
+      filteredJobs = filteredJobs.filter(
+        (job) => job.defectStatus === selectedStatus
+      );
+    }
+
+    if (selectedVehicle && selectedVehicle !== "all") {
+      filteredJobs = filteredJobs.filter(
+        (job) => job.vehicle === selectedVehicle
+      );
+    }
+
+    return filteredJobs;
+  };
 
   return (
     <React.Fragment>
@@ -205,6 +228,8 @@ const DefectsManagement = () => {
                         type="text"
                         className="form-control search"
                         placeholder="Search for something..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
                       />
                       <i className="ri-search-line search-icon"></i>
                     </div>
@@ -214,13 +239,19 @@ const DefectsManagement = () => {
                       className="form-select text-muted"
                       data-choices
                       data-choices-search-false
-                      name="choices-single-default"
-                      id="idStatus"
+                      name="vehicle"
+                      id="vehicle"
+                      onChange={handleSelectVehicle}
                     >
                       <option value="all">All Vehicles</option>
-                      <option value="Today">YS17Waa Ford Transit</option>
-                      <option value="Yesterday">P30 WST VDL Berkhof</option>
-                      <option value="Last 7 Days">YT19ECE SCANIA</option>
+                      {AllVehicles.map((vehicle) => (
+                        <option
+                          value={vehicle.registration_number}
+                          key={vehicle?._id!}
+                        >
+                          {vehicle.registration_number}
+                        </option>
+                      ))}
                     </select>
                   </Col>
                   <Col lg={3}>
@@ -230,12 +261,13 @@ const DefectsManagement = () => {
                       data-choices-search-false
                       name="choices-single-default"
                       id="idStatus"
+                      onChange={handleSelectStatus}
                     >
-                      <option value="all">Status</option>
-                      <option value="Today">New</option>
-                      <option value="Yesterday">Confirmed</option>
-                      <option value="Last 7 Days">Work Shop</option>
-                      <option value="Last 7 Days">Resolved</option>
+                      <option value="all">All Status</option>
+                      <option value="New">New</option>
+                      <option value="Confirmed">Confirmed</option>
+                      <option value="Work Shop">Work Shop</option>
+                      <option value="Resolved">Resolved</option>
                     </select>
                   </Col>
                   <Col lg={3} className="d-flex justify-content-end">
@@ -245,18 +277,79 @@ const DefectsManagement = () => {
                       className="add-btn"
                     >
                       <i className="bi bi-plus-circle me-1 align-middle "></i>{" "}
-                      New Suggested Route
+                      New Defect
                     </Button>
                   </Col>
                 </Row>
               </Card.Header>
               <Card.Body>
-                <DataTable columns={columns} data={data} pagination />
+                <DataTable
+                  columns={columns}
+                  data={getFilteredDefects()}
+                  pagination
+                />
               </Card.Body>
             </Card>
           </Col>
         </Container>
       </div>
+      <Offcanvas
+        show={showDetails}
+        onHide={() => setShowDetails(!showDetails)}
+        placement="end"
+      >
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title>Defect Details</Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          <div>
+            <table>
+              <tr>
+                <td>
+                  <h6>Vehicle : </h6>
+                </td>
+                <td>{defectLocation?.state?.vehicle!}</td>
+              </tr>
+              <tr>
+                <td>
+                  <h6>Date : </h6>
+                </td>
+                <td>{defectLocation?.state?.date!}</td>
+              </tr>
+              <tr>
+                <td>
+                  <h6>Level : </h6>
+                </td>
+                <td>{defectLocation?.state?.level!}</td>
+              </tr>
+              <tr>
+                <td>
+                  <h6>Issue : </h6>
+                </td>
+                <td>{defectLocation?.state?.issue!}</td>
+              </tr>
+              <tr>
+                <td>
+                  <h6>Time : </h6>
+                </td>
+                <td>{defectLocation?.state?.time!}</td>
+              </tr>
+              <tr>
+                <td>
+                  <h6>Status : </h6>
+                </td>
+                <td>{defectLocation?.state?.defectStatus!}</td>
+              </tr>
+              <tr>
+                <td>
+                  <h6>Note : </h6>
+                </td>
+                <td>{defectLocation?.state?.note!}</td>
+              </tr>
+            </table>
+          </div>
+        </Offcanvas.Body>
+      </Offcanvas>
     </React.Fragment>
   );
 };

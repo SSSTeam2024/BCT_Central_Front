@@ -92,7 +92,7 @@ import AddNewDefect from "pages/Administration/Vehicles/AddNewDefect";
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: <Dashboard /> },
-  { path: "/request-feature", component: <RequestFeature /> },
+  { path: "/requested-features", component: <RequestFeature /> },
   { path: "/report-error", component: <ReportError /> },
   { path: "/user-manual", component: <UserManual /> },
   { path: "/defects-management", component: <DefectsManagement /> },

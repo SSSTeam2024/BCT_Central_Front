@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Card,
-  Col,
-  Container,
-  Row,
-  Tab,
-  Nav,
-  Dropdown,
-  Table,
-} from "react-bootstrap";
+import { Card, Col, Container, Row } from "react-bootstrap";
 import {
   GoogleApiWrapper,
   Map,
@@ -18,10 +9,14 @@ import {
 } from "google-maps-react";
 import { io } from "socket.io-client";
 import coach from "../../../assets/images/coach.png";
+import coachOnTime from "../../../assets/images/coachOnTime.png";
+import coachWithDelay from "../../../assets/images/coachWithDelay.png";
 import chauffeur from "../../../assets/images/chauffeur.png";
 import Swal from "sweetalert2";
 import axios from "axios";
 import { useGetAllDriverQuery } from "features/Driver/driverSlice";
+import start_clicked from "../../../assets/images/start_clicked.png";
+import dest_unclicked from "../../../assets/images/dest_unclicked.png";
 
 const LoadingContainer = () => <div>Loading...</div>;
 const Maptracking = (props: any) => {
@@ -41,7 +36,11 @@ const Maptracking = (props: any) => {
       driver.driverStatus !== "onVacation" && driver.driverStatus !== "Inactive"
   );
   const [markers, setMarkers] = useState<any[]>([]);
+  const [currentDrvierIndex, setCurrentDriverIndex] = useState<any>(null);
   const [routeCoordinates, setRouteCoordinates] = useState<any[]>([]);
+  const [routeMarkers, setRouteMarkers] = useState<any[]>([]);
+  const [estimatedArrivalTime, setEstimatedArrivalTime] = useState<string>("");
+
   const URL = "http://57.128.184.217:3000"; //=== 'production' ? http://57.128.184.217:3000 : 'http://localhost:8800';
   const socket = io(URL);
 
@@ -94,8 +93,9 @@ const Maptracking = (props: any) => {
       socket.disconnect();
     };
   }, [markers]);
-
-  console.log("markers", markers);
+  let quotes_with_delay = markers.filter(
+    (quote) => quote.details.details.delays.length !== 0
+  );
   const drawPolyline = async (positions?: any) => {
     let array = positions
       .map((position: any) => `${position.lat},${position.lng}`)
@@ -154,24 +154,142 @@ const Maptracking = (props: any) => {
     // setRouteCoordinates(temp_routes);
   };
 
-  const drawRoute = (fromPosition: any, toPosition: any, waypts: any) => {
+  // const { isLoaded, loadError } = useJsApiLoader({
+  //   googleMapsApiKey: process.env.REACT_APP_MAPS_API!,
+  //   libraries: ["places"],
+  // });
+  const handleStopClick = (index: number) => {
+    let prevRouteMarkers = [...routeMarkers];
+    prevRouteMarkers[index].infoWindowVisibility = true;
+    for (let i = 0; i < prevRouteMarkers.length; i++) {
+      if (i !== index) {
+        prevRouteMarkers[i].infoWindowVisibility = false;
+      }
+    }
+    setRouteMarkers(prevRouteMarkers);
+    getDurationBetweenDriverAndCurrentStop(prevRouteMarkers[index].coordinates);
+  };
+
+  const getDurationBetweenDriverAndCurrentStop = (stopPosition: any) => {
+    let currentMarkers = getFilteredJobs();
+    let driverPosition = currentMarkers[currentDrvierIndex].details.position;
     const directionsService = new google.maps.DirectionsService();
+    directionsService.route(
+      {
+        origin: driverPosition,
+        destination: stopPosition,
+        travelMode: google.maps.TravelMode.DRIVING,
+      },
+      (result, status) => {
+        if (result !== null && status === google.maps.DirectionsStatus.OK) {
+          let duration = result.routes[0].legs[0].duration?.value;
+          const currentDate = new Date();
+          const currentTime = currentDate.toTimeString().substring(0, 5);
+          let durationHhMm = convertSeconds(duration!);
+          let newTime = addDurationToTime(
+            currentTime,
+            durationHhMm.hours,
+            durationHhMm.minutes
+          );
+          setEstimatedArrivalTime(
+            newTime.hours.toString().padStart(2, "0") +
+              ":" +
+              newTime.minutes.toString().padStart(2, "0")
+          );
+        } else {
+          console.error("Directions request failed due to " + status);
+        }
+      }
+    );
+  };
+
+  const convertSeconds = (
+    seconds: number
+  ): { hours: number; minutes: number } => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return { hours, minutes };
+  };
+
+  const convertTimeToMinutes = (time: string): number => {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
+
+  const addDurationToTime = (
+    time: string,
+    hoursToAdd: number,
+    minutesToAdd: number
+  ) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    let totalMinutes = hours * 60 + minutes;
+    totalMinutes += hoursToAdd * 60 + minutesToAdd;
+
+    const newHours = Math.floor(totalMinutes / 60) % 24;
+    const newMinutes = totalMinutes % 60;
+
+    return {
+      hours: newHours,
+      minutes: newMinutes,
+    };
+  };
+
+  const drawRoute = (marker: any, index: number) => {
+    const directionsService = new google.maps.DirectionsService();
+    const waypoints = marker.details.details.mid_stations.map((stop: any) => ({
+      location: { query: stop.address.placeName },
+      stopover: true,
+    }));
 
     directionsService.route(
       {
-        origin: fromPosition,
-        destination: toPosition,
+        origin: marker.details.details.start_point.coordinates,
+        destination: marker.details.details.destination_point.coordinates,
         travelMode: google.maps.TravelMode.DRIVING,
-        waypoints: waypts,
+        waypoints,
       },
       (result, status) => {
-        if (status === google.maps.DirectionsStatus.OK) {
-          let route = result!.routes[0].overview_path.map((point) => {
-            return { lat: point.lat(), lng: point.lng() };
+        if (result !== null && status === google.maps.DirectionsStatus.OK) {
+          const route = result.routes[0].overview_path.map((point: any) => ({
+            lat: point.lat(),
+            lng: point.lng(),
+          }));
+          setRouteCoordinates(route);
+          let stopMarkers = [
+            {
+              time: marker.details.details.pickup_time,
+              placeName: marker.details.details.start_point.placeName,
+              infoWindowVisibility: false,
+              type: "stop",
+              coordinates: marker.details.details.start_point.coordinates,
+            },
+          ];
+
+          for (let stop of marker.details.details.mid_stations) {
+            stopMarkers.push({
+              time: stop.time,
+              placeName: stop.address.placeName,
+              infoWindowVisibility: false,
+              type: "stop",
+              coordinates: {
+                lat: Number(stop.address.coordinates.lat),
+                lng: Number(stop.address.coordinates.lng),
+              },
+            });
+          }
+
+          stopMarkers.push({
+            time: marker.details.details.dropoff_time,
+            placeName: marker.details.details.destination_point.placeName,
+            infoWindowVisibility: false,
+            type: "destination",
+            coordinates: marker.details.details.destination_point.coordinates,
           });
-          return route;
+
+          setRouteMarkers(stopMarkers);
+          setCurrentDriverIndex(index);
         } else {
-          console.error("Error fetching directions:", status);
+          console.error("Directions request failed due to " + status);
         }
       }
     );
@@ -292,7 +410,19 @@ const Maptracking = (props: any) => {
           <Card>
             <Card.Body>
               <Row>
-                <Col>
+                <Col lg={2} className="hstack gap-1">
+                  <span className="badge bg-success-subtle text-success fs-12">
+                    {markers.length}
+                  </span>
+                  <span className="fw-bold align-middle">Current Trips</span>
+                </Col>
+                <Col lg={2} className="hstack gap-1">
+                  <span className="badge bg-danger-subtle text-danger fs-12">
+                    {quotes_with_delay.length}
+                  </span>
+                  <span className="fw-bold align-middle">With Delay</span>
+                </Col>
+                <Col lg={2}>
                   <select
                     className="form-select text-muted"
                     data-choices
@@ -308,7 +438,7 @@ const Maptracking = (props: any) => {
                     <option value="Picked Up">Picked Up</option>
                   </select>
                 </Col>
-                <Col>
+                <Col lg={2}>
                   <select
                     className="form-select text-muted"
                     data-choices
@@ -325,7 +455,7 @@ const Maptracking = (props: any) => {
                     ))}
                   </select>
                 </Col>
-                <Col className="d-flex align-items-center">
+                <Col className="d-flex align-items-center" lg={4}>
                   <div className="form-check form-check-inline">
                     <input
                       className="form-check-input"
@@ -399,7 +529,6 @@ const Maptracking = (props: any) => {
                                 style={{ width: "25px" }}
                               />
                               <span>
-                                {" "}
                                 {marker.details.details.driver.firstname}{" "}
                                 {marker.details.details.driver.surname}
                               </span>
@@ -414,28 +543,123 @@ const Maptracking = (props: any) => {
                             </div>
                           </InfoWindow>
                         ))}
-                        {getFilteredJobs().map((marker, index) => (
-                          <Marker
-                            key={index}
-                            position={{
-                              lat: marker.details.position.lat,
-                              lng: marker.details.position.lng,
-                            }}
-                            icon={{
-                              url: coach,
-                              scaledSize: new window.google.maps.Size(35, 35), // Adjust the size of the icon
-                            }}
-                            onClick={() => {
-                              drawPolyline(marker.positions);
-                            }}
-                          />
-                        ))}
+                        {getFilteredJobs().map((marker, index) =>
+                          convertTimeToMinutes(
+                            marker.details.details.pickup_time
+                          ) < convertTimeToMinutes(estimatedArrivalTime) ? (
+                            <Marker
+                              key={index}
+                              position={{
+                                lat: marker.details.position.lat,
+                                lng: marker.details.position.lng,
+                              }}
+                              icon={{
+                                url: coachWithDelay,
+                                scaledSize: new window.google.maps.Size(35, 35),
+                              }}
+                              onClick={() => {
+                                drawRoute(marker, index);
+                              }}
+                            />
+                          ) : convertTimeToMinutes(
+                              marker.details.details.pickup_time
+                            ) >= convertTimeToMinutes(estimatedArrivalTime) ? (
+                            <Marker
+                              key={index}
+                              position={{
+                                lat: marker.details.position.lat,
+                                lng: marker.details.position.lng,
+                              }}
+                              icon={{
+                                url: coachOnTime,
+                                scaledSize: new window.google.maps.Size(35, 35),
+                              }}
+                              onClick={() => {
+                                drawRoute(marker, index);
+                              }}
+                            />
+                          ) : (
+                            <Marker
+                              key={index}
+                              position={{
+                                lat: marker.details.position.lat,
+                                lng: marker.details.position.lng,
+                              }}
+                              icon={{
+                                url: coach,
+                                scaledSize: new window.google.maps.Size(35, 35), // Adjust the size of the icon
+                              }}
+                              onClick={() => {
+                                drawRoute(marker, index);
+                              }}
+                            />
+                          )
+                        )}
                         <Polyline
                           path={routeCoordinates}
                           strokeColor="#FF1493"
                           strokeOpacity={0.7}
                           strokeWeight={7}
                         />
+                        {routeMarkers.map((marker, index) => (
+                          <InfoWindow
+                            key={index}
+                            position={{
+                              lat: Number(marker.coordinates.lat),
+                              lng: Number(marker.coordinates.lng),
+                            }} // Use the position of the first marker
+                            visible={marker.infoWindowVisibility}
+                            pixelOffset={{ width: 0, height: -35 }}
+                          >
+                            <div style={{ textAlign: "center" }}>
+                              <span>Location: {marker.placeName}</span> <br />
+                              <span>
+                                Time:{" "}
+                                <span className="fw-bold">{marker.time}</span>
+                              </span>{" "}
+                              <br />
+                              <span>
+                                Arrival Time:{" "}
+                                <strong className="text-success">
+                                  {estimatedArrivalTime}
+                                </strong>
+                              </span>
+                            </div>
+                          </InfoWindow>
+                        ))}
+                        {routeMarkers.map((marker, index) =>
+                          marker.type === "stop" ? (
+                            <Marker
+                              key={index}
+                              position={{
+                                lat: Number(marker.coordinates.lat),
+                                lng: Number(marker.coordinates.lng),
+                              }}
+                              icon={{
+                                url: start_clicked,
+                                scaledSize: new window.google.maps.Size(40, 40),
+                              }}
+                              onClick={() => {
+                                handleStopClick(index);
+                              }}
+                            />
+                          ) : (
+                            <Marker
+                              key={index}
+                              position={{
+                                lat: Number(marker.coordinates.lat),
+                                lng: Number(marker.coordinates.lng),
+                              }}
+                              icon={{
+                                url: dest_unclicked,
+                                scaledSize: new window.google.maps.Size(40, 40),
+                              }}
+                              onClick={() => {
+                                handleStopClick(index);
+                              }}
+                            />
+                          )
+                        )}
                       </Map>
                     </div>
                   </div>

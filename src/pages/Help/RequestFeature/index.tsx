@@ -1,230 +1,329 @@
-import React from "react";
-import { Container, Form, Row, Card, Col } from "react-bootstrap";
+import React, { useState } from "react";
+import {
+  Container,
+  Form,
+  Row,
+  Card,
+  Col,
+  Button,
+  Offcanvas,
+} from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
+import Swal from "sweetalert2";
+import {
+  useAddNewRequestFeatureMutation,
+  useGetAllRequestFeaturesQuery,
+} from "features/RequestFeature/requestFeature";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import DataTable from "react-data-table-component";
+import { Document, Page } from "react-pdf";
+import { pdfjs } from "react-pdf";
+import "@react-pdf-viewer/core/lib/styles/index.css";
 
 const RequestFeature = () => {
-  document.title = "Request New Feature | Bouden Coach Travel";
+  document.title = "Features Requested | Bouden Coach Travel";
+
+  const { data: allRequestedFeatures = [] } = useGetAllRequestFeaturesQuery();
+
+  const [showDetails, setShowDetails] = useState<boolean>(false);
+
+  const requestedFeatureLocation = useLocation();
+
+  const columns = [
+    {
+      name: <span className="font-weight-bold fs-13">Reference</span>,
+      selector: (row: any) => row.ref,
+      sortable: true,
+    },
+    {
+      name: <span className="font-weight-bold fs-13">Client</span>,
+      selector: (row: any) =>
+        row.company_id !== null ? (
+          <span>{row.company_id.name}</span>
+        ) : (
+          <span>{row.school_id.name}</span>
+        ),
+      sortable: true,
+    },
+    {
+      name: <span className="font-weight-bold fs-13">Subject</span>,
+      selector: (row: any) => row.subject,
+      sortable: true,
+    },
+    {
+      name: <span className="font-weight-bold fs-13">Title</span>,
+      selector: (row: any) => row.title,
+      sortable: true,
+    },
+    {
+      name: <span className="font-weight-bold fs-13">Date</span>,
+      selector: (row: any) => row.date,
+      sortable: true,
+    },
+    {
+      name: <span className="font-weight-bold fs-13">Status</span>,
+      selector: (row: any) => row.status,
+      sortable: true,
+    },
+    {
+      name: <span className="font-weight-bold fs-13">Action</span>,
+      sortable: true,
+      cell: (row: any) => {
+        return (
+          <ul className="hstack gap-2 list-unstyled mb-0">
+            <li>
+              <Link
+                to="#"
+                className="badge badge-soft-info edit-item-btn"
+                state={row}
+                onClick={() => setShowDetails(!showDetails)}
+              >
+                <i
+                  className="ri-eye-line"
+                  style={{
+                    transition: "transform 0.3s ease-in-out",
+                    cursor: "pointer",
+                    fontSize: "1.2em",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.transform = "scale(1.3)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.transform = "scale(1)")
+                  }
+                ></i>
+              </Link>
+            </li>
+            <li>
+              <Link to="#" className="badge badge-soft-danger remove-item-btn">
+                <i
+                  className="ri-delete-bin-2-line"
+                  style={{
+                    transition: "transform 0.3s ease-in-out",
+                    cursor: "pointer",
+                    fontSize: "1.2em",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.transform = "scale(1.3)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.transform = "scale(1)")
+                  }
+                  // onClick={()=>AlertDelete(row._id)}
+                ></i>
+              </Link>
+            </li>
+          </ul>
+        );
+      },
+    },
+  ];
+
+  const [selectedSubject, setSelectedSubject] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // This function is triggered when the select Subject
+  const handleSelectSubject = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedSubject(value);
+  };
+
+  // This function is triggered when the select Status
+  const handleSelectStatus = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSelectedStatus(value);
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const getFilteredRequestedFeatures = () => {
+    let filteredJobs = allRequestedFeatures;
+
+    if (searchTerm) {
+      filteredJobs = filteredJobs.filter(
+        (job: any) =>
+          job?.subject!.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          job?.company_id
+            ?.name!.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          job?.school_id?.name!.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (selectedStatus && selectedStatus !== "all") {
+      filteredJobs = filteredJobs.filter(
+        (job) => job.status === selectedStatus
+      );
+    }
+
+    if (selectedSubject && selectedSubject !== "all") {
+      filteredJobs = filteredJobs.filter(
+        (job) => job.subject === selectedSubject
+      );
+    }
+
+    return filteredJobs;
+  };
 
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-          <Breadcrumb title="Request Feature" pageTitle="Help" />
+          <Breadcrumb title="Features Requested" pageTitle="Relevance" />
           <Card>
-            <Row>
-              <Col lg={6}>
-                <Card.Header className="border-0">
-                  <h3>New Request</h3>
-                </Card.Header>
-                <Card.Body>
-                  <Row className="d-flex justify-content-center">
-                    {/* Company  == Done */}
-                    <Row>
-                      <Col lg={12}>
-                        <div className="mb-3">
-                          <Form.Label htmlFor="customerName-field">
-                            Company
-                          </Form.Label>
-                          <Form.Control
-                            type="text"
-                            id="customerName-field"
-                            // placeholder="Enter contract"
-                            required
-                          />
-                        </div>
-                      </Col>
-                    </Row>
-
-                    {/* Email == Done */}
-                    <Row>
-                      <Col lg={12}>
-                        <div className="mb-3">
-                          <Form.Label htmlFor="supplierName-field">
-                            Email
-                          </Form.Label>
-                          <Form.Control
-                            type="text"
-                            id="supplierName-field"
-                            // placeholder="Enter account name"
-                            required
-                          />
-                        </div>
-                      </Col>
-                    </Row>
-                    <Row>
-                      {/* Subject  == Done */}
-                      <Col lg={12}>
-                        <div className="mb-3">
-                          <Form.Label htmlFor="supplierName-field">
-                            Subject
-                          </Form.Label>
-                          <select
-                            className="form-select text-muted"
-                            name="choices-single-default"
-                            id="statusSelect"
-                            required
-                          >
-                            <option value="">Bouden Coach Travel</option>
-                            <option value="Entreprise">Billing</option>
-                            <option value="Schools">Digital Marketing</option>
-                            <option value="Entreprise">Other</option>
-                            <option value="Schools">Sales</option>
-                            <option value="Schools">Emails and Hosting</option>
-                            <option value="Schools">
-                              Website and mobile app
-                            </option>
-                          </select>
-                        </div>
-                      </Col>
-                    </Row>
-                    {/* Title  == Done */}
-                    <Row>
-                      <Col lg={12}>
-                        <div className="mb-3">
-                          <Form.Label htmlFor="supplierName-field">
-                            Title
-                          </Form.Label>
-                          <Form.Control
-                            type="terxt"
-                            id="supplierName-field"
-                            // placeholder="Enter email"
-                            required
-                          />
-                        </div>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col lg={12}>
-                        <div className="mb-3">
-                          <Form.Label htmlFor="supplierName-field">
-                            Details
-                          </Form.Label>
-                          <textarea
-                            className="form-control"
-                            id="exampleFormControlTextarea5"
-                            // placeholder="for everyone : customer can see it"
-                            rows={3}
-                          ></textarea>
-                        </div>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col lg={12}>
-                        <div className="mb-3">
-                          <Form.Label htmlFor="supplierName-field">
-                            Screenshot
-                          </Form.Label>
-                          <Form.Control
-                            type="terxt"
-                            id="supplierName-field"
-                            placeholder="Click here and press Ctrl+V to paste a screenshot"
-                            required
-                          />
-                        </div>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col lg={12}>
-                        <div className="mb-3">
-                          <Form.Label htmlFor="supplierName-field">
-                            Upload Images
-                          </Form.Label>
-                          <div>
-                            <input
-                              className="form-control mb-2"
-                              type="file"
-                              id="formFile"
-                            />
-                          </div>
-                        </div>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <div
-                        className="position-relative"
-                        style={{ height: "40px" }}
-                      >
-                        <div className="position-absolute bottom-0 start-50 translate-middle-x">
-                          <button
-                            type="button"
-                            className="btn rounded-pill btn-info"
-                          >
-                            <span className="mdi mdi-send-outline"></span> Send
-                          </button>
-                        </div>
-                      </div>
-                    </Row>
-                  </Row>
-                </Card.Body>
-              </Col>
-              <Col lg={6}>
-                <Card.Header>
-                  <h3>Check an existing request</h3>
-                  <Row className="d-flex justify-content-center">
-                    {/* Email  == Done */}
-                    <Row>
-                      <Col lg={12}>
-                        <div className="mb-3">
-                          <Form.Label htmlFor="customerName-field">
-                            Email
-                          </Form.Label>
-                          <Form.Control
-                            type="text"
-                            id="customerName-field"
-                            // placeholder="Enter contract"
-                            required
-                          />
-                        </div>
-                      </Col>
-                    </Row>
-
-                    {/* Reference == Done */}
-                    <Row>
-                      <Col lg={12}>
-                        <div className="mb-3">
-                          <Form.Label htmlFor="supplierName-field">
-                            Reference
-                          </Form.Label>
-                          <Form.Control
-                            type="text"
-                            id="supplierName-field"
-                            // placeholder="Enter account name"
-                            required
-                          />
-                        </div>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <div
-                        className="position-relative"
-                        style={{ height: "40px" }}
-                      >
-                        <div className="position-absolute bottom-0 start-50 translate-middle-x">
-                          <button
-                            type="button"
-                            className="btn rounded-pill btn-info"
-                          >
-                            <span className="mdi mdi-send-outline"></span> Send
-                          </button>
-                        </div>
-                      </div>
-                    </Row>
-                  </Row>
-                </Card.Header>
-                <Card.Body>
-                  <h3>Emergency Support</h3>
-                  <p>
-                    For all normal requests please submit the details in the box
-                    on the left. In an emergency please phone using the numbers
-                    below:
-                  </p>
-                  <p>UK: +44(0)203 409 0646</p>
-                </Card.Body>
-              </Col>
-            </Row>
+            <Card.Header className="border-bottom-dashed">
+              <Row className="g-3">
+                <Col lg={3}>
+                  <div className="search-box">
+                    <input
+                      type="text"
+                      className="form-control search"
+                      placeholder="Search for something..."
+                      value={searchTerm}
+                      onChange={handleSearchChange}
+                    />
+                    <i className="ri-search-line search-icon"></i>
+                  </div>
+                </Col>
+                <Col lg={3} className="col-lg-auto">
+                  <select
+                    className="form-select text-muted"
+                    data-choices
+                    data-choices-search-false
+                    name="subject"
+                    id="subject"
+                    onChange={handleSelectSubject}
+                  >
+                    <option value="all">All Subjects</option>
+                    <option value="Billing">Billing</option>
+                    <option value="Digital Marketing">Digital Marketing</option>
+                    <option value="Entreprise">Entreprise</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Emails and Hosting">
+                      Emails and Hosting
+                    </option>
+                    <option value="Website and mobile app">
+                      Website and mobile app
+                    </option>
+                  </select>
+                </Col>
+                <Col lg={3}>
+                  <select
+                    className="form-select text-muted"
+                    data-choices
+                    data-choices-search-false
+                    name="choices-single-default"
+                    id="idStatus"
+                    onChange={handleSelectStatus}
+                  >
+                    <option value="all">All Status</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Answered">Answered</option>
+                  </select>
+                </Col>
+              </Row>
+            </Card.Header>
+            <Card.Body>
+              <DataTable
+                columns={columns}
+                data={getFilteredRequestedFeatures()}
+                pagination
+              />
+            </Card.Body>
           </Card>
         </Container>
       </div>
+      <Offcanvas
+        show={showDetails}
+        onHide={() => setShowDetails(!showDetails)}
+        placement="end"
+      >
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title>Request Details</Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          <div className="border-bottom border-bottom-dashed">
+            <table>
+              <tr>
+                <td>
+                  <h6>Reference : </h6>
+                </td>
+                <td>{requestedFeatureLocation?.state?.ref!}</td>
+              </tr>
+              <tr>
+                <td>
+                  <h6>Client : </h6>
+                </td>
+                <td>
+                  {requestedFeatureLocation?.state?.company_id! !== null ? (
+                    <span>
+                      {requestedFeatureLocation?.state?.company_id?.name}
+                    </span>
+                  ) : (
+                    <span>
+                      {requestedFeatureLocation?.state?.school_id?.name}
+                    </span>
+                  )}
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <h6>Title : </h6>
+                </td>
+                <td>{requestedFeatureLocation?.state?.title!}</td>
+              </tr>
+              <tr>
+                <td>
+                  <h6>Subject : </h6>
+                </td>
+                <td>{requestedFeatureLocation?.state?.subject!}</td>
+              </tr>
+              <tr>
+                <td>
+                  <h6>Date : </h6>
+                </td>
+                <td>{requestedFeatureLocation?.state?.date!}</td>
+              </tr>
+              <tr>
+                <td>
+                  <h6>Details : </h6>
+                </td>
+                <td>{requestedFeatureLocation?.state?.details!}</td>
+              </tr>
+              <tr>
+                <td>
+                  <h6>Status : </h6>
+                </td>
+                <td>
+                  {requestedFeatureLocation?.state?.status! === "Pending" ? (
+                    <span className="badge bg-warning">
+                      {requestedFeatureLocation?.state?.status!}
+                    </span>
+                  ) : (
+                    <span className="badge bg-warning">
+                      {requestedFeatureLocation?.state?.status!}
+                    </span>
+                  )}
+                </td>
+              </tr>
+              {requestedFeatureLocation?.state?.status! === "Pending" ? (
+                ""
+              ) : (
+                <tr>
+                  <td>
+                    <h6>Answer : </h6>
+                  </td>
+                  <td>{requestedFeatureLocation?.state?.answer!}</td>
+                </tr>
+              )}
+            </table>
+          </div>
+        </Offcanvas.Body>
+      </Offcanvas>
     </React.Fragment>
   );
 };

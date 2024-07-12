@@ -366,8 +366,7 @@ const CompletedJobs = () => {
             .includes(searchTerm.toLowerCase()) ||
           job.destination_point.placeName
             .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          job.id_visitor.name.toLowerCase().includes(searchTerm.toLowerCase())
+            .includes(searchTerm.toLowerCase())
       );
     }
 

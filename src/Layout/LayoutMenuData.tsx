@@ -441,13 +441,6 @@ const Navdata = () => {
       stateVariables: isRevelance,
       subItems: [
         {
-          id: "Report",
-          label: "Report",
-          link: "/reporting-management",
-          icon: "mdi mdi-chart-bar",
-          parentId: "Revelance",
-        },
-        {
           id: "Feedback",
           label: "Feedback",
           link: "/feedback",
@@ -456,9 +449,16 @@ const Navdata = () => {
         },
         {
           id: "Claims",
-          label: "Claims",
+          label: "Complains",
           link: "/claims",
           icon: "mdi mdi-thumb-down",
+          parentId: "Revelance",
+        },
+        {
+          id: "Request Feature",
+          label: "Features Requested",
+          link: "/requested-features",
+          icon: "mdi mdi-playlist-plus",
           parentId: "Revelance",
         },
       ],
@@ -481,13 +481,6 @@ const Navdata = () => {
           label: "User Manual",
           link: "/user-manual",
           icon: "mdi mdi-book-open-page-variant",
-          parentId: "Help",
-        },
-        {
-          id: "Request Feature",
-          label: "Request Feature",
-          link: "/request-feature",
-          icon: "mdi mdi-playlist-plus",
           parentId: "Help",
         },
         {

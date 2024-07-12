@@ -41,6 +41,8 @@ import { emailSentSlice } from "features/emailSent/emailSentSlice";
 import { shortCodeSlice } from "features/ShortCode/shortCodeSlice";
 import { emailQueueSlice } from "features/EmailQueue/emailQueueSlice";
 import { feedbackSlice } from "features/FeedBack/feedBackSlice";
+import { defectSlice } from "features/Defects/defectSlice";
+import { requestFeatureSlice } from "features/RequestFeature/requestFeature";
 
 export const store = configureStore({
   reducer: {
@@ -77,6 +79,8 @@ export const store = configureStore({
     [shortCodeSlice.reducerPath]: shortCodeSlice.reducer,
     [emailQueueSlice.reducerPath]: emailQueueSlice.reducer,
     [feedbackSlice.reducerPath]: feedbackSlice.reducer,
+    [defectSlice.reducerPath]: defectSlice.reducer,
+    [requestFeatureSlice.reducerPath]: requestFeatureSlice.reducer,
     auth: authSlice,
     Layout: LayoutReducer,
     ForgetPassword: ForgetPasswordReducer,
@@ -117,7 +121,9 @@ export const store = configureStore({
       emailSentSlice.middleware,
       shortCodeSlice.middleware,
       emailQueueSlice.middleware,
-      feedbackSlice.middleware
+      feedbackSlice.middleware,
+      defectSlice.middleware,
+      requestFeatureSlice.middleware
     ]);
   },
 });
