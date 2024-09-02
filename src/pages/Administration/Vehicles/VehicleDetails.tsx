@@ -10,21 +10,21 @@ import {
   Modal,
   Row,
   Tooltip,
+  Image,
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
-import { Swiper, SwiperSlide } from "swiper/react";
-import SwiperCore, { FreeMode, Navigation, Thumbs } from "swiper";
 import SimpleBar from "simplebar-react";
 import { Link, useLocation } from "react-router-dom";
 
-// Import Swiper styles
+import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
-import "swiper/css/free-mode";
+import "swiper/css/pagination";
 import "swiper/css/navigation";
-import "swiper/css/thumbs";
+import "swiper/css/scrollbar";
+import "swiper/css/effect-fade";
+import "swiper/css/effect-flip";
+import { Pagination, Scrollbar, Autoplay, Mousewheel } from "swiper";
 
-// Import Images
-import productsImg31 from "../../../assets/images/products/images.jpg";
 import { Document, Page } from "react-pdf";
 import { pdfjs } from "react-pdf";
 import "@react-pdf-viewer/core/lib/styles/index.css";
@@ -80,15 +80,27 @@ const VehicleDetails = () => {
               </Row>
               <Row className="sticky-side-div m-4">
                 <Col lg={12} className="mt-4">
-                  <div className="bg-white rounded-4 position-relative ribbon-box overflow-hidden">
-                    <img
-                      src={`${process.env.REACT_APP_BASE_URL}/VehicleFiles/vehicleImages/${LocationVehicle.state.vehicle_images}`}
-                      // src={productsImg31}
-                      alt=""
-                      className="img-fluid rounded-4"
-                      style={{ width: 480 }}
-                    />
-                  </div>
+                  <Swiper
+                    direction={"vertical"}
+                    pagination={{ clickable: true }}
+                    modules={[Pagination, Autoplay]}
+                    loop={true}
+                    autoplay={{ delay: 2500, disableOnInteraction: false }}
+                    className="mySwiper swiper vertical-swiper rounded"
+                    style={{ height: "324px" }}
+                  >
+                    {LocationVehicle.state.vehicle_images.map((image: any) => (
+                      <div className="swiper-wrapper">
+                        <SwiperSlide>
+                          <Image
+                            src={`${process.env.REACT_APP_BASE_URL}/VehicleFiles/vehicleImages/${image}`}
+                            alt=""
+                            className="img-fluid"
+                          />
+                        </SwiperSlide>
+                      </div>
+                    ))}
+                  </Swiper>
                 </Col>
               </Row>
               <Row>

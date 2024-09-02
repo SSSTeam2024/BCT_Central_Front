@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Card, Col, Modal, Offcanvas, Row } from "react-bootstrap";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import DataTable from "react-data-table-component";
@@ -21,6 +21,7 @@ const Template = ({ emails }: any) => {
   const emailDetailsLocation = useLocation();
   const emailUpdateLocation = useLocation();
   const [updateEmailTemplateMutation] = useUpdateEmailTemplateMutation();
+
   const [title, setTitle] = useState<string>("");
   const handleTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
@@ -32,12 +33,43 @@ const Template = ({ emails }: any) => {
   const tog_ModalEmailTemplate = () => {
     setModalUpdateEmailTemplate(!modal_updateEmailTemplate);
   };
-  const handleUpdate = () => {
-    updateEmailTemplateMutation({
-      _id: emailUpdateLocation?.state?._id!,
-      name: title === "" ? emailUpdateLocation?.state?.name! : title,
-      body: emailBody === "" ? emailUpdateLocation?.state?.body! : emailBody,
-    }).then(() => navigate("/email-templates"));
+
+  const [emailId, setEmailId] = useState<string>("");
+
+  useEffect(() => {
+    if (emailUpdateLocation?.state) {
+      setEmailId(emailUpdateLocation.state._id || "");
+      setEmailBody(emailUpdateLocation.state.body || "");
+      setTitle(emailUpdateLocation.state.name || "");
+    }
+  }, [emailUpdateLocation]);
+
+  const handleName = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setTitle(e.target.value);
+  };
+
+  const handleText = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setEmailBody(e.target.value);
+  };
+
+  const onSubmitUpdateEmail = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const email = {
+        _id: emailId || emailUpdateLocation.state._id,
+        name: title || emailUpdateLocation.state.name,
+        body: emailBody || emailUpdateLocation.state.body,
+      };
+      updateEmailTemplateMutation(email)
+        .then(() => notifyUpdateSuccess())
+        .then(() => setEmailTemplate(initialEmailTemplate));
+    } catch (error) {
+      notifyError(error);
+    }
   };
 
   const notifySuccess = () => {
@@ -45,6 +77,16 @@ const Template = ({ emails }: any) => {
       position: "center",
       icon: "success",
       title: "Email Template is created successfully",
+      showConfirmButton: false,
+      timer: 2500,
+    });
+  };
+
+  const notifyUpdateSuccess = () => {
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: "Email Template is updated successfully",
       showConfirmButton: false,
       timer: 2500,
     });
@@ -189,6 +231,25 @@ const Template = ({ emails }: any) => {
     },
   ];
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const getFilteredHourBand = () => {
+    let filteredHourBand = emails;
+    if (searchTerm) {
+      filteredHourBand = filteredHourBand.filter(
+        (hourBand: any) =>
+          (hourBand?.name! &&
+            hourBand?.name!.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (hourBand?.body! &&
+            hourBand?.body!.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+    return filteredHourBand;
+  };
+
   return (
     <React.Fragment>
       <Row className="align-items-center mb-4">
@@ -202,6 +263,8 @@ const Template = ({ emails }: any) => {
                   id="searchInputList"
                   autoComplete="off"
                   placeholder="Search template..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
                 />
                 <i className="ri-search-line search-icon"></i>
               </div>
@@ -219,7 +282,11 @@ const Template = ({ emails }: any) => {
           </Card.Header>
           <Card.Body>
             <div className="table-responsive table-card">
-              <DataTable columns={columns} data={emails} pagination />
+              <DataTable
+                columns={columns}
+                data={getFilteredHourBand()}
+                pagination
+              />
             </div>
           </Card.Body>
         </Card>
@@ -323,7 +390,7 @@ const Template = ({ emails }: any) => {
           <h5 className="modal-title fs-18">Update email template</h5>
         </Modal.Header>
         <Modal.Body className="p-4">
-          <form className="create-form">
+          <form className="create-form" onSubmit={onSubmitUpdateEmail}>
             <input type="hidden" id="id-field" />
             <div
               id="alert-error-msg"
@@ -341,9 +408,8 @@ const Template = ({ emails }: any) => {
                     className="form-control"
                     id="name"
                     name="name"
-                    onChange={handleTitle}
-                    placeholder="Enter Title"
-                    defaultValue={emailUpdateLocation?.state?.name!}
+                    onChange={handleName}
+                    value={title}
                   />
                 </div>
               </Col>
@@ -356,8 +422,8 @@ const Template = ({ emails }: any) => {
                     className="form-control"
                     id="body"
                     name="body"
-                    onChange={handleEmailBody}
-                    defaultValue={emailUpdateLocation?.state?.body!}
+                    onChange={handleText}
+                    value={emailBody}
                     rows={3}
                   ></textarea>
                 </div>
@@ -367,7 +433,7 @@ const Template = ({ emails }: any) => {
                   <Button
                     variant="ghost-danger"
                     className="btn btn-ghost-danger"
-                    onClick={() => setShow(false)}
+                    onClick={tog_ModalEmailTemplate}
                   >
                     <i className="ri-close-line align-bottom me-1"></i> Close
                   </Button>
@@ -376,7 +442,7 @@ const Template = ({ emails }: any) => {
                     variant="primary"
                     id="addNew"
                     className="btn btn-primary"
-                    onClick={handleUpdate}
+                    onClick={tog_ModalEmailTemplate}
                   >
                     Update Template
                   </Button>

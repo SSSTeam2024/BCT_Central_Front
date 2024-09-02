@@ -43,6 +43,14 @@ export const journeySlice = createApi({
         }),
         invalidatesTags: ["Journey"],
       }),
+      updateJourney: builder.mutation<void, Journey>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updateJourney/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["Journey"],
+      }),
     };
   },
 });
@@ -52,4 +60,5 @@ export const {
   useAddNewJourneyMutation,
   useDeleteJourneyMutation,
   useFetchJourneyByIdQuery,
+  useUpdateJourneyMutation
 } = journeySlice;

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { useAddNewSchoolMutation } from "features/Schools/schools";
 import Flatpickr from "react-flatpickr";
@@ -36,7 +36,9 @@ const AddNewSchool = () => {
   document.title = "Create School | Bouden Coach Travel";
 
   // DateOfBirth
-  const [selectedJoiningDate, setSelectedJoiningDate] = useState<Date | null>(null);
+  const [selectedJoiningDate, setSelectedJoiningDate] = useState<Date | null>(
+    null
+  );
   const handleDateJoining = (selectedDates: Date[]) => {
     // Assuming you only need the first selected date
     setSelectedJoiningDate(selectedDates[0]);
@@ -71,15 +73,6 @@ const AddNewSchool = () => {
   ) => {
     const value = event.target.value;
     setSelectedCategory(value);
-  };
-
-  const [selectedActivity, setSelectedActivity] = useState<string>("");
-  // This function is triggered when the select Model
-  const handleSelectActivity = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const value = event.target.value;
-    setSelectedActivity(value);
   };
 
   const [selectedStatus, setSelectedStatus] = useState<string>("");
@@ -170,7 +163,6 @@ const AddNewSchool = () => {
     e.preventDefault();
     try {
       school["corporateCategory"] = selectedCategory;
-      school["activity"] = selectedActivity;
       school["statusSchool"] = selectedStatus;
       school["service_date"] = selectedJoiningDate?.toDateString()!;
       createSchool(school)
@@ -322,28 +314,6 @@ const AddNewSchool = () => {
                               </select>
                             </div>
                           </Col>
-                          {/* Activity  == Done */}
-                          <Col lg={3}>
-                            <div className="mb-3">
-                              <Form.Label htmlFor="activity">
-                                Activity
-                              </Form.Label>
-                              <select
-                                className="form-select text-muted"
-                                name="activity"
-                                id="activity"
-                                onChange={handleSelectActivity}
-                              >
-                                <option value="">Activity</option>
-                                {/* <option value="Industry">Industry</option>
-                                  <option value="Health">Health</option> */}
-                                <option value="School">School</option>
-                                <option value="High Education">
-                                  High Education
-                                </option>
-                              </select>
-                            </div>
-                          </Col>
                           {/* Service_Date  == Done */}
                           {/* <Col lg={3}>
                               <div className="mb-3">
@@ -485,7 +455,7 @@ const AddNewSchool = () => {
                           </Card.Header>
                           <Card.Body>
                             <Row>
-                            <Col lg={3}>
+                              <Col lg={3}>
                                 <div className="mb-3">
                                   <Form.Label htmlFor="legal_card_date">
                                     Date

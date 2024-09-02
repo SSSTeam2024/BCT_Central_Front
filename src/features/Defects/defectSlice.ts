@@ -49,6 +49,14 @@ export const defectSlice = createApi({
         }),
         invalidatesTags: ["Defect"],
       }),
+      updateDefect: builder.mutation<void, Defect>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updateDefect/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["Defect"],
+      }),
     };
   },
 });
@@ -56,6 +64,7 @@ export const defectSlice = createApi({
 export const {
   useAddNewDefectMutation,
   useGetAllDefectsQuery,
-useDeleteDefectMutation
+useDeleteDefectMutation,
+useUpdateDefectMutation
 //   useGetLocationQuery,
 } = defectSlice;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import { Link } from "react-router-dom";
@@ -8,55 +8,136 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { VectorMap } from "@south-paw/react-vector-maps";
 import { numbersList } from "Common/data";
+import { useGetAllPassengerAndLuggagesQuery } from "features/PassengerAndLuggageLimits/passengerAndLuggageSlice";
+import { useGetAllJourneyQuery } from "features/Journeys/journeySlice";
+import { useGetAllSourcesQuery } from "features/Sources/sourcesSlice";
+import {
+  DirectionsRenderer,
+  GoogleMap,
+  Marker,
+  Autocomplete,
+  useJsApiLoader,
+} from "@react-google-maps/api";
+
+interface Stop {
+  placeName: string;
+  coordinates: {
+    lat: string;
+    lng: string;
+  };
+  raduis: string;
+}
 
 const ReallyNewQuote = () => {
   document.title = "Create New Quote | Bouden Coach Travel";
 
-  // The selected Type
-  const [selectedType, setSelectedType] = useState<String>();
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: "AIzaSyBbORSZJBXcqDnY6BbMx_JSP0l_9HLQSkw",
+    libraries: ["places"],
+  });
+  const [map, setMap] = useState<google.maps.Map | null>(null);
 
-  // This function will be triggered when a radio button is selected
-  const radioHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedType(event.target.value);
+  const originRef = useRef<any>(null);
+  const [searchResult, setSearchResult] = useState("");
+  const [searchDestination, setSearchDestination] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [selectedDestination, setSelectedDestination] = useState(null);
+  const [nom, setNom] = useState<any>();
+  const [fatma, setFatma] = useState<any>();
+
+  function onLoad(autocomplete: any) {
+    setSearchResult(autocomplete);
+  }
+
+  function onLoadDest(autocomplete: any) {
+    setSearchDestination(autocomplete);
+  }
+
+  function onPlaceChanged() {
+    if (searchResult != null) {
+      const place = (
+        searchResult as unknown as google.maps.places.Autocomplete
+      ).getPlace();
+      const name = place.name;
+      const location = place.geometry?.location;
+
+      if (location) {
+        const coordinates = { lat: location.lat(), lng: location.lng() };
+
+        // programmData["programDetails"]["origin_point"].placeName = name!;
+        // programmData["programDetails"]["origin_point"].coordinates =
+        //   coordinates!;
+        const status = place.business_status;
+        const formattedAddress = place.formatted_address;
+      } else {
+        console.error("Location not found in place object");
+      }
+    } else {
+      alert("Please enter text");
+    }
+  }
+
+  function onPlaceChangedDest() {
+    if (searchDestination != null) {
+      const place = (
+        searchDestination as unknown as google.maps.places.Autocomplete
+      ).getPlace();
+      const name = place.name;
+      const location = place.geometry?.location;
+
+      if (location) {
+        const coordinates = { lat: location.lat(), lng: location.lng() };
+
+        // programmData["programDetails"]["destination_point"].placeName = name!;
+        // programmData["programDetails"]["destination_point"].coordinates =
+        //   coordinates!;
+        const status = place.business_status;
+        const formattedAddress = place.formatted_address;
+      } else {
+        console.error("Location not found in place object");
+      }
+    } else {
+      alert("Please enter text");
+    }
+  }
+
+  const handleLocationButtonClick = () => {
+    setSelectedLocation(nom);
   };
-  const [selectedFiles, setselectedFiles] = useState([]);
 
-  function handleAcceptedFiles(files: any) {
-    files.map((file: any) =>
-      Object.assign(file, {
-        preview: URL.createObjectURL(file),
-        formattedSize: formatBytes(file.size),
-      })
-    );
-    setselectedFiles(files);
-  }
+  const handleLocationButtonClickDest = () => {
+    setSelectedDestination(fatma);
+  };
 
-  /* Formats the size */
-  function formatBytes(bytes: any, decimals = 2) {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  const { data: AllPassengerLimit = [] } = useGetAllPassengerAndLuggagesQuery();
 
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-  }
+  const { data: AllJourneys = [] } = useGetAllJourneyQuery();
+
+  const { data: AllSources = [] } = useGetAllSourcesQuery();
 
   const [selected, setSelected] = useState("");
-  const handlePassengerNumber = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  const handlePassengerNumber = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const passengerNumber = e.target.value;
     setSelected(passengerNumber);
   };
 
   const [selectedVehicle, setSelectedVehicle] = useState("");
-  const handleVehicleType = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  const handleVehicleType = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const vehicleType = e.target.value;
     setSelectedVehicle(vehicleType);
   };
+
+  const optionVehicleTypes = AllPassengerLimit.filter(
+    (item) =>
+      // item.vehicle_type.type === selectedValue &&
+      Number(item.max_passengers) >= Number(selected)
+  );
+
+  const optionLuggages = AllPassengerLimit.filter(
+    (item) =>
+      item.vehicle_type.type === selectedVehicle &&
+      Number(item.max_passengers) >= Number(selected)
+  );
 
   return (
     <React.Fragment>
@@ -82,14 +163,6 @@ const ReallyNewQuote = () => {
                     </div>
                     <div className="flex-grow-1">
                       <h5 className="card-title mb-1">Create a new quote</h5>
-                    </div>
-                    <div className="hstack gap-2 justify-content-end">
-                      <Button variant="success" id="add-btn" className="btn-sm">
-                        Save & Send
-                      </Button>
-                      <Button variant="info" id="add-btn" className="btn-sm">
-                        Quick Save
-                      </Button>
                     </div>
                   </div>
                   <Card.Header>
@@ -165,7 +238,7 @@ const ReallyNewQuote = () => {
                         </div>
                       </Col>
                       {/*  Company == Done */}
-                      <Col lg={4}>
+                      {/* <Col lg={4}>
                         <div className="mb-3">
                           <Form.Label htmlFor="supplierName-field">
                             Company
@@ -181,9 +254,9 @@ const ReallyNewQuote = () => {
                             required
                           />
                         </div>
-                      </Col>
+                      </Col> */}
                       {/* External Reference  == Done*/}
-                      <Col lg={4}>
+                      {/* <Col lg={4}>
                         <div className="mb-3">
                           <Form.Label htmlFor="supplierName-field">
                             External Reference
@@ -199,64 +272,15 @@ const ReallyNewQuote = () => {
                             required
                           />
                         </div>
-                      </Col>
-                    </Row>
-                    <Row>
-                      {/* Notes  == Done */}
-                      <Row>
-                        <h3>Passenger</h3>
-                      </Row>
-                      <Row>
-                        <Col lg={4}>
-                          <div className="mb-3">
-                            <Form.Label htmlFor="supplierName-field">
-                              Passenger Name
-                            </Form.Label>
-                            <Form.Control
-                              type="text"
-                              id="supplierName-field"
-                              placeholder="Enter Passenger name"
-                              required
-                            />
-                          </div>
-                        </Col>
-                        {/*  Type == Done */}
-                        <Col lg={4}>
-                          <div className="mb-3">
-                            <Form.Label htmlFor="supplierName-field">
-                              Passenger Email
-                            </Form.Label>
-                            <Form.Control
-                              type="email"
-                              id="supplierName-field"
-                              placeholder="Enter Passenger email"
-                              required
-                            />
-                          </div>
-                        </Col>
-                        {/* Pickup date & time  == Not Yet */}
-                        <Col lg={4}>
-                          <div className="mb-3">
-                            <Form.Label htmlFor="supplierName-field">
-                              Phone Number
-                            </Form.Label>
-                            <Form.Control
-                              type="email"
-                              id="supplierName-field"
-                              placeholder="Enter Passenger phone number"
-                              required
-                            />
-                          </div>
-                        </Col>
-                      </Row>
+                      </Col> */}
                     </Row>
                   </Card.Header>
                   <Card.Body>
                     <div className="mb-3">
-                      <Form className="tablelist-form p-2">
+                      <Form className="tablelist-form">
                         <Row>
                           <Card.Header>
-                            <div className="d-flex align-items-center p-1">
+                            <div className="d-flex align-items-center">
                               <div className="flex-shrink-0 me-3">
                                 <div className="avatar-sm">
                                   <div className="avatar-title rounded-circle bg-light text-primary fs-20">
@@ -269,12 +293,11 @@ const ReallyNewQuote = () => {
                               </div>
                             </div>
                             <Row>
-                              {/* Collection_address  == Done */}
                               <Col lg={3}>
                                 <div className="mb-3">
                                   <label
                                     htmlFor="statusSelect"
-                                    className="form-label"
+                                    className="form-label fs-13"
                                   >
                                     Passengers number
                                   </label>
@@ -282,10 +305,9 @@ const ReallyNewQuote = () => {
                                     className="form-select text-muted"
                                     name="choices-single-default"
                                     id="statusSelect"
-                                    required
                                     onChange={handlePassengerNumber}
                                   >
-                                    <option value="">Number</option>
+                                    <option value="">Select</option>
                                     {numbersList.map((item) => (
                                       <option value={item.value}>
                                         {item.value}
@@ -298,733 +320,60 @@ const ReallyNewQuote = () => {
                               <Col lg={3}>
                                 <div className="mb-3">
                                   <label
-                                    htmlFor="statusSelect"
+                                    htmlFor="selectVehicleType"
                                     className="form-label"
                                   >
                                     Vehicle Type
                                   </label>
-                                  {selected === "1" ||
-                                    selected === "2" ||
-                                    selected === "3" ? (
-                                    <select
-                                      className="form-select text-muted"
-                                      name="choices-single-default"
-                                      id="statusSelect"
-                                      onChange={handleVehicleType}
-                                      required
-                                    >
-                                      <option value="">Type</option>
-                                      <option value="StandardSaloonCar">
-                                        Standard Saloon Car
-                                      </option>
-                                      <option value="ExecutiveSaloonCar">
-                                        Executive Saloon Car
-                                      </option>
-                                      <option value="VIPSaloonCar">
-                                        VIP Saloon Car
-                                      </option>
-                                      <option value="Standard6SeatMPV">
-                                        Standard 6 Seat MPV
-                                      </option>
-                                      <option value="Executive6SeatMPV">
-                                        Executive 6 Seat MPV
-                                      </option>
-                                      <option value="VIP6SeatMPV">
-                                        VIP 6 Seat MPV
-                                      </option>
-                                      <option value="Executive7SeatMPV">
-                                        Executive 7 Seat MPV
-                                      </option>
-                                      <option value="Luxury7SeatMPV">
-                                        Luxury 7 Seat MPV
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        Standard 8 Seat MPV
-                                      </option>
-                                      <option value="Executive8SeatMPV">
-                                        Executive 8 Seat MPV
-                                      </option>
-                                      <option value="10-16SeatStandardMinibus">
-                                        10-16 Seat Standard Minibus
-                                      </option>
-                                      <option value="10-16SeatExecutiveMinibus">
-                                        10-16 Seat Executive Minibus
-                                      </option>
-                                    </select>
-                                  ) : selected === "4" ||
-                                    selected === "5" ||
-                                    selected === "6" ? (
-                                    <select
-                                      className="form-select text-muted"
-                                      name="choices-single-default"
-                                      id="statusSelect"
-                                      required
-                                    >
-                                      <option value="">Type</option>
-                                      <option value="Dorset Mini Coach">
-                                        Standard 6 Seat MPV
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        Executive 6 Seat MPV
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        VIP 6 Seat MPV
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        Executive 7 Seat MPV
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        Luxury 7 Seat MPV
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        Standard 8 Seat MPV
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        Executive 8 Seat MPV
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        10-16 Seat Standard Minibus
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        10-16 Seat Executive Minibus
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        14-16 Seat Luxury Minibus
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        17-24 Seat Standard Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        17-24 Seat Executive Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        17-24 Seat Luxury Midi Coach
-                                      </option>
-                                    </select>
-                                  ) : selected === "7" ? (
-                                    <select
-                                      className="form-select text-muted"
-                                      name="choices-single-default"
-                                      id="statusSelect"
-                                      required
-                                    >
-                                      <option value="">Type</option>
-                                      <option value="Dorset Mini Coach">
-                                        Executive 7 Seat MPV
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        Luxury 7 Seat MPV
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        Standard 8 Seat MPV
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        Executive 8 Seat MPV
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        10-16 Seat Standard Minibus
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        10-16 Seat Executive Minibus
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        14-16 Seat Luxury Minibus
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        17-24 Seat Standard Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        17-24 Seat Executive Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        17-24 Seat Luxury Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        25-33 Seat Luxury Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        29 Seat Standard Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        29 Seat Executive Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        29 Seat Luxury Midi Coach
-                                      </option>
-                                    </select>
-                                  ) : selected === "8" ? (
-                                    <select
-                                      className="form-select text-muted"
-                                      name="choices-single-default"
-                                      id="statusSelect"
-                                      required
-                                    >
-                                      <option value="">Type</option>
-                                      <option value="Dorset Mini Coach">
-                                        Standard 8 Seat MPV
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        Executive 8 Seat MPV
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        10-16 Seat Standard Minibus
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        10-16 Seat Executive Minibus
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        14-16 Seat Luxury Minibus
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        17-24 Seat Standard Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        17-24 Seat Executive Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        17-24 Seat Luxury Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        25-33 Seat Luxury Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        29 Seat Standard Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        29 Seat Executive Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        29 Seat Luxury Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        33 Seat Standard
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        33 Seat Executive
-                                      </option>
-                                    </select>
-                                  ) : selected === "9" || selected === "10" || selected === "11" || selected === "12" || selected === "13" || selected === "14" || selected === "15" || selected === "16" ? (
-                                    <select
-                                      className="form-select text-muted"
-                                      name="choices-single-default"
-                                      id="statusSelect"
-                                      required
-                                    >
-                                      <option value="">Type</option>
-                                      <option value="Dorset Mini Coach">
-                                        10-16 Seat Standard Minibus
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        10-16 Seat Executive Minibus
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        14-16 Seat Luxury Minibus
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        17-24 Seat Standard Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        17-24 Seat Executive Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        17-24 Seat Luxury Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        25-33 Seat Luxury Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        29 Seat Standard Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        29 Seat Executive Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        29 Seat Luxury Midi Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        33 Seat Standard
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        33 Seat Executive
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        36 Seat Luxury Team Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        49 Seat Standard Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        49 Seat Executive Coach
-                                      </option>
-                                      <option value="Dorset Mini Coach">
-                                        49 Seat Luxury Coach
-                                      </option>
-                                    </select>
-                                  ) : selected === "17" || selected === "18" || selected === "19"
-                                  || selected === "20" || selected === "21" || selected === "22" || 
-                                  selected === "23" || selected==="24"
-                                  ? <select
+                                  <select
                                     className="form-select text-muted"
-                                    name="choices-single-default"
-                                    id="statusSelect"
-                                    required
+                                    name="selectVehicleType"
+                                    id="selectVehicleType"
+                                    onChange={handleVehicleType}
                                   >
-                                    <option value="">Type</option>
-                                    <option value="Dorset Mini Coach">
-                                      17-24 Seat Standard Midi Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      17-24 Seat Executive Midi Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      17-24 Seat Luxury Midi Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      25-33 Seat Luxury Midi Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      29 Seat Standard Midi Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      29 Seat Executive Midi Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      29 Seat Luxury Midi Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      33 Seat Standard
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      33 Seat Executive
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      36 Seat Luxury Team Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      49 Seat Standard Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      49 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      49 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      53 Seat Luxury Coach
-                                    </option>
-                                  </select> : selected === "25" || selected === "26" || selected === "27"
-                                  || selected === "28" || selected === "29"
-                                  ? <select
-                                    className="form-select text-muted"
-                                    name="choices-single-default"
-                                    id="statusSelect"
-                                    required
-                                  >
-                                    <option value="">Type</option>
-                                    <option value="Dorset Mini Coach">
-                                      25-33 Seat Luxury Midi Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      29 Seat Standard Midi Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      29 Seat Executive Midi Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      29 Seat Luxury Midi Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      33 Seat Standard
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      33 Seat Executive
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      36 Seat Luxury Team Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      49 Seat Standard Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      49 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      49 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      53 Seat Luxury Coach
-                                    </option>
-                                  </select>: selected === "30" || selected === "31" || selected === "32"
-                                  || selected === "33"
-                                  ? <select
-                                    className="form-select text-muted"
-                                    name="choices-single-default"
-                                    id="statusSelect"
-                                    required
-                                  >
-                                    <option value="">Type</option>
-                                    <option value="Dorset Mini Coach">
-                                      25-33 Seat Luxury Midi Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      33 Seat Standard
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      33 Seat Executive
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      36 Seat Luxury Team Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      49 Seat Standard Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      49 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      49 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      53 Seat Luxury Coach
-                                    </option>
-                                  </select>:selected === "34" || selected === "35" || selected === "36"
-                                  ? <select
-                                    className="form-select text-muted"
-                                    name="choices-single-default"
-                                    id="statusSelect"
-                                    required
-                                  >
-                                    <option value="">Type</option>
-                                    <option value="Dorset Mini Coach">
-                                      36 Seat Luxury Team Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      49 Seat Standard Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      49 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      49 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      53 Seat Luxury Coach
-                                    </option>
-                                  </select>:selected >= "37" && selected <= "49"
-                                  ? <select
-                                    className="form-select text-muted"
-                                    name="choices-single-default"
-                                    id="statusSelect"
-                                    required
-                                  >
-                                    <option value="">Type</option>
-                                    <option value="Dorset Mini Coach">
-                                      49 Seat Standard Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      49 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      49 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      53 Seat Standard Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      53 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      53 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      55 Seat Standard Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      55 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      55 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      57 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      57 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      62 Seat Standard Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      62 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      62 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      63 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      72 Seat Standard Coach
-                                    </option>
-                                  </select>: selected >= "50" && selected <= "53"
-                                  ? <select
-                                    className="form-select text-muted"
-                                    name="choices-single-default"
-                                    id="statusSelect"
-                                    required
-                                  >
-                                    <option value="">Type</option>
-                                    <option value="Dorset Mini Coach">
-                                      53 Seat Standard Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      53 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      53 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      55 Seat Standard Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      55 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      55 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      57 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      57 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      62 Seat Standard Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      62 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      62 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      63 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      72 Seat Standard Coach
-                                    </option>
-                                  </select>: selected >= "54" && selected <= "55"
-                                  ? <select
-                                    className="form-select text-muted"
-                                    name="choices-single-default"
-                                    id="statusSelect"
-                                    required
-                                  >
-                                    <option value="">Type</option>
-                                    <option value="Dorset Mini Coach">
-                                      55 Seat Standard Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      55 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      55 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      57 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      57 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      62 Seat Standard Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      62 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      62 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      63 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      72 Seat Standard Coach
-                                    </option>
-                                  </select>:selected >= "56" && selected <= "57"
-                                  ? <select
-                                    className="form-select text-muted"
-                                    name="choices-single-default"
-                                    id="statusSelect"
-                                    required
-                                  >
-                                    <option value="">Type</option>
-                                    <option value="Dorset Mini Coach">
-                                      57 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      57 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      62 Seat Standard Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      62 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      62 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      63 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      72 Seat Standard Coach
-                                    </option>
-                                  </select>:selected >= "58" && selected <= "62"
-                                  ? <select
-                                    className="form-select text-muted"
-                                    name="choices-single-default"
-                                    id="statusSelect"
-                                    required
-                                  >
-                                    <option value="">Type</option>
-                                    <option value="Dorset Mini Coach">
-                                      62 Seat Standard Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      62 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      62 Seat Luxury Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      63 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      72 Seat Standard Coach
-                                    </option>
-                                  </select>:selected === "63"
-                                  ? <select
-                                    className="form-select text-muted"
-                                    name="choices-single-default"
-                                    id="statusSelect"
-                                    required
-                                  >
-                                    <option value="">Type</option>
-                                    <option value="Dorset Mini Coach">
-                                      63 Seat Executive Coach
-                                    </option>
-                                    <option value="Dorset Mini Coach">
-                                      72 Seat Standard Coach
-                                    </option>
-                                  </select>:selected > "63" && selected <="72"
-                                  ? <select
-                                    className="form-select text-muted"
-                                    name="choices-single-default"
-                                    id="statusSelect"
-                                    required
-                                  >
-                                    <option value="">Type</option>
-                                    <option value="Dorset Mini Coach">
-                                      72 Seat Standard Coach
-                                    </option>
-                                  </select>:selected > "72"
-                                  ? <select
-                                    className="form-select text-muted"
-                                    name="choices-single-default"
-                                    id="statusSelect"
-                                    required
-                                  >
-                                    <option value="">Type</option>
-                                    <option value="MultipleStandardVehicles">
-                                    Multiple Standard Vehicles
-                                    </option>
-                                    <option value="MultipleExecutiveVehicles">
-                                    Multiple Executive Vehicles
-                                    </option>
-                                    <option value="MultipleLuxuryVehicles">
-                                    Multiple Luxury Vehicles
-                                    </option>
-                                  </select>:""}
+                                    {selected === "" ? (
+                                      <option value="">Select</option>
+                                    ) : (
+                                      optionVehicleTypes.map((item) => (
+                                        <option
+                                          value={item.vehicle_type.type}
+                                          key={item?._id!}
+                                        >
+                                          {item.vehicle_type.type}
+                                        </option>
+                                      ))
+                                    )}
+                                  </select>
                                 </div>
                               </Col>
                               {/* Luggage Details  == Done */}
                               <Col lg={3}>
                                 <div className="mb-3">
                                   <label
-                                    htmlFor="statusSelect"
+                                    htmlFor="selectLuggage"
                                     className="form-label"
                                   >
                                     Luggage Details
                                   </label>
-                                  {selected === "1" && (selectedVehicle === "StandardSaloonCar" || selectedVehicle === "ExecutiveSaloonCar" || selectedVehicle === "VIPSaloonCar") ? 
-                                 <select
-                                 className="form-select text-muted"
-                                 name="choices-single-default"
-                                 id="statusSelect"
-                                 required
-                               >
-                                 <option value="">Details</option>
-                                 <option value="0.00">
-                                   No Luggage
-                                 </option>
-                                 <option value="1.00">
-                                   Lap Luggage Only
-                                 </option>
-                                 <option value="1.20">
-                                 1 x 10kg Hand luggage per person only
-                                 </option>                                
-                                 <option value="2.00">
-                                   1 x 20kg Check in luggage per person only
-                                 </option>
-                               </select>  
-                                : selected === "1" && (selectedVehicle === "StandardSaloonCar" || selectedVehicle === "ExecutiveSaloonCar" || selectedVehicle === "VIPSaloonCar") ?
-                                <select
-                                 className="form-select text-muted"
-                                 name="choices-single-default"
-                                 id="statusSelect"
-                                 required
-                               >
-                                 <option value="">Details</option>
-                                 <option value="0.00">
-                                   No Luggage
-                                 </option>
-                                 <option value="1.00">
-                                   Lap Luggage Only
-                                 </option>
-                                 <option value="1.20">
-                                 1 x 10kg Hand luggage per person only
-                                 </option>                                
-                                 <option value="2.00">
-                                   1 x 20kg Check in luggage per person only
-                                 </option>
-                               </select>
-                                 :selected === "2" && (selectedVehicle === "StandardSaloonCar" || selectedVehicle === "ExecutiveSaloonCar" || selectedVehicle === "VIPSaloonCar") ?
-                                 <select
-                                  className="form-select text-muted"
-                                  name="choices-single-default"
-                                  id="statusSelect"
-                                  required
-                                >
-                                  <option value="">Details</option>
-                                  <option value="1.20">
-                                  1 x 10kg Hand luggage per person only
-                                  </option>                                
-                                </select>
-                                  : selected === "3" && (selectedVehicle === "StandardSaloonCar" || selectedVehicle === "ExecutiveSaloonCar" || selectedVehicle === "VIPSaloonCar") ?
                                   <select
-                                   className="form-select text-muted"
-                                   name="choices-single-default"
-                                   id="statusSelect"
-                                   required
-                                 >
-                                   <option value="">Details</option>
-                                   <option value="1.00">
-                                   Lap Luggage Only
-                                 </option>                             
-                                 </select>
-                                   :""
-                                }
+                                    className="form-select text-muted"
+                                    name="selectLuggage"
+                                    id="selectLuggage"
+                                    onChange={handleVehicleType}
+                                  >
+                                    {selected === "" ? (
+                                      <option value="">Select</option>
+                                    ) : (
+                                      optionLuggages.map((item) => (
+                                        <option
+                                          value={item.max_luggage.description}
+                                          key={item?._id!}
+                                        >
+                                          {item.max_luggage.description}
+                                        </option>
+                                      ))
+                                    )}
+                                  </select>
                                 </div>
                               </Col>
                               {/* Luggage Details  == Done */}
@@ -1040,53 +389,13 @@ const ReallyNewQuote = () => {
                                     className="form-select text-muted"
                                     name="choices-single-default"
                                     id="statusSelect"
-                                    required
                                   >
                                     <option value="">Journey</option>
-                                    <option value="Weeding">
-                                      Airport Transfer
-                                    </option>
-                                    <option value="Weeding">
-                                      Charity Event
-                                    </option>
-                                    <option value="Weeding">
-                                      Christmas Party
-                                    </option>
-                                    <option value="10Kg">
-                                      Corporate Event
-                                    </option>
-                                    <option value="20Kg">Day Trip</option>
-                                    <option value="20Kg">Emergency</option>
-                                    <option value="20Kg">
-                                      Football Away Game( fan trip)
-                                    </option>
-                                    <option value="10Kg">Funeral</option>
-                                    <option value="10Kg">Golf Trip</option>
-                                    <option value="10Kg">Night Out</option>
-                                    <option value="20Kg">
-                                      Rail Replacement
-                                    </option>
-                                    <option value="10Kg">
-                                      School or University Educational Trip
-                                    </option>
-                                    <option value="Weeding">Site Tour</option>
-                                    <option value="10Kg">Sporting Event</option>
-                                    <option value="20Kg">
-                                      Sports Team (players transport)
-                                    </option>
-                                    <option value="10Kg">
-                                      Staff Shuttles or Transport
-                                    </option>
-                                    <option value="Weeding">Stag/Hen Do</option>
-                                    <option value="20Kg">
-                                      UK Tour or International Tour
-                                    </option>
-                                    <option value="Weeding">
-                                      Vehicle Maintenance(internal book out)
-                                    </option>
-                                    <option value="20Kg">Wedding</option>
-                                    <option value="20Kg">Weekend Away</option>
-                                    <option value="10Kg">Other</option>
+                                    {AllJourneys.map((journey) => (
+                                      <option value={journey.type}>
+                                        {journey.type}
+                                      </option>
+                                    ))}
                                   </select>
                                 </div>
                               </Col>
@@ -1098,7 +407,7 @@ const ReallyNewQuote = () => {
                     <div className="mb-3">
                       <Form className="tablelist-form p-2">
                         <Row>
-                          <Card.Header>
+                          {/* <Card.Header>
                             <div className="d-flex align-items-center p-1">
                               <div className="flex-shrink-0 me-3">
                                 <div className="avatar-sm">
@@ -1112,7 +421,7 @@ const ReallyNewQuote = () => {
                               </div>
                             </div>
                             <Row>
-                              {/* Collection_address  == Done */}
+                             
                               <Col lg={3}>
                                 <div className="mb-3">
                                   <Form.Label htmlFor="supplierName-field">
@@ -1126,7 +435,7 @@ const ReallyNewQuote = () => {
                                   />
                                 </div>
                               </Col>
-                              {/* Vehicle Type  == Done */}
+                             
                               <Col lg={3}>
                                 <div className="mb-3">
                                   <label
@@ -1144,7 +453,7 @@ const ReallyNewQuote = () => {
                                   />
                                 </div>
                               </Col>
-                              {/* Luggage Details  == Done */}
+                              
                               <Col lg={3}>
                                 <div className="mb-3">
                                   <Form.Label htmlFor="supplierName-field">
@@ -1159,7 +468,7 @@ const ReallyNewQuote = () => {
                                   />
                                 </div>
                               </Col>
-                              {/* Luggage Details  == Done */}
+                             
                               <Col lg={3}>
                                 <div className="mb-3">
                                   <Form.Label htmlFor="supplierName-field">
@@ -1203,9 +512,9 @@ const ReallyNewQuote = () => {
                                 </div>
                               </Col>
                             </Row>
-                          </Card.Header>
+                          </Card.Header> */}
                           <Card.Header>
-                            <div className="d-flex align-items-center p-1">
+                            <div className="d-flex align-items-center">
                               <div className="flex-shrink-0 me-3">
                                 <div className="avatar-sm">
                                   <div className="avatar-title rounded-circle bg-light text-primary fs-20">
@@ -1218,8 +527,8 @@ const ReallyNewQuote = () => {
                               </div>
                             </div>
                             <Row>
-                              {/* Collection_address  == Done */}
-                              <Col lg={3}>
+                              {/* How did you hear of us == Done */}
+                              <Col lg={4}>
                                 <div className="mb-3">
                                   <Form.Label htmlFor="supplierName-field">
                                     How did you hear of us ?
@@ -1228,45 +537,17 @@ const ReallyNewQuote = () => {
                                     className="form-select text-muted"
                                     name="choices-single-default"
                                     id="statusSelect"
-                                    required
                                   >
                                     <option value="">Select</option>
-                                    <option value="1">Bing / MSN</option>
-                                    <option value="2">
-                                      Booked With us Before
-                                    </option>
-                                    <option value="3">Colleague</option>
-                                    <option value="4">Google</option>
-                                    <option value="5">Recommendation</option>
-                                    <option value="3">Yahoo</option>
-                                    <option value="4">Yell</option>
-                                    <option value="5">Other</option>
+                                    {AllSources.map((source) => (
+                                      <option value={source.name}>
+                                        {source.name}
+                                      </option>
+                                    ))}
                                   </select>
                                 </div>
                               </Col>
-                              {/* Vehicle Type  == Done */}
-                              <Col lg={3}>
-                                <div className="mb-3">
-                                  <Form.Label htmlFor="supplierName-field">
-                                    Salesperson
-                                  </Form.Label>
-                                  <select
-                                    className="form-select text-muted"
-                                    name="choices-single-default"
-                                    id="statusSelect"
-                                    required
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="1" selected>
-                                      Abdelbari ben Yagouta
-                                    </option>
-                                    <option value="2">Adel</option>
-                                    <option value="3">Anna</option>
-                                    <option value="4">Amine</option>
-                                  </select>
-                                </div>
-                              </Col>
-                              {/* Luggage Details  == Done */}
+                              {/* Priority  == Done */}
                               <Col lg={3}>
                                 <div className="mb-3">
                                   <Form.Label htmlFor="supplierName-field">
@@ -1276,7 +557,6 @@ const ReallyNewQuote = () => {
                                     className="form-select text-muted"
                                     name="choices-single-default"
                                     id="statusSelect"
-                                    required
                                   >
                                     <option value="">Select</option>
                                     <option value="1">1</option>
@@ -1287,8 +567,8 @@ const ReallyNewQuote = () => {
                                   </select>
                                 </div>
                               </Col>
-                              {/* Luggage Details  == Done */}
-                              <Col lg={3}>
+                              {/* Notes  == Done */}
+                              <Col lg={5}>
                                 <div className="mb-3">
                                   <Form.Label htmlFor="supplierName-field">
                                     Notes
@@ -1348,8 +628,18 @@ const ReallyNewQuote = () => {
                         <Col lg={12}>
                           <Form.Label>Pickup date</Form.Label>
                           <Flatpickr
-                            className="form-control flatpickr-input"
-                            placeholder="Select Date-time"
+                            className="form-control flatpickr-input mb-2"
+                            placeholder="Select Date"
+                            options={{
+                              dateFormat: "d M, Y",
+                            }}
+                          />
+                        </Col>
+                        <Col lg={12}>
+                          <Form.Label>Pickup Time</Form.Label>
+                          <Flatpickr
+                            className="form-control flatpickr-input mb-2"
+                            placeholder="Select Date"
                             options={{
                               dateFormat: "d M, Y",
                             }}
@@ -1357,12 +647,27 @@ const ReallyNewQuote = () => {
                         </Col>
                         <Col lg={12}>
                           <Form.Label>Collection Address</Form.Label>
-                          <Form.Control
-                            type="email"
-                            id="supplierName-field"
-                            placeholder="Enter Collection address"
-                            required
-                          />
+                          <Autocomplete
+                            onPlaceChanged={onPlaceChanged}
+                            onLoad={onLoad}
+                          >
+                            <Form.Control
+                              type="text"
+                              placeholder="Origin"
+                              ref={originRef}
+                              id="origin"
+                              onClick={() => {
+                                handleLocationButtonClick();
+                                if (nom) {
+                                  map?.panTo(nom);
+                                  map?.setZoom(15);
+                                }
+                              }}
+                              // onChange={onChangeProgramms}
+                              // required
+                              className="mb-2"
+                            />
+                          </Autocomplete>
                         </Col>
                         <Col lg={12}>
                           <Form.Label>Destination Address</Form.Label>
@@ -1373,53 +678,6 @@ const ReallyNewQuote = () => {
                             required
                           />
                         </Col>
-                        <Row className="mt-2">
-                          <div className="d-flex justify-content-evenly mb-2">
-                            <button
-                              type="button"
-                              className="btn btn-primary btn-sm fs-10"
-                            >
-                              <i className="ph ph-note-blank"></i> Blank Journey
-                            </button>
-
-                            <button
-                              type="button"
-                              className="btn btn-primary btn-sm fs-10"
-                            >
-                              <i className="ph ph-key-return"></i> Return
-                            </button>
-
-                            <button
-                              type="button"
-                              className="btn btn-primary btn-sm fs-10"
-                            >
-                              <i className="ph ph-copy"></i> Duplicate Mouvement
-                            </button>
-                          </div>
-                          <div className="d-flex justify-content-sm-around">
-                            <button
-                              type="button"
-                              className="btn btn-primary btn-sm fs-10"
-                            >
-                              <i className="ph ph-user-plus"></i> Assign Driver
-                            </button>
-
-                            <button
-                              type="button"
-                              className="btn btn-primary btn-sm fs-10"
-                            >
-                              <i className="ph ph-share"></i> Push Job
-                            </button>
-
-                            <button
-                              type="button"
-                              className="btn btn-primary btn-sm fs-10"
-                            >
-                              <i className="ph ph-trash-simple"></i> Remove
-                              Driver
-                            </button>
-                          </div>
-                        </Row>
                       </Form>
                     </Row>
                   </Card.Body>

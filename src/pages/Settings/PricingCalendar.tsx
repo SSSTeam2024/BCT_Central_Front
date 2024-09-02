@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Row, Card, Col, Button, Modal } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import Flatpickr from "react-flatpickr";
@@ -43,6 +43,11 @@ const PricingCalendar = () => {
   const AllAccounts = [...AllSchools, ...AllCompanies, ...AllVisitors];
   const AllVehicleAccounts = [...AllVehicleTypes];
 
+  const pricingCalendarLocation = useLocation();
+
+  const [showPriority, setShowPriority] = useState<boolean>(false);
+  const [showVehicle, setShowVehicle] = useState<boolean>(false);
+
   const handleSelectAccoun = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     setSelectedAccoun(value);
@@ -81,6 +86,7 @@ const PricingCalendar = () => {
   };
 
   const [createNewPricingCalendar] = useAddNewPricingCalendarMutation();
+  const [updatePricingCalendar] = useAddNewPricingCalendarMutation();
   const [deletePricingCalendar] = useDeletePricingCalendarMutation();
 
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
@@ -218,6 +224,16 @@ const PricingCalendar = () => {
     });
   };
 
+  const notifyUpdateSuccess = () => {
+    Swal.fire({
+      position: "top-right",
+      icon: "success",
+      title: "Pricing Calendar is updated successfully",
+      showConfirmButton: false,
+      timer: 2500,
+    });
+  };
+
   const notifyError = (err: any) => {
     Swal.fire({
       position: "top-right",
@@ -317,6 +333,43 @@ const PricingCalendar = () => {
     }
   };
 
+  const [calendarName, setCalendarName] = useState<string>("");
+  const [calendarUplift, setCalendarUplift] = useState<string>("");
+  const [calendarId, setCalendarId] = useState<string>("");
+
+  useEffect(() => {
+    if (pricingCalendarLocation?.state) {
+      setCalendarId(pricingCalendarLocation.state._id || "");
+      setCalendarName(pricingCalendarLocation.state.name || "");
+      setCalendarUplift(pricingCalendarLocation.state.uplift || "");
+    }
+  }, [pricingCalendarLocation]);
+
+  const handleCalendarName = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setCalendarName(e.target.value);
+  };
+
+  const handleCalendarUplift = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setCalendarUplift(e.target.value);
+  };
+
+  const onSubmitUpdatePricingCalendar = (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
+    try {
+      updatePricingCalendar(pricingCalendar)
+        .then(() => notifySuccess())
+        .then(() => setPricingCalendar(initialPricingCalendar));
+    } catch (error) {
+      notifyError(error);
+    }
+  };
+
   const columns = [
     {
       name: <span className="font-weight-bold fs-13">Priority</span>,
@@ -407,7 +460,12 @@ const PricingCalendar = () => {
               </Link>
             </li>
             <li>
-              <Link to="#" className="badge badge-soft-success edit-item-btn">
+              <Link
+                to="#"
+                className="badge badge-soft-success edit-item-btn"
+                state={row}
+                onClick={tog_UpdateCalendar}
+              >
                 <i className="ri-edit-2-line"></i>
               </Link>
             </li>
@@ -431,14 +489,49 @@ const PricingCalendar = () => {
     setmodal_AddCalendar(!modal_AddCalendar);
   }
 
+  const [modal_UpdateCalendar, setmodal_UpdateCalendar] =
+    useState<boolean>(false);
+  function tog_UpdateCalendar() {
+    setmodal_UpdateCalendar(!modal_UpdateCalendar);
+  }
+
   const [isRight, setIsRight] = useState(false);
 
   const toggleRightCanvas = () => {
     setIsRight(!isRight);
   };
 
-  const pricingCalendarLocation = useLocation();
-  console.log(pricingCalendarLocation.state);
+  const [searchTerm, setSearchTerm] = useState("");
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const getFilteredForceJourney = () => {
+    let filteredForceJourney = AllPricingCalendars;
+    if (searchTerm) {
+      filteredForceJourney = filteredForceJourney.filter(
+        (forceJourney: any) =>
+          (forceJourney?.car?.type! &&
+            forceJourney?.car
+              ?.type!.toLowerCase()
+              .includes(searchTerm.toLowerCase())) ||
+          (forceJourney?.miles! &&
+            forceJourney
+              ?.miles!.toLowerCase()
+              .includes(searchTerm.toLowerCase())) ||
+          (forceJourney?.percentage! &&
+            forceJourney
+              ?.percentage!.toLowerCase()
+              .includes(searchTerm.toLowerCase())) ||
+          (forceJourney?.hours_wait! &&
+            forceJourney
+              ?.hours_wait!.toLowerCase()
+              .includes(searchTerm.toLowerCase()))
+      );
+    }
+    return filteredForceJourney;
+  };
+
   return (
     <React.Fragment>
       <Col lg={12}>
@@ -451,6 +544,8 @@ const PricingCalendar = () => {
                     type="text"
                     className="form-control search"
                     placeholder="Search for something..."
+                    value={searchTerm}
+                    onChange={handleSearchChange}
                   />
                   <i className="ri-search-line search-icon"></i>
                 </div>
@@ -542,6 +637,501 @@ const PricingCalendar = () => {
                     <option value="11">11</option>
                     <option value="12">12</option>
                   </select>
+                </div>
+              </Col>
+              <Col lg={4}>
+                <div className="mb-3">
+                  <Form.Label htmlFor="customerName-field">
+                    Exclusive
+                  </Form.Label>
+                  <div className="form-check m-2">
+                    <Form.Control
+                      className="form-check-input"
+                      type="checkbox"
+                      id="formCheck1"
+                      checked={isChecked}
+                      onChange={handleCheckboxChange}
+                    />
+                  </div>
+                </div>
+              </Col>
+            </Row>
+            <Row>
+              <Col lg={4}>
+                <div className="mb-3">
+                  <Form.Label htmlFor="account">Account Type</Form.Label>
+                  <select
+                    className="form-select text-muted"
+                    name="account"
+                    id="account"
+                    onChange={handleSelectAccoun}
+                  >
+                    <option value="">Select</option>
+                    <option value="School or University">
+                      School or University
+                    </option>
+                    <option value="Company">Company</option>
+                    <option value="Passenger">Passenger</option>
+                    <option value="All">All</option>
+                  </select>
+                </div>
+              </Col>
+              {selectedAccoun === "School or University" && (
+                <Col lg={8}>
+                  <div className="mb-3">
+                    <Form.Label htmlFor="customerName-field">
+                      Account
+                    </Form.Label>
+                    <select
+                      className="form-select text-muted"
+                      name="choices-single-default"
+                      id="statusSelect"
+                      onChange={handleSelectAccount}
+                    >
+                      <option value="">Select</option>
+                      {AllSchools.map((schools) => (
+                        <option value={schools?._id!} key={schools?._id!}>
+                          {schools.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </Col>
+              )}
+              {selectedAccoun === "Company" && (
+                <Col lg={8}>
+                  <div className="mb-3">
+                    <Form.Label htmlFor="customerName-field">
+                      Account
+                    </Form.Label>
+                    <select
+                      className="form-select text-muted"
+                      name="choices-single-default"
+                      id="statusSelect"
+                      onChange={handleSelectAccount}
+                    >
+                      <option value="Brit Coaches Ltd">Select</option>
+                      {AllCompanies.map((companies) => (
+                        <option value={companies?._id!} key={companies?._id!}>
+                          {companies.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </Col>
+              )}
+              {selectedAccoun === "Passenger" && (
+                <Col lg={8}>
+                  <div className="mb-3">
+                    <Form.Label htmlFor="customerName-field">
+                      Account
+                    </Form.Label>
+                    <select
+                      className="form-select text-muted"
+                      name="choices-single-default"
+                      id="statusSelect"
+                      onChange={handleSelectAccount}
+                    >
+                      <option value="Brit Coaches Ltd">Select</option>
+                      {AllVisitors.map((visitors) => (
+                        <option value={visitors?._id!} key={visitors?._id!}>
+                          {visitors.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </Col>
+              )}
+            </Row>
+            <Row>
+              <Col lg={6}>
+                <div className="mb-3">
+                  <Form.Label htmlFor="startDate"></Form.Label>
+                  <Flatpickr
+                    className="form-control flatpickr-input"
+                    placeholder="Start Date"
+                    onChange={handleStartDateChange}
+                    options={{
+                      dateFormat: "d M, Y",
+                    }}
+                    id="startDate"
+                    name="startDate"
+                  />
+                </div>
+              </Col>
+              <Col lg={6}>
+                <div className="mb-3">
+                  <Form.Label htmlFor="customerName-field"></Form.Label>
+                  <div>
+                    <DatePicker
+                      selected={selectedTime}
+                      onChange={handleTimeChange}
+                      showTimeSelect
+                      showTimeSelectOnly
+                      timeIntervals={15}
+                      dateFormat="h:mm aa"
+                      timeCaption="Time"
+                      placeholderText="Select a start time"
+                      className="form-control flatpickr-input"
+                    />
+                  </div>
+                </div>
+              </Col>
+            </Row>
+            <Row>
+              <Col lg={6}>
+                <div className="mb-3">
+                  <Form.Label htmlFor="endDate"></Form.Label>
+                  <Flatpickr
+                    className="form-control flatpickr-input"
+                    placeholder="End Date"
+                    options={{
+                      dateFormat: "d M, Y",
+                    }}
+                    onChange={handleEndDateChange}
+                    id="endDate"
+                    name="endDate"
+                  />
+                </div>
+              </Col>
+              <Col lg={6}>
+                <div className="mb-3">
+                  <Form.Label htmlFor="customerName-field"></Form.Label>
+                  <div>
+                    <DatePicker
+                      selected={selectedEndTime}
+                      onChange={handleEndTimeChange}
+                      showTimeSelect
+                      showTimeSelectOnly
+                      timeIntervals={15}
+                      dateFormat="h:mm aa"
+                      timeCaption="Time"
+                      placeholderText="Select an end time"
+                      className="form-control flatpickr-input"
+                    />
+                  </div>
+                </div>
+              </Col>
+            </Row>
+            <Row>
+              <Col lg={6}>
+                <div className="mb-3">
+                  <Form.Label htmlFor="customerName-field">Days</Form.Label>
+                  <div>
+                    <select
+                      multiple
+                      size={5}
+                      onChange={handleSelectChange}
+                      className="form-control"
+                    >
+                      <option value="Monday">Monday</option>
+                      <option value="Tuesday">Tuesday</option>
+                      <option value="Wednesday">Wednesday</option>
+                      <option value="Thursday">Thursday</option>
+                      <option value="Friday">Friday</option>
+                      <option value="Saturday">Saturday</option>
+                      <option value="Sunday">Sunday</option>
+                    </select>
+                  </div>
+                </div>
+              </Col>
+              <Col lg={6}>
+                <div className="mb-3">
+                  <Form.Label htmlFor="uplift">Uplift</Form.Label>
+                  <Form.Control
+                    type="text"
+                    id="uplift"
+                    name="uplift"
+                    onChange={onChangePricingCalendar}
+                    value={pricingCalendar.uplift}
+                  />
+                </div>
+              </Col>
+            </Row>
+            <Row>
+              <Col lg={12}>
+                <div className="mb-3">
+                  <Form.Label htmlFor="supplierName-field">Vehicle</Form.Label>
+                  <select
+                    className="form-select text-muted"
+                    name="choices-single-default"
+                    id="statusSelect"
+                    onChange={handleSelectVehicleAccounts}
+                  >
+                    <option value="">Type</option>
+                    <option value="All">All</option>
+                    {AllVehicleTypes.map((vehicleType) => (
+                      <option value={vehicleType?._id!} key={vehicleType?._id!}>
+                        {vehicleType.type}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </Col>
+              <Col lg={12}>
+                <div className="hstack gap-2 justify-content-end">
+                  <Button
+                    className="btn-ghost-danger"
+                    onClick={() => {
+                      tog_AddCalendar();
+                      setPricingCalendar(initialPricingCalendar);
+                    }}
+                    data-bs-dismiss="modal"
+                  >
+                    <i className="ri-close-line align-bottom me-1"></i> Close
+                  </Button>
+                  <Button
+                    variant="primary"
+                    id="add-btn"
+                    type="submit"
+                    onClick={() => {
+                      tog_AddCalendar();
+                    }}
+                  >
+                    Add
+                  </Button>
+                </div>
+              </Col>
+            </Row>
+          </Form>
+        </Modal.Body>
+      </Modal>
+      <Offcanvas show={isRight} onHide={toggleRightCanvas} placement="end">
+        <Offcanvas.Header className="border-bottom" closeButton>
+          <Offcanvas.Title id="offcanvasRightLabel">
+            {pricingCalendarLocation.state?.name}
+          </Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body className="p-0 overflow-hidden">
+          <div data-simplebar style={{ height: "calc(100vh - 112px)" }}>
+            <div className="acitivity-timeline p-4">
+              <div className="acitivity-item d-flex">
+                <div className="flex-grow-1 ms-3">
+                  <h6 className="mb-1">Priority</h6>
+                  <p className="text-muted mb-1">
+                    {pricingCalendarLocation.state?.priority}
+                  </p>
+                </div>
+              </div>
+              <div className="acitivity-item py-2 d-flex">
+                <div className="flex-shrink-0">
+                  <div className="avatar-xs acitivity-avatar">
+                    <div className="avatar-title bg-info-subtle text-info">
+                      <i className="ri-line-chart-line"></i>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex-grow-1 ms-3">
+                  <h6 className="mb-1">Uplift</h6>
+                  <p className="text-muted mb-1">
+                    {pricingCalendarLocation.state?.uplift} %
+                  </p>
+                </div>
+              </div>
+              <div className="acitivity-item d-flex">
+                <div className="flex-grow-1 ms-3">
+                  <h6 className="mb-1">Exclusive</h6>
+                  {pricingCalendarLocation.state?.exclusive === "Exclusive" ? (
+                    <span className="badge bg-primary-subtle text-primary align-middle">
+                      Yes
+                    </span>
+                  ) : (
+                    <span className="badge bg-warning-subtle text-warning align-middle">
+                      No
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="acitivity-item py-2 d-flex">
+                <div className="flex-shrink-0 avatar-xs acitivity-avatar">
+                  <div className="avatar-title bg-success-subtle text-success">
+                    <i className="ri-time-line"></i>
+                  </div>
+                </div>
+                <div className="flex-grow-1 ms-3">
+                  <h6 className="mb-1">From</h6>
+                  <p className="text-muted mb-1">
+                    {pricingCalendarLocation.state?.startDate} at{" "}
+                    {pricingCalendarLocation.state?.startTime}
+                  </p>
+                </div>
+              </div>
+              <div className="acitivity-item py-2 d-flex">
+                <div className="flex-shrink-0 avatar-xs acitivity-avatar">
+                  <div className="avatar-title bg-secondary-subtle text-success">
+                    <i className="ri-time-line"></i>
+                  </div>
+                </div>
+                <div className="flex-grow-1 ms-3">
+                  <h6 className="mb-1">To</h6>
+                  <p className="text-muted mb-1">
+                    {pricingCalendarLocation.state?.endDate} at{" "}
+                    {pricingCalendarLocation.state?.endTime}
+                  </p>
+                </div>
+              </div>
+              <div className="acitivity-item py-2 d-flex">
+                <div className="flex-shrink-0">
+                  <div className="avatar-xs acitivity-avatar">
+                    <div className="avatar-title rounded-circle bg-danger-subtle text-danger">
+                      <i className="ri-car-line"></i>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex-grow-1 ms-3">
+                  <h6 className="mb-1">Vehicles </h6>
+                  {pricingCalendarLocation.state?.allVehicles.length === 0 ? (
+                    <p className="text-muted mb-1">
+                      {pricingCalendarLocation.state?.vehicle_type?.type!}
+                    </p>
+                  ) : (
+                    <span className="badge bg-info-subtle text-info align-middle">
+                      All
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="acitivity-item py-2 d-flex">
+                <div className="flex-shrink-0">
+                  <div className="avatar-xs acitivity-avatar">
+                    <div className="avatar-title bg-info-subtle text-info">
+                      <i className="ri-list-check"></i>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex-grow-1 ms-3">
+                  <h6 className="mb-1">Account</h6>
+                  {pricingCalendarLocation.state?.allAccounts.length !== 1 ? (
+                    <span className="badge bg-primary-subtle text-primary align-middle">
+                      All
+                    </span>
+                  ) : selectedAccoun === "School or University" ? (
+                    <span className="badge bg-primary-subtle text-primary align-middle">
+                      {pricingCalendarLocation.state?.accountSchool?.name!}
+                    </span>
+                  ) : selectedAccoun === "Company" ? (
+                    <span className="badge bg-primary-subtle text-primary align-middle">
+                      {pricingCalendarLocation.state?.accountCompany?.name!}
+                    </span>
+                  ) : (
+                    <span className="badge bg-primary-subtle text-primary align-middle">
+                      {pricingCalendarLocation?.state?.accountPassenger?.name!}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="acitivity-item py-2 d-flex">
+                <div className="flex-shrink-0">
+                  <div className="avatar-xs acitivity-avatar">
+                    <div className="avatar-title bg-white text-dark">
+                      <i className="ri-list-check"></i>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex-grow-1 ms-3">
+                  <h6 className="mb-1">Days</h6>
+                  <ul>
+                    {pricingCalendarLocation.state?.days.map(
+                      (day: any, index: number) => (
+                        <li key={index}>
+                          <small className="mb-0 text-muted">{day}</small>
+                        </li>
+                      )
+                    )}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Offcanvas.Body>
+      </Offcanvas>
+      <Modal
+        className="fade zoomIn"
+        size="lg"
+        show={modal_UpdateCalendar}
+        onHide={() => {
+          tog_UpdateCalendar();
+        }}
+        centered
+      >
+        <Modal.Header className="px-4 pt-4" closeButton>
+          <h5 className="modal-title fs-18" id="exampleModalLabel">
+            Update Pricing Calendar
+          </h5>
+        </Modal.Header>
+        <Modal.Body className="p-4">
+          <div
+            id="alert-error-msg"
+            className="d-none alert alert-danger py-2"
+          ></div>
+          <Form
+            className="tablelist-form"
+            onSubmit={onSubmitUpdatePricingCalendar}
+          >
+            <Row>
+              <Col lg={4}>
+                <div className="mb-3">
+                  <Form.Label htmlFor="name">Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    id="name"
+                    name="name"
+                    onChange={handleCalendarName}
+                    value={calendarName}
+                  />
+                </div>
+              </Col>
+              <Col lg={4}>
+                <div className="mb-3">
+                  <Form.Label htmlFor="priority">
+                    Priority :{" "}
+                    <span className="fs-16">
+                      {pricingCalendarLocation?.state?.priority!}
+                    </span>
+                    <div
+                      className="d-flex justify-content-start mt-n3"
+                      style={{ marginLeft: "80px" }}
+                    >
+                      <label
+                        htmlFor="id_file"
+                        className="mb-0"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="right"
+                        title="Select company logo"
+                      >
+                        <span
+                          className="avatar-xs d-inline-block"
+                          onClick={() => setShowPriority(!showPriority)}
+                        >
+                          <span className="avatar-title bg-white text-success cursor-pointer">
+                            <i className="bi bi-pen fs-14"></i>
+                          </span>
+                        </span>
+                      </label>
+                    </div>
+                  </Form.Label>
+                  {showPriority && (
+                    <select
+                      className="form-select text-muted"
+                      name="priority"
+                      id="priority"
+                      onChange={handleSelectPriority}
+                    >
+                      <option value="">Select</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                      <option value="6">6</option>
+                      <option value="7">7</option>
+                      <option value="8">8</option>
+                      <option value="9">9</option>
+                      <option value="10">10</option>
+                      <option value="11">11</option>
+                      <option value="12">12</option>
+                    </select>
+                  )}
                 </div>
               </Col>
               <Col lg={4}>
@@ -747,8 +1337,8 @@ const PricingCalendar = () => {
                     type="text"
                     id="uplift"
                     name="uplift"
-                    onChange={onChangePricingCalendar}
-                    value={pricingCalendar.uplift}
+                    onChange={handleCalendarUplift}
+                    value={calendarUplift}
                   />
                 </div>
               </Col>
@@ -778,7 +1368,7 @@ const PricingCalendar = () => {
                   <Button
                     className="btn-ghost-danger"
                     onClick={() => {
-                      tog_AddCalendar();
+                      tog_UpdateCalendar();
                       setPricingCalendar(initialPricingCalendar);
                     }}
                     data-bs-dismiss="modal"
@@ -790,10 +1380,10 @@ const PricingCalendar = () => {
                     id="add-btn"
                     type="submit"
                     onClick={() => {
-                      tog_AddCalendar();
+                      tog_UpdateCalendar();
                     }}
                   >
-                    Add
+                    Update
                   </Button>
                 </div>
               </Col>
@@ -801,155 +1391,6 @@ const PricingCalendar = () => {
           </Form>
         </Modal.Body>
       </Modal>
-      <Offcanvas show={isRight} onHide={toggleRightCanvas} placement="end">
-        <Offcanvas.Header className="border-bottom" closeButton>
-          <Offcanvas.Title id="offcanvasRightLabel">
-            {pricingCalendarLocation.state?.name}
-          </Offcanvas.Title>
-        </Offcanvas.Header>
-        <Offcanvas.Body className="p-0 overflow-hidden">
-          <div data-simplebar style={{ height: "calc(100vh - 112px)" }}>
-            <div className="acitivity-timeline p-4">
-              <div className="acitivity-item d-flex">
-                <div className="flex-grow-1 ms-3">
-                  <h6 className="mb-1">Priority</h6>
-                  <p className="text-muted mb-1">
-                    {pricingCalendarLocation.state?.priority}
-                  </p>
-                </div>
-              </div>
-              <div className="acitivity-item py-2 d-flex">
-                <div className="flex-shrink-0">
-                  <div className="avatar-xs acitivity-avatar">
-                    <div className="avatar-title bg-info-subtle text-info">
-                      <i className="ri-line-chart-line"></i>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex-grow-1 ms-3">
-                  <h6 className="mb-1">Uplift</h6>
-                  <p className="text-muted mb-1">
-                    {pricingCalendarLocation.state?.uplift} %
-                  </p>
-                </div>
-              </div>
-              <div className="acitivity-item d-flex">
-                <div className="flex-grow-1 ms-3">
-                  <h6 className="mb-1">Exclusive</h6>
-                  {pricingCalendarLocation.state?.exclusive === "Exclusive" ? (
-                    <span className="badge bg-primary-subtle text-primary align-middle">
-                      Yes
-                    </span>
-                  ) : (
-                    <span className="badge bg-warning-subtle text-warning align-middle">
-                      No
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="acitivity-item py-2 d-flex">
-                <div className="flex-shrink-0 avatar-xs acitivity-avatar">
-                  <div className="avatar-title bg-success-subtle text-success">
-                    <i className="ri-time-line"></i>
-                  </div>
-                </div>
-                <div className="flex-grow-1 ms-3">
-                  <h6 className="mb-1">From</h6>
-                  <p className="text-muted mb-1">
-                    {pricingCalendarLocation.state?.startDate} at{" "}
-                    {pricingCalendarLocation.state?.startTime}
-                  </p>
-                </div>
-              </div>
-              <div className="acitivity-item py-2 d-flex">
-                <div className="flex-shrink-0 avatar-xs acitivity-avatar">
-                  <div className="avatar-title bg-secondary-subtle text-success">
-                    <i className="ri-time-line"></i>
-                  </div>
-                </div>
-                <div className="flex-grow-1 ms-3">
-                  <h6 className="mb-1">To</h6>
-                  <p className="text-muted mb-1">
-                    {pricingCalendarLocation.state?.endDate} at{" "}
-                    {pricingCalendarLocation.state?.endTime}
-                  </p>
-                </div>
-              </div>
-              <div className="acitivity-item py-2 d-flex">
-                <div className="flex-shrink-0">
-                  <div className="avatar-xs acitivity-avatar">
-                    <div className="avatar-title rounded-circle bg-danger-subtle text-danger">
-                      <i className="ri-car-line"></i>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex-grow-1 ms-3">
-                  <h6 className="mb-1">Vehicles </h6>
-                  {pricingCalendarLocation.state?.allVehicles.length === 0 ? (
-                    <p className="text-muted mb-1">
-                      {pricingCalendarLocation.state?.vehicle_type?.type!}
-                    </p>
-                  ) : (
-                    <span className="badge bg-info-subtle text-info align-middle">
-                      All
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="acitivity-item py-2 d-flex">
-                <div className="flex-shrink-0">
-                  <div className="avatar-xs acitivity-avatar">
-                    <div className="avatar-title bg-info-subtle text-info">
-                      <i className="ri-list-check"></i>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex-grow-1 ms-3">
-                  <h6 className="mb-1">Account</h6>
-                  {pricingCalendarLocation.state?.allAccounts.length !== 1 ? (
-                    <span className="badge bg-primary-subtle text-primary align-middle">
-                      All
-                    </span>
-                  ) : selectedAccoun === "School or University" ? (
-                    <span className="badge bg-primary-subtle text-primary align-middle">
-                      {pricingCalendarLocation.state?.accountSchool.name}
-                    </span>
-                  ) : selectedAccoun === "Company" ? (
-                    <span className="badge bg-primary-subtle text-primary align-middle">
-                      {pricingCalendarLocation.state?.accountCompany.name}
-                    </span>
-                  ) : (
-                    <span className="badge bg-primary-subtle text-primary align-middle">
-                      {pricingCalendarLocation.state?.accountPassenger.name}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="acitivity-item py-2 d-flex">
-                <div className="flex-shrink-0">
-                  <div className="avatar-xs acitivity-avatar">
-                    <div className="avatar-title bg-white text-dark">
-                      <i className="ri-list-check"></i>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex-grow-1 ms-3">
-                  <h6 className="mb-1">Days</h6>
-                  <ul>
-                    {pricingCalendarLocation.state?.days.map(
-                      (day: any, index: number) => (
-                        <li key={index}>
-                          <small className="mb-0 text-muted">{day}</small>
-                        </li>
-                      )
-                    )}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Offcanvas.Body>
-      </Offcanvas>
     </React.Fragment>
   );
 };

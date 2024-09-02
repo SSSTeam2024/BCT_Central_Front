@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Row, Card, Col, Button, Modal } from "react-bootstrap";
 import DataTable from "react-data-table-component";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   useAddNewSourceMutation,
   useDeleteSourceMutation,
   useGetAllSourcesQuery,
+  useUpdateSourcesMutation,
 } from "features/Sources/sourcesSlice";
 import Swal from "sweetalert2";
 
@@ -17,6 +18,16 @@ const SourcesSetting = () => {
       position: "top-right",
       icon: "success",
       title: "Source is created successfully",
+      showConfirmButton: false,
+      timer: 2500,
+    });
+  };
+
+  const notifyUpdateSuccess = () => {
+    Swal.fire({
+      position: "top-right",
+      icon: "success",
+      title: "Source is updated successfully",
       showConfirmButton: false,
       timer: 2500,
     });
@@ -75,7 +86,7 @@ const SourcesSetting = () => {
   };
 
   const [createSource] = useAddNewSourceMutation();
-
+  const [updateSource] = useUpdateSourcesMutation();
   const initialSource = {
     name: "",
   };
@@ -102,6 +113,38 @@ const SourcesSetting = () => {
     }
   };
 
+  const [sourceName, setSourceName] = useState<string>("");
+  const [sourceId, setSourceId] = useState<string>("");
+  const sourceLocation = useLocation();
+
+  useEffect(() => {
+    if (sourceLocation?.state) {
+      setSourceId(sourceLocation.state._id || "");
+      setSourceName(sourceLocation.state.name || "");
+    }
+  }, [sourceLocation]);
+
+  const handleName = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setSourceName(e.target.value);
+  };
+
+  const onSubmitUpdatedSource = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const source = {
+        _id: sourceId || sourceLocation.state._id,
+        name: sourceName || sourceLocation.state.name,
+      };
+      updateSource(source)
+        .then(() => notifyUpdateSuccess())
+        .then(() => setSource(initialSource));
+    } catch (error) {
+      notifyError(error);
+    }
+  };
+
   const columns = [
     {
       name: <span className="font-weight-bold fs-13">How Know</span>,
@@ -116,12 +159,21 @@ const SourcesSetting = () => {
         return (
           <ul className="hstack gap-2 list-unstyled mb-0">
             <li>
-              <Link to="#" className="badge badge-soft-success edit-item-btn">
+              <Link
+                to="#"
+                className="badge badge-soft-success edit-item-btn"
+                state={row}
+                onClick={tog_UpdateSource}
+              >
                 <i className="ri-edit-2-line"></i>
               </Link>
             </li>
             <li>
-              <Link to="#" className="badge badge-soft-danger remove-item-btn" onClick={()=>AlertDelete(row._id)}>
+              <Link
+                to="#"
+                className="badge badge-soft-danger remove-item-btn"
+                onClick={() => AlertDelete(row._id)}
+              >
                 <i className="ri-delete-bin-2-line"></i>
               </Link>
             </li>
@@ -136,6 +188,28 @@ const SourcesSetting = () => {
     setmodal_AddSource(!modal_AddSource);
   }
 
+  const [modal_UpdateSource, setmodal_UpdateSource] = useState<boolean>(false);
+  function tog_UpdateSource() {
+    setmodal_UpdateSource(!modal_UpdateSource);
+  }
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const getFilteredSources = () => {
+    let filteredSources = AllSources;
+    if (searchTerm) {
+      filteredSources = filteredSources.filter(
+        (source: any) =>
+          source?.name! &&
+          source?.name!.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    return filteredSources;
+  };
+
   return (
     <React.Fragment>
       <Col lg={12}>
@@ -148,6 +222,8 @@ const SourcesSetting = () => {
                     type="text"
                     className="form-control search"
                     placeholder="Search for something..."
+                    value={searchTerm}
+                    onChange={handleSearchChange}
                   />
                   <i className="ri-search-line search-icon"></i>
                 </div>
@@ -164,15 +240,19 @@ const SourcesSetting = () => {
                     className="btn btn-primary"
                     onClick={() => tog_AddSource()}
                   >
-                    <i className="ri-pin-distance-line align-middle"></i>{" "}
-                    <span>Add New Source</span>
+                    <i className="ri-add-fill align-middle"></i>{" "}
+                    <span>New Source</span>
                   </button>
                 </div>
               </Col>
             </Row>
           </Card.Header>
           <Card.Body>
-            <DataTable columns={columns} data={AllSources} pagination />
+            <DataTable
+              columns={columns}
+              data={getFilteredSources()}
+              pagination
+            />
           </Card.Body>
         </Card>
       </Col>
@@ -231,6 +311,68 @@ const SourcesSetting = () => {
                     }}
                   >
                     Add
+                  </Button>
+                </div>
+              </Col>
+            </Row>
+          </Form>
+        </Modal.Body>
+      </Modal>
+      <Modal
+        className="fade zoomIn"
+        size="sm"
+        show={modal_UpdateSource}
+        onHide={() => {
+          tog_UpdateSource();
+        }}
+        centered
+      >
+        <Modal.Header className="px-4 pt-4" closeButton>
+          <h5 className="modal-title fs-18" id="exampleModalLabel">
+            Update Source
+          </h5>
+        </Modal.Header>
+        <Modal.Body className="p-4">
+          <div
+            id="alert-error-msg"
+            className="d-none alert alert-danger py-2"
+          ></div>
+          <Form className="tablelist-form" onSubmit={onSubmitUpdatedSource}>
+            <input type="hidden" id="id-field" />
+            <Row>
+              <Col lg={12}>
+                <div className="mb-3">
+                  <Form.Label htmlFor="name">How Know</Form.Label>
+                  <Form.Control
+                    type="text"
+                    id="name"
+                    name="name"
+                    onChange={handleName}
+                    value={sourceName}
+                  />
+                </div>
+              </Col>
+              <Col lg={12}>
+                <div className="hstack gap-2 justify-content-end">
+                  <Button
+                    className="btn-ghost-danger"
+                    onClick={() => {
+                      tog_UpdateSource();
+                      setSource(initialSource);
+                    }}
+                    data-bs-dismiss="modal"
+                  >
+                    <i className="ri-close-line align-bottom me-1"></i> Close
+                  </Button>
+                  <Button
+                    variant="primary"
+                    id="add-btn"
+                    type="submit"
+                    onClick={() => {
+                      tog_UpdateSource();
+                    }}
+                  >
+                    Update
                   </Button>
                 </div>
               </Col>

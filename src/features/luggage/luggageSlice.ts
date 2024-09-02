@@ -44,6 +44,14 @@ export const luggageSlice = createApi({
         }),
         invalidatesTags: ["Luggage"],
       }),
+      updateLuggage: builder.mutation<void, Luggage>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updateLuggage/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["Luggage"],
+      }),
     };
   },
 });
@@ -53,4 +61,5 @@ export const {
   useAddNewLuggageMutation,
   useDeleteLuggageMutation,
   useFetchLuggageByIdQuery,
+  useUpdateLuggageMutation
 } = luggageSlice;

@@ -62,6 +62,14 @@ export const schoolSlice = createApi({
         }),
         invalidatesTags: ["School"],
       }),
+      updateSchool: builder.mutation<void, School>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updateSchool/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["School"],
+      }),
     };
   },
 });
@@ -71,4 +79,5 @@ export const {
   useDeleteSchoolMutation,
   useGetAllSchoolsQuery,
   useFetchSchoolByIdQuery,
+  useUpdateSchoolMutation
 } = schoolSlice;

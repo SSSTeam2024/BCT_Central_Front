@@ -31,7 +31,7 @@ const TeamDetails = () => {
     setmodal_AddShippingModals(!modal_AddShippingModals);
   }
   const [activeVerticalTab, setactiveVerticalTab] = useState<number>(1);
-  const [seletedCountry, setseletedCountry] = useState("");
+
   return (
     <React.Fragment>
       <div className="page-content">

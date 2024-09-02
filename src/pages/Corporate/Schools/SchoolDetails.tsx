@@ -76,12 +76,6 @@ const SchoolDetails = () => {
                                 </td>
                               </tr>
                               <tr>
-                                <td>Activity</td>
-                                <td className="fw-medium">
-                                  {LocationSchool.state.activity}
-                                </td>
-                              </tr>
-                              <tr>
                                 <td>Bank Name</td>
                                 <td className="fw-medium">
                                   {LocationSchool.state.bank_name}

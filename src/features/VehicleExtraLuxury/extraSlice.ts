@@ -36,8 +36,16 @@ export const extraSlice = createApi({
         }),
         invalidatesTags: ["Extra"],
       }),
+      updateExtra: builder.mutation<void, Extra>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updateLuxury/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["Extra"],
+      }),
     };
   },
 });
 
-export const { useAddNewExtraMutation, useGetAllExtrasQuery, useDeleteExtraMutation } = extraSlice;
+export const { useAddNewExtraMutation, useGetAllExtrasQuery, useDeleteExtraMutation, useUpdateExtraMutation } = extraSlice;

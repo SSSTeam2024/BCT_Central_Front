@@ -40,6 +40,14 @@ export const regionalPricingSlice = createApi({
         }),
         invalidatesTags: ["RegionalPricing"],
       }),
+      updateRegionalPricing: builder.mutation<void, RegionalPricing>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updateRegionalPricing/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["RegionalPricing"],
+      }),
     };
   },
 });
@@ -48,4 +56,5 @@ export const {
   useAddNewRegionalPricingMutation,
   useDeleteRegionalPricingMutation,
   useGetAllRegionalPricingsQuery,
+  useUpdateRegionalPricingMutation
 } = regionalPricingSlice;

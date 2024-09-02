@@ -18,14 +18,14 @@ export interface FeedBack {
 export const feedbackSlice = createApi({
   reducerPath: "feedback",
   baseQuery: fetchBaseQuery({
-    baseUrl: `${process.env.REACT_APP_BASE_URL}/api/feedback`,
+    baseUrl: `${process.env.REACT_APP_BASE_URL}/api/driver-feedback`,
   }),
   tagTypes: ["FeedBack"],
   endpoints(builder) {
     return {
       getAllFeedBacks: builder.query<FeedBack[], number | void>({
         query() {
-          return "/getAllFeedbacks";
+          return "/get-all-drivers-feedbacks";
         },
         providesTags: ["FeedBack"],
       }),

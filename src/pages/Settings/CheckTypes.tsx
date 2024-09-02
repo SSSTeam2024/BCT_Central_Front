@@ -125,8 +125,23 @@ const CheckTypes = () => {
     },
     {
       name: <span className="font-weight-bold fs-13">Image</span>,
-      selector: (row: any) => row.checkType_image,
+      // selector: (row: any) => row.checkType_image,
+      selector: (row: any) => {
+        return (
+          <div className="d-flex align-items-center gap-2">
+            <div className="flex-shrink-0">
+              <img
+                src={`${process.env.REACT_APP_BASE_URL}/checkTypeFiles/${row.checkType_image}`}
+                alt=""
+                className="avatar-xs rounded-circle user-profile-img"
+                id="photos"
+              />
+            </div>
+          </div>
+        );
+      },
       sortable: true,
+      width: "120px",
     },
     {
       name: <span className="font-weight-bold fs-13">Category</span>,
@@ -237,7 +252,7 @@ const CheckTypes = () => {
                         (e.currentTarget.style.transform = "scale(1)")
                       }
                     ></i>{" "}
-                    <span>Add New Check Type</span>
+                    <span>New Check Type</span>
                   </button>
                 </div>
               </Col>

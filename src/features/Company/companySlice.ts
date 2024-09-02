@@ -54,6 +54,14 @@ export const companySlice = createApi({
         },
         invalidatesTags: ["Company"],
       }),
+      updateCompany: builder.mutation<void, Company>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updateCompany/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["Company"],
+      }),
       deleteCompany: builder.mutation<void, Company>({
         query: (_id) => ({
           url: `/deleteCompany/${_id}`,
@@ -70,4 +78,5 @@ export const {
   useDeleteCompanyMutation,
   useGetAllCompanyQuery,
   useFetchCompanyByIdQuery,
+  useUpdateCompanyMutation
 } = companySlice;

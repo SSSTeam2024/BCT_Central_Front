@@ -44,6 +44,14 @@ export const shortCodeSlice = createApi({
         }),
         invalidatesTags: ["ShortCode"],
       }),
+      updateShortCode: builder.mutation<void, ShortCode>({
+        query: ({ _id, ...rest }) => ({
+          url: `/update-short-code/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["ShortCode"],
+      }),
     };
   },
 });
@@ -52,5 +60,5 @@ export const {
   useAddNewShortCodeMutation,
   useDeleteShortCodeMutation,
   useGetAllShortCodesQuery,
-//   useFetchLuggageByIdQuery,
+useUpdateShortCodeMutation
 } = shortCodeSlice;

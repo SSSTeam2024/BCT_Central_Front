@@ -155,7 +155,7 @@ const VerticalLayout = (props: any) => {
   }
 
   function tog_Calendar() {
-    navigate("/scheduling");
+    navigate("/calendar");
   }
 
   const { data: AllEmailQueue = [] } = useGetAllEmailQueuesQuery();

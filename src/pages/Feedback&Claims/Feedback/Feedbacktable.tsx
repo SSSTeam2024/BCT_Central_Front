@@ -15,7 +15,7 @@ const Feedbacktable = ({ reviews }: any) => {
   const [showReadMoreButton, setShowReadMoreButton] = useState<boolean>(false);
 
   const ref = useRef<HTMLParagraphElement | null>(null);
-
+  console.log("reviews", reviews);
   useEffect(() => {
     if (ref.current) {
       setShowReadMoreButton(
@@ -35,37 +35,14 @@ const Feedbacktable = ({ reviews }: any) => {
           {(reviews || []).map((item: any, key: number) => (
             <Card className="me-3" key={key}>
               <Card.Body>
-                <img src={item.img} alt="" className="avatar-sm rounded" />
+                <img
+                  src={`${process.env.REACT_APP_BASE_URL}/driverFiles/profileImages/${item.driver_id.profile_image}`}
+                  alt=""
+                  className="avatar-sm rounded"
+                />
                 <h5 className="mb-2 mt-3">{item.name}</h5>
-                <div className="text-warning mb-3">
-                  <i className="ri-star-s-fill"></i>
-                  <i className="ri-star-s-fill"></i>
-                  <i className="ri-star-s-fill"></i>
-                  <i className="ri-star-s-fill"></i>
-                  <i className="ri-star-s-fill"></i>
-                </div>
-                <p
-                  className="mb-0 text-muted fs-15"
-                  //   style={isOpen ? undefined : paragraphStyles}
-                  //   ref={ref}
-                >
-                  {item.subTitle}
-                </p>
-                {/* <div className="text-end">
-                  {showReadMoreButton && (
-                    <Link
-                      to="#"
-                      className="link-dark fw-medium"
-                      onClick={() => setIsOpen(!isOpen)}
-                    >
-                      {isOpen ? (
-                        <i className="ri-arrow-up-s-line align-middle"></i>
-                      ) : (
-                        <i className="ri-arrow-down-s-line align-middle"></i>
-                      )}
-                    </Link>
-                  )}
-                </div> */}
+                <span>Category : </span>
+                <span className="mb-0 text-muted fs-15">{item.category}</span>
               </Card.Body>
             </Card>
           ))}

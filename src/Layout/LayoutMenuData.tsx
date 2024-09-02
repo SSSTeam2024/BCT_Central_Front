@@ -461,34 +461,12 @@ const Navdata = () => {
           icon: "mdi mdi-playlist-plus",
           parentId: "Revelance",
         },
-      ],
-    },
-    {
-      id: "Help",
-      label: "Help",
-      icon: "mdi mdi-hand-heart",
-      link: "/#",
-      click: function (e: any) {
-        e.preventDefault();
-        setIsHelp(!isHelp);
-        setIscurrentState("Help");
-        updateIconSidebar(e);
-      },
-      stateVariables: isHelp,
-      subItems: [
-        {
-          id: "User Manual",
-          label: "User Manual",
-          link: "/user-manual",
-          icon: "mdi mdi-book-open-page-variant",
-          parentId: "Help",
-        },
         {
           id: "ReportError",
-          label: "Report an Error",
-          link: "/report-error",
+          label: "Errors Reported ",
+          link: "/errors-reported",
           icon: "mdi mdi-bug",
-          parentId: "Help",
+          parentId: "Revelance",
         },
       ],
     },

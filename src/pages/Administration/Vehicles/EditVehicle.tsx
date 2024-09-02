@@ -1,3 +1,4 @@
+import { useGetAllVehicleTypesQuery } from "features/VehicleType/vehicleTypeSlice";
 import React, { useState } from "react";
 import {
   Button,
@@ -5,101 +6,967 @@ import {
   Col,
   Container,
   Form,
+  Image,
   Modal,
   Nav,
   Row,
   Tab,
 } from "react-bootstrap";
 import Flatpickr from "react-flatpickr";
-import { useLocation } from "react-router-dom";
-import Select from "react-select";
+import { useLocation, useNavigate } from "react-router-dom";
 
-const colourOptions: any = [
-  { value: "Parking", label: "Parking" },
-  { value: "Toll charges", label: "Toll charges" },
-  { value: "Drivers accommodation", label: "Drivers accommodation" },
-];
+import { Document, Page } from "react-pdf";
+import { pdfjs } from "react-pdf";
+import "@react-pdf-viewer/core/lib/styles/index.css";
+import Swal from "sweetalert2";
+import {
+  useUpdateVehicleMutation,
+  Vehicle,
+} from "features/Vehicles/vehicleSlice";
+import Select from "react-select";
+import { useGetAllExtrasQuery } from "features/VehicleExtraLuxury/extraSlice";
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
+function convertToBase64(
+  file: File
+): Promise<{ base64Data: string; extension: string }> {
+  return new Promise((resolve, reject) => {
+    const fileReader = new FileReader();
+    fileReader.onload = () => {
+      const base64String = fileReader.result as string;
+      const [, base64Data] = base64String.split(","); // Extract only the Base64 data
+      const extension = file.name.split(".").pop() ?? ""; // Get the file extension
+      resolve({ base64Data, extension });
+    };
+    fileReader.onerror = (error) => {
+      reject(error);
+    };
+    fileReader.readAsDataURL(file);
+  });
+}
 
 const EditVehicle = () => {
   document.title = "Edit Vehicle | Bouden Coach Travel";
+  const { data: AllVehicleTypes = [] } = useGetAllVehicleTypesQuery();
+  const { data: AllExtras = [] } = useGetAllExtrasQuery();
+  const vehicleLocation = useLocation();
 
-  const [changeColor, setChangeColor] = useState<boolean>(false);
-
-  // function for handleClick
-  const handleClick = () => {
-    setChangeColor(!changeColor);
+  const customStyles = {
+    control: (styles: any, { isFocused }: any) => ({
+      ...styles,
+      minHeight: "41px",
+      borderColor: isFocused ? "#4b93ff" : "#e9ebec",
+      boxShadow: isFocused ? "0 0 0 1px #4b93ff" : styles.boxShadow,
+      ":hover": {
+        borderColor: "#4b93ff",
+      },
+    }),
+    multiValue: (styles: any, { data }: any) => {
+      return {
+        ...styles,
+        backgroundColor: "#4b93ff",
+      };
+    },
+    multiValueLabel: (styles: any, { data }: any) => ({
+      ...styles,
+      backgroundColor: "#4b93ff",
+      color: "white",
+    }),
+    multiValueRemove: (styles: any, { data }: any) => ({
+      ...styles,
+      color: "white",
+      backgroundColor: "#4b93ff",
+      ":hover": {
+        backgroundColor: "#4b93ff",
+        color: "white",
+      },
+    }),
   };
 
-  const [changeColorAC, setChangeColorAC] = useState<boolean>(false);
-
-  // function for handleClick AC
-  const handleClickAC = () => {
-    setChangeColorAC(!changeColorAC);
+  const [numPages, setNumPages] = useState<number | null>(null);
+  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+    setNumPages(numPages);
   };
 
-  const [changeColorFrigo, setChangeColorFrigo] = useState<boolean>(false);
+  const [modal_MOTFile, setmodal_MOTFile] = useState<boolean>(false);
+  function tog_MOTFileModal() {
+    setmodal_MOTFile(!modal_MOTFile);
+  }
 
-  // function for handleClick Frigo
-  const handleClickFrigo = () => {
-    setChangeColorFrigo(!changeColorFrigo);
-  };
+  const [modal_TaxFile, setmodal_TaxFile] = useState<boolean>(false);
+  function tog_TaxFileModal() {
+    setmodal_TaxFile(!modal_TaxFile);
+  }
 
-  const [changeColorScreen, setChangeColorScreen] = useState<boolean>(false);
+  const [modal_InsuranceFile, setmodal_InsuranceFile] =
+    useState<boolean>(false);
+  function tog_InsuranceFileModal() {
+    setmodal_InsuranceFile(!modal_InsuranceFile);
+  }
 
-  // function for handleClick Screen
-  const handleClickScreen = () => {
-    setChangeColorScreen(!changeColorScreen);
-  };
+  const [showVehicleModel, setShowVehicleModel] = useState<boolean>(false);
 
-  const [changeColorAutomatic, setChangeColorAutomatic] =
+  const [showVehicleType, setShowVehicleType] = useState<boolean>(false);
+
+  const [showRegistrationDate, setShowRegistrationDate] =
     useState<boolean>(false);
 
-  // function for handleClick Automatic
-  const handleClickAutomatic = () => {
-    setChangeColorAutomatic(!changeColorAutomatic);
+  const [showPurchaseDate, setShowPurchaseDate] = useState<boolean>(false);
+
+  const [showSaleDate, setShowSaleDate] = useState<boolean>(false);
+
+  const [showVehicleStatus, setShowVehicleStatus] = useState<boolean>(false);
+
+  const [showFuelType, setShowFuelType] = useState<boolean>(false);
+
+  const [showSpeedLimit, setShowSpeedLimit] = useState<boolean>(false);
+
+  const [showInsuranceType, setShowInsuranceType] = useState<boolean>(false);
+
+  const [showOwnership, setShowOwnership] = useState<boolean>(false);
+
+  const [showMOTExpiry, setShowMOTExpiry] = useState<boolean>(false);
+
+  const [showTaxExpiry, setShowTaxExpiry] = useState<boolean>(false);
+
+  const [showInsuranceExpiry, setShowInsuranceExpiry] =
+    useState<boolean>(false);
+
+  const [showInspectionDue, setShowInspectionDue] = useState<boolean>(false);
+
+  const [showServiceDue, setServiceDue] = useState<boolean>(false);
+
+  const [showTachoCalibration, setShowTachoCalibratio] =
+    useState<boolean>(false);
+
+  const [showCOIFCertificateDate, setShowCOIFCertificateDate] =
+    useState<boolean>(false);
+
+  const [showHPStartDate, setHPStartDate] = useState<boolean>(false);
+
+  const [showHPEndDate, setShowHPEndDate] = useState<boolean>(false);
+
+  const [vehicleReg, setVehicleReg] = useState<string>(
+    vehicleLocation?.state?.registration_number ?? ""
+  );
+
+  const [selectedVehicleModel, setSelectedVehicleModel] = useState<string>("");
+
+  const [selectedVehicleStatus, setSelectedVehicleStatus] =
+    useState<string>("");
+
+  const [selectedFuelType, setSelectedFuelType] = useState<string>("");
+
+  const [selectedSpeedLimit, setSelectedSpeedLimit] = useState<string>("");
+
+  const [selectedInsuranceType, setSelectedInsuranceType] =
+    useState<string>("");
+
+  const [selectedOwnership, setSelectedOwnership] = useState<string>("");
+
+  const [vehicleColor, setVehicleColor] = useState<string>(
+    vehicleLocation?.state?.color ?? ""
+  );
+  const [maxPassenger, setMaxPassenger] = useState<string>(
+    vehicleLocation?.state?.max_passengers ?? ""
+  );
+  const [fleetNumber, setFleetNumber] = useState<string>(
+    vehicleLocation?.state?.fleet_number ?? ""
+  );
+  const [engineNumber, setEngineNumber] = useState<string>(
+    vehicleLocation?.state?.engine_number ?? ""
+  );
+  const [ownedOwnerName, setOwnedOwnerName] = useState<string>(
+    vehicleLocation?.state?.owner_name ?? ""
+  );
+  const [vehicleMileage, setVehicleMileage] = useState<string>(
+    vehicleLocation?.state?.mileage ?? ""
+  );
+  const [selectedRegistrationDate, setSelectedRegistrationDate] =
+    useState<Date | null>(null);
+
+  const [selectedPurchaseDate, setSelectedPurchaseDate] = useState<Date | null>(
+    null
+  );
+
+  const [selectedSaleDate, setSelectedSaleDate] = useState<Date | null>(null);
+
+  const [selectedMOTExpiryDate, setSelectedMOTExpiryDate] =
+    useState<Date | null>(null);
+
+  const [selectedInspectionDue, setSelectedInspectionDue] =
+    useState<Date | null>(null);
+
+  const [selectedTaxExpiryDate, setSelectedTaxExpiryDate] =
+    useState<Date | null>(null);
+
+  const [selectedInsuranceExpiryDate, setSelectedInsuranceExpiryDate] =
+    useState<Date | null>(null);
+
+  const [selectedServiceDue, setSelectedServiceDuee] = useState<Date | null>(
+    null
+  );
+
+  const [selectedTachoCalibration, setSelectedTachoCalibration] =
+    useState<Date | null>(null);
+
+  const [selectedCOIFCertificateDate, setSelectedCOIFCertificateDate] =
+    useState<Date | null>(null);
+
+  const [selectedHPStartDate, setSelectedHPStartDate] = useState<Date | null>(
+    null
+  );
+
+  const [selectedHPEndDate, setSelectedHPEndDate] = useState<Date | null>(null);
+
+  const [purchasePrice, setPurchasePrice] = useState<string>(
+    vehicleLocation?.state?.purchase_price ?? ""
+  );
+  const [depotName, setDepotName] = useState<string>(
+    vehicleLocation?.state?.depot_name ?? ""
+  );
+  const [vehicleManufacturer, setVehicleManufacturer] = useState<string>(
+    vehicleLocation?.state?.manufacturer ?? ""
+  );
+  const [engineSize, setEngineSize] = useState<string>(
+    vehicleLocation?.state?.engine_size ?? ""
+  );
+  const [insurancePolicyNumber, setInsurancePolicyNumber] = useState<string>(
+    vehicleLocation?.state?.insurance_policy_number ?? ""
+  );
+  const [vehicleNotes, setVehicleNotes] = useState<string>(
+    vehicleLocation?.state?.note ?? ""
+  );
+  const [cOIFCertificateNumber, setCOIFCertificateNumber] = useState<string>(
+    vehicleLocation?.state?.coif_certificate_number ?? ""
+  );
+  const [hPReferenceNo, setHPReferenceNo] = useState<string>(
+    vehicleLocation?.state?.hp_reference_no ?? ""
+  );
+  const [monthlyRepaymentAmount, setMonthlyRepaymentAmount] = useState<string>(
+    vehicleLocation?.state?.monthly_repayment_amount ?? ""
+  );
+  const [hpCompany, setHpCompany] = useState<string>(
+    vehicleLocation?.state?.hp_company ?? ""
+  );
+
+  const [selectedVehiclType, setSelectedVehicleType] = useState<string>("");
+
+  const handleVehicleReg = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setVehicleReg(e.target.value);
+  };
+  const handleSelectVehicleModel = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const value = event.target.value;
+    setSelectedVehicleModel(value);
+  };
+  const handleSelectDepotName = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setDepotName(event.target.value);
+  };
+  const handleVehicleColor = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setVehicleColor(e.target.value);
+  };
+  const handleMaxPassenger = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMaxPassenger(e.target.value);
+  };
+  const handleFleetNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFleetNumber(e.target.value);
+  };
+  const handleOwnedOwnerName = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setOwnedOwnerName(e.target.value);
+  };
+  const handleEngineNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEngineNumber(e.target.value);
+  };
+  const handleVehicleMileage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setVehicleMileage(e.target.value);
+  };
+  const handlePurchasePrice = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPurchasePrice(e.target.value);
+  };
+  const handleManufacturer = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setVehicleManufacturer(e.target.value);
+  };
+  const handleEngineSize = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEngineSize(e.target.value);
+  };
+  const handleInsurancePolicyNumber = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setInsurancePolicyNumber(e.target.value);
+  };
+  const handleVehicleNotes = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setVehicleNotes(e.target.value);
+  };
+  const handleCOIFCertificateNumber = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setCOIFCertificateNumber(e.target.value);
+  };
+  const handleHPReferenceNo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setHPReferenceNo(e.target.value);
+  };
+  const handleMonthlyRepaymentAmount = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setMonthlyRepaymentAmount(e.target.value);
+  };
+  const handleHpCompany = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setHpCompany(e.target.value);
+  };
+  const handleSelectVehicleType = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const value = event.target.value;
+    setSelectedVehicleType(value);
+  };
+  const handleRegistrationDateChange = (selectedDates: Date[]) => {
+    setSelectedRegistrationDate(selectedDates[0]);
+  };
+  const handlePurchaseDateChange = (selectedDates: Date[]) => {
+    setSelectedPurchaseDate(selectedDates[0]);
+  };
+  const handleSaleDateChange = (selectedDates: Date[]) => {
+    setSelectedSaleDate(selectedDates[0]);
+  };
+  const handleSelectVehicleStatus = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const value = event.target.value;
+    setSelectedVehicleStatus(value);
+  };
+  const handleSelectFuelType = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const value = event.target.value;
+    setSelectedFuelType(value);
+  };
+  const handleSelectSpeedLimit = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const value = event.target.value;
+    setSelectedSpeedLimit(value);
+  };
+  const handleSelectInsuranceType = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const value = event.target.value;
+    setSelectedInsuranceType(value);
+  };
+  const handleSelectOwnership = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const value = event.target.value;
+    setSelectedOwnership(value);
+  };
+  const handleMOTExpiryDateChange = (selectedDates: Date[]) => {
+    setSelectedMOTExpiryDate(selectedDates[0]);
+  };
+  const handleTaxDateChange = (selectedDates: Date[]) => {
+    setSelectedTaxExpiryDate(selectedDates[0]);
+  };
+  const handleInsuranceDateChange = (selectedDates: Date[]) => {
+    setSelectedInsuranceExpiryDate(selectedDates[0]);
+  };
+  const handleInspectionDateChange = (selectedDates: Date[]) => {
+    setSelectedInspectionDue(selectedDates[0]);
+  };
+  const handleServiceDueDateChange = (selectedDates: Date[]) => {
+    setSelectedServiceDuee(selectedDates[0]);
+  };
+  const handleTachoCalibrationDateChange = (selectedDates: Date[]) => {
+    setSelectedTachoCalibration(selectedDates[0]);
+  };
+  const handleCOIFCertificateDateChange = (selectedDates: Date[]) => {
+    setSelectedCOIFCertificateDate(selectedDates[0]);
+  };
+  const handleHPStarDateChange = (selectedDates: Date[]) => {
+    setSelectedHPStartDate(selectedDates[0]);
+  };
+  const handleHPEndDateChange = (selectedDates: Date[]) => {
+    setSelectedHPEndDate(selectedDates[0]);
   };
 
-  const [selectedFiles, setselectedFiles] = useState([]);
+  const [selectedValues, setSelectedValues] = useState(
+    vehicleLocation?.state?.extra || []
+  );
 
-  function handleAcceptedFiles(files: any) {
-    files.map((file: any) =>
-      Object.assign(file, {
-        preview: URL.createObjectURL(file),
-        formattedSize: formatBytes(file.size),
+  const allExtraOptions = AllExtras.map((extra) => ({
+    label: extra.name,
+    value: extra.name,
+  }));
+
+  const defaultExtraOptions =
+    vehicleLocation?.state?.extra?.map((item: any) => ({
+      label: item,
+      value: item,
+    })) || [];
+
+  const handleSelectValueColumnChange = (selectedOptions: any) => {
+    const values = selectedOptions.map((option: any) => option.value);
+    setSelectedValues(values);
+  };
+
+  const navigate = useNavigate();
+
+  const notifySuccess = () => {
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: "Driver Account Updated successfully",
+      showConfirmButton: false,
+      timer: 2500,
+    });
+  };
+
+  const notifyError = (err: any) => {
+    Swal.fire({
+      position: "center",
+      icon: "error",
+      title: `Sothing Wrong, ${err}`,
+      showConfirmButton: false,
+      timer: 2500,
+    });
+  };
+
+  const [updateVehicleProfileMutation] = useUpdateVehicleMutation();
+
+  const initialVehicleAccount = {
+    _id: "",
+    registration_number: "",
+    model: "",
+    color: "",
+    type: "",
+    max_passengers: "",
+    fleet_number: "",
+    engine_number: "",
+    sale_date: "",
+    purchase_price: "",
+    purchase_date: "",
+    depot_name: "",
+    registration_date: "",
+    mileage: "",
+    statusVehicle: "",
+    manufacturer: "",
+    engine_size: "",
+    fuel_type: "",
+    speed_limit: "",
+    insurance_type: "",
+    insurance_policy_number: "",
+    ownership: "",
+    owner_name: "",
+    note: "",
+    extra: [""],
+    vehicle_images_base64_string: [""],
+    vehicle_images_extension: [""],
+    vehicle_images: [""],
+    mot_expiry: "",
+    mot_file_base64_string: "",
+    mot_file_extension: "",
+    tax_expiry: "",
+    tax_file_base64_string: "",
+    tax_file_extension: "",
+    insurance_file_base64_string: "",
+    insurance_file_extension: "",
+    insurance_expiry: "",
+    inspection_due: "",
+    service_due: "",
+    tacho_calibration_due: "",
+    coif_certificate_number: "",
+    coif_certificate_date: "",
+    hp_start_date: "",
+    hp_end_date: "",
+    hp_reference_no: "",
+    monthly_repayment_amount: "",
+    hp_company: "",
+    mot_file: "",
+    tax_file: "",
+    insurance_file: "",
+  };
+
+  const [updateVehicleProfile, setUpdateVehicleProfile] = useState<Vehicle>(
+    initialVehicleAccount
+  );
+
+  // Avatar
+  const handleFileUpload = async (files: File[]) => {
+    const base64Images = await Promise.all(
+      files.map(async (file: File) => {
+        const { base64Data, extension } = await convertToBase64(file);
+        return {
+          base64Data,
+          extension,
+          fileName: file.name,
+        };
       })
     );
-    setselectedFiles(files);
-  }
 
-  /* Formats the size */
-  function formatBytes(bytes: any, decimals = 2) {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    setUpdateVehicleProfile((prevState) => ({
+      ...prevState,
+      vehicle_images: [
+        ...prevState.vehicle_images,
+        ...base64Images.map(
+          (img) => `data:image/${img.extension};base64,${img.base64Data}`
+        ),
+      ],
+      vehicle_images_base64_string: [
+        ...prevState.vehicle_images_base64_string,
+        ...base64Images.map((img) => img.base64Data),
+      ],
+      vehicle_images_extension: [
+        ...prevState.vehicle_images_extension,
+        ...base64Images.map((img) => img.extension),
+      ],
+    }));
+  };
 
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-  }
-  const [modal_AddExtra, setmodal_AddExtra] = useState<boolean>(false);
-  function tog_AddExtra() {
-    setmodal_AddExtra(!modal_AddExtra);
-  }
+  const allImages = [
+    ...vehicleLocation.state.vehicle_images,
+    // ...updateVehicleProfile.vehicle_images,
+  ];
 
-  const LocationEdit = useLocation()
+  // Handle image removal
+  const handleRemoveImage = (index: any) => {
+    setUpdateVehicleProfile((prevState) => {
+      const newVehicleImages = [...prevState.vehicle_images];
+      newVehicleImages.splice(index, 1);
+
+      const newVehicleImagesBase64String = [
+        ...prevState.vehicle_images_base64_string,
+      ];
+      newVehicleImagesBase64String.splice(index, 1);
+
+      const newVehicleImagesExtension = [...prevState.vehicle_images_extension];
+      newVehicleImagesExtension.splice(index, 1);
+
+      return {
+        ...prevState,
+        vehicle_images: newVehicleImages,
+        vehicle_images_base64_string: newVehicleImagesBase64String,
+        vehicle_images_extension: newVehicleImagesExtension,
+      };
+    });
+  };
+
+  // mot file
+  const handleFileUploadMotFile = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = (
+      document.getElementById("mot_file_base64_string") as HTMLFormElement
+    ).files[0];
+    if (file) {
+      const { base64Data, extension } = await convertToBase64(file);
+      const profileImage = base64Data + "." + extension;
+      setUpdateVehicleProfile({
+        ...updateVehicleProfile,
+        mot_file: profileImage,
+        mot_file_base64_string: base64Data,
+        mot_file_extension: extension,
+      });
+    }
+  };
+
+  // tax file
+  const handleFileUploadTaxFile = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = (
+      document.getElementById("tax_file_base64_string") as HTMLFormElement
+    ).files[0];
+    if (file) {
+      const { base64Data, extension } = await convertToBase64(file);
+      const profileImage = base64Data + "." + extension;
+      setUpdateVehicleProfile({
+        ...updateVehicleProfile,
+        tax_file: profileImage,
+        tax_file_base64_string: base64Data,
+        tax_file_extension: extension,
+      });
+    }
+  };
+
+  // insurance file
+  const handleFileUploadInsuranceFile = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = (
+      document.getElementById("insurance_file_base64_string") as HTMLFormElement
+    ).files[0];
+    if (file) {
+      const { base64Data, extension } = await convertToBase64(file);
+      const profileImage = base64Data + "." + extension;
+      setUpdateVehicleProfile({
+        ...updateVehicleProfile,
+        insurance_file: profileImage,
+        insurance_file_base64_string: base64Data,
+        insurance_file_extension: extension,
+      });
+    }
+  };
+
+  const {
+    _id,
+    registration_number,
+    model,
+    color,
+    type,
+    max_passengers,
+    fleet_number,
+    engine_number,
+    sale_date,
+    purchase_price,
+    purchase_date,
+    depot_name,
+    registration_date,
+    mileage,
+    statusVehicle,
+    manufacturer,
+    engine_size,
+    fuel_type,
+    speed_limit,
+    insurance_type,
+    insurance_policy_number,
+    ownership,
+    owner_name,
+    note,
+    extra,
+    vehicle_images_base64_string,
+    vehicle_images_extension,
+    vehicle_images,
+    mot_expiry,
+    mot_file_base64_string,
+    mot_file_extension,
+    tax_expiry,
+    tax_file_base64_string,
+    tax_file_extension,
+    insurance_file_base64_string,
+    insurance_file_extension,
+    insurance_expiry,
+    inspection_due,
+    service_due,
+    tacho_calibration_due,
+    coif_certificate_number,
+    coif_certificate_date,
+    hp_start_date,
+    hp_end_date,
+    hp_reference_no,
+    monthly_repayment_amount,
+    hp_company,
+    mot_file,
+    tax_file,
+    insurance_file,
+  } = updateVehicleProfile as Vehicle;
+
+  const onSubmitUpdateDriverProfile = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
+    try {
+      updateVehicleProfile["_id"] = vehicleLocation?.state?._id!;
+      if (vehicleReg === "") {
+        updateVehicleProfile["registration_number"] =
+          vehicleLocation?.state?.registration_number!;
+      } else {
+        updateVehicleProfile["registration_number"] = vehicleReg;
+      }
+
+      if (selectedVehicleModel === "") {
+        updateVehicleProfile["model"] = vehicleLocation?.state?.model!;
+      } else {
+        updateVehicleProfile["model"] = selectedVehicleModel;
+      }
+
+      if (vehicleColor === "") {
+        updateVehicleProfile["color"] = vehicleLocation?.state?.color!;
+      } else {
+        updateVehicleProfile["color"] = vehicleColor;
+      }
+
+      if (selectedVehiclType === "") {
+        updateVehicleProfile["type"] = vehicleLocation?.state?.type!;
+      } else {
+        updateVehicleProfile["type"] = selectedVehiclType;
+      }
+
+      if (maxPassenger === "") {
+        updateVehicleProfile["max_passengers"] =
+          vehicleLocation?.state?.max_passengers!;
+      } else {
+        updateVehicleProfile["max_passengers"] = maxPassenger;
+      }
+
+      if (fleetNumber === "") {
+        updateVehicleProfile["fleet_number"] =
+          vehicleLocation?.state?.fleet_number!;
+      } else {
+        updateVehicleProfile["fleet_number"] = fleetNumber;
+      }
+
+      if (engineNumber === "") {
+        updateVehicleProfile["engine_number"] =
+          vehicleLocation?.state?.engine_number!;
+      } else {
+        updateVehicleProfile["engine_number"] = engineNumber;
+      }
+
+      if (vehicleMileage === "") {
+        updateVehicleProfile["mileage"] = vehicleLocation?.state?.mileage!;
+      } else {
+        updateVehicleProfile["mileage"] = vehicleMileage;
+      }
+
+      if (selectedRegistrationDate === null) {
+        updateVehicleProfile["registration_date"] =
+          vehicleLocation?.state?.registration_date!;
+      } else {
+        updateVehicleProfile["registration_date"] =
+          selectedRegistrationDate?.toDateString()!;
+      }
+
+      if (depotName === "") {
+        updateVehicleProfile["depot_name"] =
+          vehicleLocation?.state?.depot_name!;
+      } else {
+        updateVehicleProfile["depot_name"] = depotName;
+      }
+
+      if (selectedPurchaseDate === null) {
+        updateVehicleProfile["purchase_date"] =
+          vehicleLocation?.state?.purchase_date!;
+      } else {
+        updateVehicleProfile["purchase_date"] =
+          selectedPurchaseDate?.toDateString()!;
+      }
+
+      if (purchasePrice === "") {
+        updateVehicleProfile["purchase_price"] =
+          vehicleLocation?.state?.purchase_price!;
+      } else {
+        updateVehicleProfile["purchase_price"] = purchasePrice;
+      }
+
+      if (selectedSaleDate === null) {
+        updateVehicleProfile["sale_date"] = vehicleLocation?.state?.sale_date!;
+      } else {
+        updateVehicleProfile["sale_date"] = selectedSaleDate?.toDateString()!;
+      }
+
+      if (selectedVehicleStatus === "") {
+        updateVehicleProfile["statusVehicle"] =
+          vehicleLocation?.state?.statusVehicle!;
+      } else {
+        updateVehicleProfile["statusVehicle"] = selectedVehicleStatus;
+      }
+
+      if (vehicleManufacturer === "") {
+        updateVehicleProfile["manufacturer"] =
+          vehicleLocation?.state?.manufacturer!;
+      } else {
+        updateVehicleProfile["manufacturer"] = vehicleManufacturer;
+      }
+
+      if (engineSize === "") {
+        updateVehicleProfile["engine_size"] =
+          vehicleLocation?.state?.engine_size!;
+      } else {
+        updateVehicleProfile["engine_size"] = engineSize;
+      }
+
+      if (selectedFuelType === "") {
+        updateVehicleProfile["fuel_type"] = vehicleLocation?.state?.fuel_type!;
+      } else {
+        updateVehicleProfile["fuel_type"] = selectedFuelType;
+      }
+
+      if (selectedSpeedLimit === "") {
+        updateVehicleProfile["speed_limit"] =
+          vehicleLocation?.state?.speed_limit!;
+      } else {
+        updateVehicleProfile["speed_limit"] = selectedSpeedLimit;
+      }
+
+      if (selectedInsuranceType === "") {
+        updateVehicleProfile["insurance_type"] =
+          vehicleLocation?.state?.insurance_type!;
+      } else {
+        updateVehicleProfile["insurance_type"] = selectedInsuranceType;
+      }
+
+      if (insurancePolicyNumber === "") {
+        updateVehicleProfile["insurance_policy_number"] =
+          vehicleLocation?.state?.insurance_policy_number!;
+      } else {
+        updateVehicleProfile["insurance_policy_number"] = insurancePolicyNumber;
+      }
+
+      if (selectedOwnership === "") {
+        updateVehicleProfile["ownership"] = vehicleLocation?.state?.ownership!;
+      } else {
+        updateVehicleProfile["ownership"] = selectedOwnership;
+      }
+
+      if (vehicleNotes === "") {
+        updateVehicleProfile["note"] = vehicleLocation?.state?.note!;
+      } else {
+        updateVehicleProfile["note"] = vehicleNotes;
+      }
+
+      if (selectedMOTExpiryDate === null) {
+        updateVehicleProfile["mot_expiry"] =
+          vehicleLocation?.state?.mot_expiry!;
+      } else {
+        updateVehicleProfile["mot_expiry"] =
+          selectedMOTExpiryDate?.toDateString()!;
+      }
+
+      if (selectedTaxExpiryDate === null) {
+        updateVehicleProfile["tax_expiry"] =
+          vehicleLocation?.state?.tax_expiry!;
+      } else {
+        updateVehicleProfile["tax_expiry"] =
+          selectedTaxExpiryDate?.toDateString()!;
+      }
+
+      if (selectedInspectionDue === null) {
+        updateVehicleProfile["inspection_due"] =
+          vehicleLocation?.state?.inspection_due!;
+      } else {
+        updateVehicleProfile["inspection_due"] =
+          selectedInspectionDue?.toDateString()!;
+      }
+
+      if (selectedInsuranceExpiryDate === null) {
+        updateVehicleProfile["insurance_expiry"] =
+          vehicleLocation?.state?.insurance_expiry!;
+      } else {
+        updateVehicleProfile["insurance_expiry"] =
+          selectedInsuranceExpiryDate?.toDateString()!;
+      }
+
+      if (selectedServiceDue === null) {
+        updateVehicleProfile["service_due"] =
+          vehicleLocation?.state?.service_due!;
+      } else {
+        updateVehicleProfile["service_due"] =
+          selectedServiceDue?.toDateString()!;
+      }
+
+      if (selectedTachoCalibration === null) {
+        updateVehicleProfile["tacho_calibration_due"] =
+          vehicleLocation?.state?.tacho_calibration_due!;
+      } else {
+        updateVehicleProfile["tacho_calibration_due"] =
+          selectedTachoCalibration?.toDateString()!;
+      }
+
+      if (selectedCOIFCertificateDate === null) {
+        updateVehicleProfile["coif_certificate_date"] =
+          vehicleLocation?.state?.coif_certificate_date!;
+      } else {
+        updateVehicleProfile["coif_certificate_date"] =
+          selectedCOIFCertificateDate?.toDateString()!;
+      }
+
+      if (selectedHPStartDate === null) {
+        updateVehicleProfile["hp_start_date"] =
+          vehicleLocation?.state?.hp_start_date!;
+      } else {
+        updateVehicleProfile["hp_start_date"] =
+          selectedHPStartDate?.toDateString()!;
+      }
+
+      if (selectedHPEndDate === null) {
+        updateVehicleProfile["hp_end_date"] =
+          vehicleLocation?.state?.hp_end_date!;
+      } else {
+        updateVehicleProfile["hp_end_date"] =
+          selectedHPEndDate?.toDateString()!;
+      }
+
+      if (cOIFCertificateNumber === "") {
+        updateVehicleProfile["coif_certificate_number"] =
+          vehicleLocation?.state?.coif_certificate_number!;
+      } else {
+        updateVehicleProfile["coif_certificate_number"] = cOIFCertificateNumber;
+      }
+
+      if (hPReferenceNo === "") {
+        updateVehicleProfile["hp_reference_no"] =
+          vehicleLocation?.state?.hp_reference_no!;
+      } else {
+        updateVehicleProfile["hp_reference_no"] = hPReferenceNo;
+      }
+
+      if (monthlyRepaymentAmount === "") {
+        updateVehicleProfile["monthly_repayment_amount"] =
+          vehicleLocation?.state?.monthly_repayment_amount!;
+      } else {
+        updateVehicleProfile["monthly_repayment_amount"] =
+          monthlyRepaymentAmount;
+      }
+
+      if (hpCompany === "") {
+        updateVehicleProfile["hp_company"] =
+          vehicleLocation?.state?.hp_company!;
+      } else {
+        updateVehicleProfile["hp_company"] = hpCompany;
+      }
+
+      if (ownedOwnerName === "") {
+        updateVehicleProfile["owner_name"] =
+          vehicleLocation?.state?.owner_name!;
+      } else {
+        updateVehicleProfile["owner_name"] = ownedOwnerName;
+      }
+
+      updateVehicleProfile["extra"] = selectedValues;
+
+      if (!updateVehicleProfile.mot_file_base64_string) {
+        updateVehicleProfile["mot_file"] = vehicleLocation?.state?.mot_file!;
+        updateVehicleProfile["mot_file_base64_string"] =
+          vehicleLocation?.state?.mot_file_base64_string!;
+        updateVehicleProfile["mot_file_extension"] =
+          vehicleLocation?.state?.mot_file_extension!;
+      }
+
+      if (!updateVehicleProfile.tax_file_base64_string) {
+        updateVehicleProfile["tax_file"] = vehicleLocation?.state?.tax_file!;
+        updateVehicleProfile["tax_file_base64_string"] =
+          vehicleLocation?.state?.tax_file_base64_string!;
+        updateVehicleProfile["tax_file_extension"] =
+          vehicleLocation?.state?.tax_file_extension!;
+      }
+
+      if (!updateVehicleProfile.insurance_file_base64_string) {
+        updateVehicleProfile["insurance_file"] =
+          vehicleLocation?.state?.insurance_file!;
+        updateVehicleProfile["insurance_file_base64_string"] =
+          vehicleLocation?.state?.insurance_file_base64_string!;
+        updateVehicleProfile["insurance_file_extension"] =
+          vehicleLocation?.state?.insurance_file_extension!;
+      }
+      updateVehicleProfileMutation(updateVehicleProfile)
+        .then(() => navigate("/vehicles"))
+        .then(() => notifySuccess());
+    } catch (error) {
+      notifyError(error);
+    }
+  };
 
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          <form
-            id="createproduct-form"
-            autoComplete="off"
-            className="needs-validation"
-            noValidate
-          >
-            <Row>
-              <Card>
+          <Row>
+            <Card>
+              <Form onSubmit={onSubmitUpdateDriverProfile}>
                 <Card.Body>
                   <Tab.Container defaultActiveKey="home1">
                     <Nav
@@ -123,339 +990,534 @@ const EditVehicle = () => {
                     <Tab.Content>
                       <Tab.Pane eventKey="home1">
                         <Row>
-                          <Col lg={6}>
-                            {" "}
+                          <Col lg={7}>
                             <Card>
                               <Card.Body>
                                 <div className="mb-3">
-                                  <Form className="tablelist-form">
-                                    <input type="hidden" id="id-field" />
-                                    <Row>
-                                      <Row>
-                                        {/* Vehicle reg  == Done */}
-                                        <Col lg={6}>
-                                          <div className="mb-3">
-                                            <Form.Label htmlFor="customerName-field">
-                                              Vehicle reg
-                                            </Form.Label>
-                                            <Form.Control
-                                              type="text"
-                                              id="customerName-field"
-                                            //   placeholder="Enter vehicle name"
-                                            defaultValue={LocationEdit.state.name}
-                                              required
+                                  {/* Avatar ===  */}
+                                  <Row className="mb-3">
+                                    <div className="d-flex justify-content-center flex-wrap">
+                                      {allImages.length > 0 ? (
+                                        allImages.map((image, index) => (
+                                          <div
+                                            key={index}
+                                            className="image-wrapper"
+                                          >
+                                            <Image
+                                              src={
+                                                image.startsWith("data:image")
+                                                  ? image
+                                                  : `${process.env.REACT_APP_BASE_URL}/VehicleFiles/vehicleImages/${image}`
+                                              }
+                                              alt={`Vehicle Image ${index + 1}`}
+                                              className="img-thumbnail p-1 bg-body mt-n3"
                                             />
-                                          </div>
-                                        </Col>
-                                        {/* Vehicle make/model  == Done */}
-                                        <Col lg={6}>
-                                          <div className="mb-3">
-                                            <Form.Label htmlFor="supplierName-field">
-                                              Vehicle make/model
-                                            </Form.Label>
-                                            <select
-                                              className="form-select text-muted"
-                                              name="choices-single-default"
-                                              id="statusSelect"
-                                              required
+                                            <button
+                                              type="button"
+                                              onClick={() =>
+                                                handleRemoveImage(index)
+                                              }
+                                              className="btn btn-danger btn-sm"
                                             >
-                                              <option value="">Brand</option>
-                                              <option value="Pickups">
-                                                Tesla
-                                              </option>
-                                              <option value="Pending">
-                                                BMW
-                                              </option>
-                                              <option value="Shipping">
-                                                Ford
-                                              </option>
-                                              <option value="Pickups">
-                                                Porsche
-                                              </option>
-                                              <option value="Pending">
-                                                Bentley
-                                              </option>
-                                              <option value="Shipping">
-                                                Toyota
-                                              </option>
-                                              <option value="Pickups">
-                                                Audi
-                                              </option>
-                                              <option value="Pending">
-                                                Jeep
-                                              </option>
-                                              <option value="Shipping">
-                                                Jaguar
-                                              </option>
-                                              <option value="Pickups">
-                                                Rolls-Royce
-                                              </option>
-                                              <option value="Pending" selected>
-                                                Mercedes-Benz
-                                              </option>
-                                              <option value="Infiniti ">
-                                                Infiniti
-                                              </option>
-                                            </select>
+                                              Remove
+                                            </button>
                                           </div>
-                                        </Col>
-                                      </Row>
-                                      <Row>
-                                        {/* Vehicle_color  == Done */}
-                                        <Col lg={6}>
-                                          <div className="mb-3">
-                                            <Form.Label htmlFor="supplierName-field">
-                                              Vehicle color
-                                            </Form.Label>
-                                            <select
-                                              className="form-select text-muted"
-                                              name="choices-single-default"
-                                              id="statusSelect"
-                                              required
+                                        ))
+                                      ) : (
+                                        <p>No images available</p>
+                                      )}
+                                    </div>
+                                    <div className="d-flex justify-content-center mt-n2">
+                                      <label
+                                        htmlFor="profile_image"
+                                        className="mb-0"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="right"
+                                        title="Select affiliate logo"
+                                      >
+                                        <span className="avatar-xs d-inline-block">
+                                          <span className="avatar-title bg-light border rounded-circle text-muted cursor-pointer">
+                                            <i className="bi bi-pen"></i>
+                                          </span>
+                                        </span>
+                                      </label>
+                                      <input
+                                        className="form-control d-none"
+                                        type="file"
+                                        name="profile_image"
+                                        id="profile_image"
+                                        accept="image/*"
+                                        multiple
+                                        onChange={(e) => {
+                                          const files = e.target.files;
+                                          if (files) {
+                                            handleFileUpload(Array.from(files));
+                                          }
+                                        }}
+                                      />
+                                    </div>
+                                  </Row>
+                                  <Row>
+                                    {/* Vehicle reg  == Done */}
+                                    <Col lg={12}>
+                                      <div className="mb-3">
+                                        <Form.Label htmlFor="registration_number">
+                                          Vehicle reg
+                                        </Form.Label>
+                                        <Form.Control
+                                          type="text"
+                                          id="registration_number"
+                                          name="registration_number"
+                                          value={vehicleReg}
+                                          onChange={handleVehicleReg}
+                                        />
+                                      </div>
+                                    </Col>
+                                  </Row>
+                                  <Row>
+                                    {/* Vehicle make/model  == Done */}
+                                    <Col lg={6}>
+                                      <div className="mb-3">
+                                        <Form.Label htmlFor="supplierName-field">
+                                          Vehicle make/model :{" "}
+                                          <span>
+                                            {vehicleLocation.state.model}
+                                          </span>
+                                          <div
+                                            className="d-flex justify-content-start mt-n2"
+                                            style={{ marginLeft: "240px" }}
+                                          >
+                                            <label
+                                              htmlFor="id_file"
+                                              className="mb-0"
+                                              data-bs-toggle="tooltip"
+                                              data-bs-placement="right"
+                                              title="Select Driver Status"
                                             >
-                                              <option value="">Color</option>
-                                              <option value="Car">White</option>
-                                              <option value="Bus" selected>Black</option>
-                                              <option value="Double Height">
-                                                Blue
-                                              </option>
-                                            </select>
+                                              <span
+                                                className="d-inline-block"
+                                                onClick={() =>
+                                                  setShowVehicleModel(
+                                                    !showVehicleModel
+                                                  )
+                                                }
+                                              >
+                                                <span className="text-success cursor-pointer">
+                                                  <i className="bi bi-pen fs-14"></i>
+                                                </span>
+                                              </span>
+                                            </label>
                                           </div>
-                                        </Col>
-                                        {/* Vehicle_Type  == Done */}
-                                        <Col lg={6}>
-                                          <div className="mb-3">
-                                            <Form.Label htmlFor="supplierName-field">
-                                              Vehicle Type
-                                            </Form.Label>
-                                            <select
-                                              className="form-select text-muted"
-                                              name="choices-single-default"
-                                              id="statusSelect"
-                                              required
+                                        </Form.Label>
+                                        {showVehicleModel && (
+                                          <select
+                                            className="form-select text-muted"
+                                            name="choices-single-default"
+                                            id="statusSelect"
+                                            onChange={handleSelectVehicleModel}
+                                          >
+                                            <option value="">Select</option>
+                                            <option value="Tesla">Tesla</option>
+                                            <option value="BMW">BMW</option>
+                                            <option value="Ford">Ford</option>
+                                            <option value="Porsche">
+                                              Porsche
+                                            </option>
+                                            <option value="Bentley">
+                                              Bentley
+                                            </option>
+                                            <option value="Toyota">
+                                              Toyota
+                                            </option>
+                                            <option value="Audi">Audi</option>
+                                            <option value="Jeep">Jeep</option>
+                                            <option value="Jaguar">
+                                              Jaguar
+                                            </option>
+                                            <option value="Rolls-Royce">
+                                              Rolls-Royce
+                                            </option>
+                                            <option value="Mercedes-Benz">
+                                              Mercedes-Benz
+                                            </option>
+                                            <option value="Infiniti">
+                                              Infiniti
+                                            </option>
+                                          </select>
+                                        )}
+                                      </div>
+                                    </Col>
+                                  </Row>
+                                  <Row>
+                                    {/* Vehicle_color  == Done */}
+                                    <Col lg={6}>
+                                      <div className="mb-3">
+                                        <Form.Label htmlFor="color">
+                                          Vehicle color
+                                        </Form.Label>
+                                        <Form.Control
+                                          type="text"
+                                          id="color"
+                                          name="color"
+                                          value={vehicleColor}
+                                          onChange={handleVehicleColor}
+                                        />
+                                      </div>
+                                    </Col>
+                                    {/* Vehicle_Type  === Done */}
+                                    <Col lg={6}>
+                                      <div className="mb-3">
+                                        <Form.Label htmlFor="supplierName-field">
+                                          Vehicle Type :{" "}
+                                          <span>
+                                            {vehicleLocation.state.type}
+                                          </span>
+                                          <div
+                                            className="d-flex justify-content-start mt-n3"
+                                            style={{ marginLeft: "200px" }}
+                                          >
+                                            <label
+                                              htmlFor="id_file"
+                                              className="mb-0"
+                                              data-bs-toggle="tooltip"
+                                              data-bs-placement="right"
+                                              title="Select Driver Status"
                                             >
-                                              <option value="">Type</option>
-                                              <option value="Standard">
-                                                Standard
-                                              </option>
-                                              <option value="Executive" selected>
-                                                Executive
-                                              </option>
-                                              <option value="Luxury">
-                                                Luxury
-                                              </option>
-                                            </select>
+                                              <span
+                                                className="d-inline-block"
+                                                onClick={() =>
+                                                  setShowVehicleType(
+                                                    !showVehicleType
+                                                  )
+                                                }
+                                              >
+                                                <span className="text-success cursor-pointer">
+                                                  <i className="bi bi-pen fs-14"></i>
+                                                </span>
+                                              </span>
+                                            </label>
                                           </div>
-                                        </Col>
-                                      </Row>
-                                      <Row>
-                                        {/*Max_Passenger  == Done */}
-                                        <Col lg={6}>
-                                          <div className="mb-3">
-                                            <Form.Label htmlFor="supplierName-field">
-                                              Max Passenger
-                                            </Form.Label>
-                                            <select
-                                              className="form-select text-muted"
-                                              name="choices-single-default"
-                                              id="statusSelect"
-                                              required
+                                        </Form.Label>
+                                        {showVehicleType && (
+                                          <select
+                                            className="form-select text-muted"
+                                            name="vehicleType"
+                                            id="vehicleType"
+                                            onChange={handleSelectVehicleType}
+                                          >
+                                            <option value="">Select</option>
+                                            {AllVehicleTypes.map(
+                                              (vehicleType) => (
+                                                <option
+                                                  value={vehicleType.type}
+                                                  key={vehicleType?._id!}
+                                                >
+                                                  {vehicleType.type}
+                                                </option>
+                                              )
+                                            )}
+                                          </select>
+                                        )}
+                                      </div>
+                                    </Col>
+                                  </Row>
+                                  <Row>
+                                    {/*Max_Passenger  === Done */}
+                                    <Col lg={6}>
+                                      <div className="mb-3">
+                                        <Form.Label htmlFor="pax">
+                                          Max Passenger
+                                        </Form.Label>
+                                        <Form.Control
+                                          type="text"
+                                          id="pax"
+                                          name="pax"
+                                          value={maxPassenger}
+                                          onChange={handleMaxPassenger}
+                                        />
+                                      </div>
+                                    </Col>
+                                    {/* Fleet_Number == Done */}
+                                    <Col lg={6}>
+                                      <div className="mb-3">
+                                        <Form.Label htmlFor="fleet_number">
+                                          Fleet Number
+                                        </Form.Label>
+                                        <Form.Control
+                                          type="text"
+                                          id="fleet_number"
+                                          name="fleet_number"
+                                          value={fleetNumber}
+                                          onChange={handleFleetNumber}
+                                        />
+                                      </div>
+                                    </Col>
+                                  </Row>
+                                  <Row>
+                                    {/* Engine_number == Done */}
+                                    <Col lg={6}>
+                                      <div className="mb-3">
+                                        <Form.Label htmlFor="engine_number">
+                                          Engine Number
+                                        </Form.Label>
+                                        <Form.Control
+                                          type="text"
+                                          id="engine_number"
+                                          name="engine_number"
+                                          value={engineNumber}
+                                          onChange={handleEngineNumber}
+                                        />
+                                      </div>
+                                    </Col>
+                                    {/* Mileage / KM == Done */}
+                                    <Col lg={6}>
+                                      <div className="mb-3">
+                                        <Form.Label htmlFor="mileage">
+                                          Mileage / KM
+                                        </Form.Label>
+                                        <Form.Control
+                                          type="text"
+                                          id="mileage"
+                                          name="mileage"
+                                          value={vehicleMileage}
+                                          onChange={handleVehicleMileage}
+                                        />
+                                      </div>
+                                    </Col>
+                                  </Row>
+                                  <Row>
+                                    {/* Registration_Date  === Done */}
+                                    <Col lg={6}>
+                                      <div className="mb-3">
+                                        <Form.Label htmlFor="supplierName-field">
+                                          Registration date :{" "}
+                                          <span>
+                                            {
+                                              vehicleLocation.state
+                                                .registration_date
+                                            }
+                                          </span>
+                                          <div
+                                            className="d-flex justify-content-start mt-n3"
+                                            style={{ marginLeft: "230px" }}
+                                          >
+                                            <label
+                                              htmlFor="id_file"
+                                              className="mb-0"
+                                              data-bs-toggle="tooltip"
+                                              data-bs-placement="right"
+                                              title="Select Driver Status"
                                             >
-                                              <option value="">Select</option>
-                                              <option value="2">2</option>
-                                              <option value="3">3</option>
-                                              <option value="4" selected>4</option>
-                                              <option value="5">5</option>
-                                              <option value="6">6</option>
-                                              <option value="7">7</option>
-                                              <option value="8">8</option>
-                                              <option value="9">9</option>
-                                              <option value="10">10</option>
-                                              <option value="11">11</option>
-                                              <option value="12">12</option>
-                                              <option value="13">13</option>
-                                              <option value="2">14</option>
-                                              <option value="3">15</option>
-                                              <option value="4">16</option>
-                                              <option value="5">17</option>
-                                              <option value="6">18</option>
-                                              <option value="7">19</option>
-                                              <option value="8">20</option>
-                                              <option value="9">21</option>
-                                              <option value="10">22</option>
-                                              <option value="11">23</option>
-                                              <option value="12">24</option>
-                                              <option value="13">25</option>
-                                              <option value="2">26</option>
-                                              <option value="3">27</option>
-                                              <option value="4">28</option>
-                                              <option value="5">29</option>
-                                              <option value="6">30</option>
-                                              <option value="7">31</option>
-                                              <option value="8">32</option>
-                                              <option value="9">33</option>
-                                              <option value="10">34</option>
-                                              <option value="11">35</option>
-                                              <option value="12">36</option>
-                                              <option value="13">37</option>
-                                              <option value="2">38</option>
-                                              <option value="3">39</option>
-                                              <option value="4">40</option>
-                                              <option value="5">41</option>
-                                              <option value="6">42</option>
-                                              <option value="7">43</option>
-                                              <option value="8">44</option>
-                                              <option value="9">45</option>
-                                              <option value="10">46</option>
-                                              <option value="11">47</option>
-                                              <option value="12">48</option>
-                                              <option value="13">49</option>
-                                            </select>
+                                              <span
+                                                className="d-inline-block"
+                                                onClick={() =>
+                                                  setShowRegistrationDate(
+                                                    !showRegistrationDate
+                                                  )
+                                                }
+                                              >
+                                                <span className="text-success cursor-pointer">
+                                                  <i className="bi bi-pen fs-14"></i>
+                                                </span>
+                                              </span>
+                                            </label>
                                           </div>
-                                        </Col>
-                                        {/* Fleet_Number == Done */}
-                                        <Col lg={6}>
-                                          <div className="mb-3">
-                                            <Form.Label htmlFor="supplierName-field">
-                                              Fleet Number
-                                            </Form.Label>
-                                            <Form.Control
-                                              type="text"
-                                              id="supplierName-field"
-                                              defaultValue="4"
-                                              // placeholder="Enter serial number"
-                                              required
-                                            />
-                                          </div>
-                                        </Col>
-                                      </Row>
-                                      <Row>
-                                        {/* Engine_number == Done */}
-                                        <Col lg={6}>
-                                          <div className="mb-3">
-                                            <Form.Label htmlFor="supplierName-field">
-                                              Engine number
-                                            </Form.Label>
-                                            <Form.Control
-                                              type="text"
-                                              id="supplierName-field"
-                                              // placeholder="Enter serial number"
-                                              required
-                                            />
-                                          </div>
-                                        </Col>
-                                        {/* Mileage / KM == Done */}
-                                        <Col lg={6}>
-                                          <div className="mb-3">
-                                            <Form.Label htmlFor="supplierName-field">
-                                              Mileage / KM
-                                            </Form.Label>
-                                            <Form.Control
-                                              type="text"
-                                              id="supplierName-field"
-                                              // placeholder="Enter serial number"
-                                              required
-                                            />
-                                          </div>
-                                        </Col>
-                                      </Row>
-                                      <Row>
-                                        {/* Registration_Date  == Done */}
-                                        <Col lg={6}>
-                                          <div className="mb-3">
-                                            <Form.Label htmlFor="supplierName-field">
-                                              Registration date
-                                            </Form.Label>
-                                            <Flatpickr
-                                              className="form-control flatpickr-input"
-                                              placeholder="Select Date"
-                                              options={{
-                                                dateFormat: "d M, Y",
-                                              }}
-                                            />
-                                          </div>
-                                        </Col>
-                                        {/* Depot_name  == Done */}
-                                        <Col lg={6}>
-                                          <div className="mb-3">
-                                            <Form.Label htmlFor="supplierName-field">
-                                              Depot name
-                                            </Form.Label>
-                                            <select
-                                              className="form-select text-muted"
-                                              name="choices-single-default"
-                                              id="statusSelect"
-                                              required
+                                        </Form.Label>
+                                        {showRegistrationDate && (
+                                          <Flatpickr
+                                            className="form-control flatpickr-input"
+                                            placeholder="Select Date"
+                                            options={{
+                                              dateFormat: "d M, Y",
+                                            }}
+                                            onChange={
+                                              handleRegistrationDateChange
+                                            }
+                                          />
+                                        )}
+                                      </div>
+                                    </Col>
+                                    {/* Depot_name  === Done */}
+                                    <Col lg={6}>
+                                      <div className="mb-3">
+                                        <Form.Label htmlFor="depotName">
+                                          Depot name
+                                        </Form.Label>
+                                        <Form.Control
+                                          type="text"
+                                          id="depotName"
+                                          name="depotName"
+                                          value={depotName}
+                                          onChange={handleSelectDepotName}
+                                        />
+                                      </div>
+                                    </Col>
+                                  </Row>
+                                  <Row>
+                                    {/* Purchase_date  == Done */}
+                                    <Col lg={6}>
+                                      <div className="mb-3">
+                                        <Form.Label htmlFor="supplierName-field">
+                                          Purchase Date :{" "}
+                                          <span>
+                                            {
+                                              vehicleLocation.state
+                                                .purchase_date
+                                            }
+                                          </span>
+                                          <div
+                                            className="d-flex justify-content-start mt-n3"
+                                            style={{ marginLeft: "230px" }}
+                                          >
+                                            <label
+                                              htmlFor="id_file"
+                                              className="mb-0"
+                                              data-bs-toggle="tooltip"
+                                              data-bs-placement="right"
+                                              title="Select Driver Status"
                                             >
-                                              <option value="">
-                                                Select depot
-                                              </option>
-                                              <option value="2" selected>
-                                                Brimingham, West Midlands B35
-                                                7BT, UK
-                                              </option>
-                                            </select>
+                                              <span
+                                                className="d-inline-block"
+                                                onClick={() =>
+                                                  setShowPurchaseDate(
+                                                    !showPurchaseDate
+                                                  )
+                                                }
+                                              >
+                                                <span className="text-success cursor-pointer">
+                                                  <i className="bi bi-pen fs-14"></i>
+                                                </span>
+                                              </span>
+                                            </label>
                                           </div>
-                                        </Col>
-                                      </Row>
-                                      <Row>
-                                        {/* Purchase_date  == Done */}
-                                        <Col lg={6}>
-                                          <div className="mb-3">
-                                            <Form.Label htmlFor="supplierName-field">
-                                              Purchase Date
-                                            </Form.Label>
-                                            <Flatpickr
-                                              className="form-control flatpickr-input"
-                                              placeholder="Select Date"
-                                              options={{
-                                                dateFormat: "d M, Y",
-                                              }}
-                                            />
+                                        </Form.Label>
+                                        {showPurchaseDate && (
+                                          <Flatpickr
+                                            className="form-control flatpickr-input"
+                                            placeholder="Select Date"
+                                            options={{
+                                              dateFormat: "d M, Y",
+                                            }}
+                                            onChange={handlePurchaseDateChange}
+                                          />
+                                        )}
+                                      </div>
+                                    </Col>
+                                    {/* Purchase_price  == Done */}
+                                    <Col lg={6}>
+                                      <div className="mb-3">
+                                        <Form.Label htmlFor="purchase_price">
+                                          Purchase Price
+                                        </Form.Label>
+                                        <Form.Control
+                                          type="text"
+                                          id="purchase_price"
+                                          name="purchase_price"
+                                          value={purchasePrice}
+                                          onChange={handlePurchasePrice}
+                                        />
+                                      </div>
+                                    </Col>
+                                  </Row>
+                                  <Row>
+                                    {/* Sale_date  === Done */}
+                                    <Col lg={6}>
+                                      <div className="mb-3">
+                                        <Form.Label htmlFor="supplierName-field">
+                                          Sale Date :{" "}
+                                          <span>
+                                            {vehicleLocation.state.sale_date}
+                                          </span>
+                                          <div
+                                            className="d-flex justify-content-start mt-n3"
+                                            style={{ marginLeft: "200px" }}
+                                          >
+                                            <label
+                                              htmlFor="id_file"
+                                              className="mb-0"
+                                              data-bs-toggle="tooltip"
+                                              data-bs-placement="right"
+                                              title="Select Driver Status"
+                                            >
+                                              <span
+                                                className="d-inline-block"
+                                                onClick={() =>
+                                                  setShowSaleDate(!showSaleDate)
+                                                }
+                                              >
+                                                <span className="text-success cursor-pointer">
+                                                  <i className="bi bi-pen fs-14"></i>
+                                                </span>
+                                              </span>
+                                            </label>
                                           </div>
-                                        </Col>
-                                        {/* Purchase_price  == Done */}
-                                        <Col lg={6}>
-                                          <div className="mb-3">
-                                            <Form.Label htmlFor="supplierName-field">
-                                              Purchase Price
-                                            </Form.Label>
-                                            <Form.Control
-                                              type="text"
-                                              id="supplierName-field"
-                                              // placeholder="Enter serial number"
-                                              required
-                                            />
+                                        </Form.Label>
+                                        {showSaleDate && (
+                                          <Flatpickr
+                                            className="form-control flatpickr-input"
+                                            placeholder="Select Date"
+                                            options={{
+                                              dateFormat: "d M, Y",
+                                            }}
+                                            onChange={handleSaleDateChange}
+                                          />
+                                        )}
+                                      </div>
+                                    </Col>
+                                    {/* Status  === Done */}
+                                    <Col lg={6}>
+                                      <div className="mb-3">
+                                        <Form.Label htmlFor="statusVehicle">
+                                          Status :{" "}
+                                          {vehicleLocation.state
+                                            .statusVehicle === "Active" ? (
+                                            <span className="badge bg-success">
+                                              {
+                                                vehicleLocation.state
+                                                  .statusVehicle
+                                              }
+                                            </span>
+                                          ) : (
+                                            <span className="badge bg-danger">
+                                              {
+                                                vehicleLocation.state
+                                                  .statusVehicle
+                                              }
+                                            </span>
+                                          )}
+                                          <div
+                                            className="d-flex justify-content-start mt-n3"
+                                            style={{ marginLeft: "110px" }}
+                                          >
+                                            <label
+                                              htmlFor="id_file"
+                                              className="mb-0"
+                                              data-bs-toggle="tooltip"
+                                              data-bs-placement="right"
+                                              title="Select Driver Status"
+                                            >
+                                              <span
+                                                className="d-inline-block"
+                                                onClick={() =>
+                                                  setShowVehicleStatus(
+                                                    !showVehicleStatus
+                                                  )
+                                                }
+                                              >
+                                                <span className="text-success cursor-pointer">
+                                                  <i className="bi bi-pen fs-14"></i>
+                                                </span>
+                                              </span>
+                                            </label>
                                           </div>
-                                        </Col>
-                                      </Row>
-                                      <Row>
-                                        {/* Sale_date  == Done */}
-                                        <Col lg={6}>
-                                          <div className="mb-3">
-                                            <Form.Label htmlFor="supplierName-field">
-                                              Sale Date
-                                            </Form.Label>
-                                            <Flatpickr
-                                              className="form-control flatpickr-input"
-                                              placeholder="Select Date"
-                                              options={{
-                                                dateFormat: "d M, Y",
-                                              }}
-                                            />
-                                          </div>
-                                        </Col>
-                                        {/* Status  == Done */}
-                                        <Col lg={6}>
-                                          <div className="mb-3">
-                                            <Form.Label htmlFor="supplierName-field">
-                                              Status
-                                            </Form.Label>
+                                          {showVehicleStatus && (
                                             <select
                                               className="form-select text-muted"
-                                              name="choices-single-default"
-                                              id="statusSelect"
-                                              required
+                                              name="statusVehicle"
+                                              id="statusVehicle"
+                                              onChange={
+                                                handleSelectVehicleStatus
+                                              }
                                             >
                                               <option value="">Status</option>
                                               <option value="Active">
@@ -471,16 +1533,16 @@ const EditVehicle = () => {
                                                 On Road
                                               </option>
                                             </select>
-                                          </div>
-                                        </Col>
-                                      </Row>
-                                    </Row>
-                                  </Form>
+                                          )}
+                                        </Form.Label>
+                                      </div>
+                                    </Col>
+                                  </Row>
                                 </div>
                               </Card.Body>
                             </Card>
                           </Col>
-                          <Col lg={6}>
+                          <Col lg={5}>
                             <Card>
                               <Card.Body>
                                 <div className="mb-3">
@@ -492,16 +1554,17 @@ const EditVehicle = () => {
                                         <Col lg={6}>
                                           <div className="mb-3">
                                             <label
-                                              htmlFor="statusSelect"
+                                              htmlFor="manufacturer"
                                               className="form-label"
                                             >
                                               Manufacturer
                                             </label>
                                             <Form.Control
                                               type="text"
-                                              id="supplierName-field"
-                                              // placeholder="Enter owner name"
-                                              required
+                                              id="manufacturer"
+                                              name="manufacturer"
+                                              value={vehicleManufacturer}
+                                              onChange={handleManufacturer}
                                             />
                                           </div>
                                         </Col>
@@ -509,16 +1572,17 @@ const EditVehicle = () => {
                                         <Col lg={6}>
                                           <div className="mb-3">
                                             <label
-                                              htmlFor="statusSelect"
+                                              htmlFor="engine_size"
                                               className="form-label"
                                             >
                                               Engine Size
                                             </label>
                                             <Form.Control
                                               type="text"
-                                              id="supplierName-field"
-                                              // placeholder="Enter owner name"
-                                              required
+                                              id="engine_size"
+                                              name="engine_size"
+                                              value={engineSize}
+                                              onChange={handleEngineSize}
                                             />
                                           </div>
                                         </Col>
@@ -528,133 +1592,271 @@ const EditVehicle = () => {
                                         <Col lg={6}>
                                           <div className="mb-3">
                                             <label
-                                              htmlFor="statusSelect"
+                                              htmlFor="FuelType"
                                               className="form-label"
                                             >
-                                              Fuel Type
+                                              Fuel Type :{" "}
+                                              <span>
+                                                {
+                                                  vehicleLocation.state
+                                                    .fuel_type
+                                                }
+                                              </span>
+                                              <div
+                                                className="d-flex justify-content-start mt-n3"
+                                                style={{ marginLeft: "120px" }}
+                                              >
+                                                <label
+                                                  htmlFor="id_file"
+                                                  className="mb-0"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="right"
+                                                  title="Select Driver Status"
+                                                >
+                                                  <span
+                                                    className="d-inline-block"
+                                                    onClick={() =>
+                                                      setShowFuelType(
+                                                        !showFuelType
+                                                      )
+                                                    }
+                                                  >
+                                                    <span className="text-success cursor-pointer">
+                                                      <i className="bi bi-pen fs-14"></i>
+                                                    </span>
+                                                  </span>
+                                                </label>
+                                              </div>
                                             </label>
-                                            <select
-                                              className="form-select text-muted"
-                                              name="choices-single-default"
-                                              id="statusSelect"
-                                              required
-                                            >
-                                              <option value="">Type</option>
-                                              <option value="Pickups">
-                                                Diesel
-                                              </option>
-                                              <option value="Pending">
-                                                Gazoile
-                                              </option>
-                                              <option value="Shipping">
-                                                Hybrid
-                                              </option>
-                                              <option value="Delivered">
-                                                Full Electric
-                                              </option>
-                                            </select>
+                                            {showFuelType && (
+                                              <select
+                                                className="form-select text-muted"
+                                                name="FuelType"
+                                                id="FuelType"
+                                                onChange={handleSelectFuelType}
+                                              >
+                                                <option value="">Select</option>
+                                                <option value="Diesel">
+                                                  Diesel
+                                                </option>
+                                                <option value="Gazoile">
+                                                  Gazoile
+                                                </option>
+                                                <option value="Hybrid">
+                                                  Hybrid
+                                                </option>
+                                                <option value="Full Electric">
+                                                  Full Electric
+                                                </option>
+                                              </select>
+                                            )}
                                           </div>
                                         </Col>
-                                        {/* Speed_Limit  == Done */}
+                                        {/* Speed_Limit  === Done */}
                                         <Col lg={6}>
                                           <div className="mb-3">
                                             <label
-                                              htmlFor="statusSelect"
+                                              htmlFor="SpeedLimit"
                                               className="form-label"
                                             >
-                                              Speed Limit
+                                              Speed Limit :{" "}
+                                              <span>
+                                                {
+                                                  vehicleLocation.state
+                                                    .speed_limit
+                                                }
+                                              </span>
+                                              <div
+                                                className="d-flex justify-content-start mt-n3"
+                                                style={{ marginLeft: "135px" }}
+                                              >
+                                                <label
+                                                  htmlFor="id_file"
+                                                  className="mb-0"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="right"
+                                                  title="Select Driver Status"
+                                                >
+                                                  <span
+                                                    className="d-inline-block"
+                                                    onClick={() =>
+                                                      setShowSpeedLimit(
+                                                        !showSpeedLimit
+                                                      )
+                                                    }
+                                                  >
+                                                    <span className="text-success cursor-pointer">
+                                                      <i className="bi bi-pen fs-14"></i>
+                                                    </span>
+                                                  </span>
+                                                </label>
+                                              </div>
                                             </label>
-                                            <select
-                                              className="form-select text-muted"
-                                              name="choices-single-default"
-                                              id="statusSelect"
-                                              required
-                                            >
-                                              <option value="">Limit</option>
-                                              <option value="Pickups">
-                                                60mph
-                                              </option>
-                                              <option value="Pending">
-                                                100mph
-                                              </option>
-                                            </select>
+                                            {showSpeedLimit && (
+                                              <select
+                                                className="form-select text-muted"
+                                                name="SpeedLimit"
+                                                id="SpeedLimit"
+                                                onChange={
+                                                  handleSelectSpeedLimit
+                                                }
+                                              >
+                                                <option value="">Limit</option>
+                                                <option value="60mph">
+                                                  60mph
+                                                </option>
+                                                <option value="100mph">
+                                                  100mph
+                                                </option>
+                                              </select>
+                                            )}
                                           </div>
                                         </Col>
                                       </Row>
                                       <Row>
-                                        {/*  Insurance_type  == Done */}
-                                        <Col lg={6}>
+                                        {/*  Insurance_type  === Done */}
+                                        <Col lg={12}>
                                           <div className="mb-3">
                                             <label
-                                              htmlFor="statusSelect"
+                                              htmlFor="insurance_type"
                                               className="form-label"
                                             >
-                                              Insurance type
+                                              Insurance Type :{" "}
+                                              <span>
+                                                {
+                                                  vehicleLocation.state
+                                                    .insurance_type
+                                                }
+                                              </span>
+                                              <div
+                                                className="d-flex justify-content-start mt-n3"
+                                                style={{ marginLeft: "260px" }}
+                                              >
+                                                <label
+                                                  htmlFor="id_file"
+                                                  className="mb-0"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="right"
+                                                  title="Select Driver Status"
+                                                >
+                                                  <span
+                                                    className="d-inline-block"
+                                                    onClick={() =>
+                                                      setShowInsuranceType(
+                                                        !showInsuranceType
+                                                      )
+                                                    }
+                                                  >
+                                                    <span className="text-success cursor-pointer">
+                                                      <i className="bi bi-pen fs-14"></i>
+                                                    </span>
+                                                  </span>
+                                                </label>
+                                              </div>
                                             </label>
-                                            <select
-                                              className="form-select text-muted"
-                                              name="choices-single-default"
-                                              id="statusSelect"
-                                              required
-                                            >
-                                              <option value="">Select</option>
-                                              <option value="Pickups">
-                                                Fully comprehensive
-                                              </option>
-                                              <option value="Pending">
-                                                Third party
-                                              </option>
-                                              <option value="Shipping">
-                                                Third party, fire and theft
-                                              </option>
-                                            </select>
+                                            {showInsuranceType && (
+                                              <select
+                                                className="form-select text-muted"
+                                                name="insurance_type"
+                                                id="insurance_type"
+                                                onChange={
+                                                  handleSelectInsuranceType
+                                                }
+                                              >
+                                                <option value="">Select</option>
+                                                <option value="Fully comprehensive">
+                                                  Fully comprehensive
+                                                </option>
+                                                <option value="Third party">
+                                                  Third party
+                                                </option>
+                                                <option value="Third party, fire and theft">
+                                                  Third party, fire and theft
+                                                </option>
+                                              </select>
+                                            )}
                                           </div>
                                         </Col>
-                                        {/* Insurance_policy_number  == Done */}
-                                        <Col lg={6}>
+                                      </Row>
+                                      <Row>
+                                        {/* Insurance_policy_number  === Done */}
+                                        <Col lg={12}>
                                           <div className="mb-3">
                                             <label
-                                              htmlFor="statusSelect"
+                                              htmlFor="insurance_policy_number"
                                               className="form-label"
                                             >
                                               Insurance Policy Number
                                             </label>
                                             <Form.Control
                                               type="text"
-                                              id="supplierName-field"
-                                              // placeholder="Enter owner name"
-                                              required
+                                              id="insurance_policy_number"
+                                              name="insurance_policy_number"
+                                              value={insurancePolicyNumber}
+                                              onChange={
+                                                handleInsurancePolicyNumber
+                                              }
                                             />
                                           </div>
                                         </Col>
                                       </Row>
                                       <Row>
-                                        {/*  Ownership  == Done */}
+                                        {/*  Ownership  === Done */}
                                         <Col lg={6}>
                                           <div className="mb-3">
                                             <label
-                                              htmlFor="statusSelect"
+                                              htmlFor="ownership"
                                               className="form-label"
                                             >
-                                              Ownership
+                                              Ownership :{" "}
+                                              <span>
+                                                {
+                                                  vehicleLocation.state
+                                                    .ownership
+                                                }
+                                              </span>
+                                              <div
+                                                className="d-flex justify-content-start mt-n3"
+                                                style={{ marginLeft: "130px" }}
+                                              >
+                                                <label
+                                                  htmlFor="id_file"
+                                                  className="mb-0"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="right"
+                                                  title="Select Driver Status"
+                                                >
+                                                  <span
+                                                    className="d-inline-block"
+                                                    onClick={() =>
+                                                      setShowOwnership(
+                                                        !showOwnership
+                                                      )
+                                                    }
+                                                  >
+                                                    <span className="text-success cursor-pointer">
+                                                      <i className="bi bi-pen fs-14"></i>
+                                                    </span>
+                                                  </span>
+                                                </label>
+                                              </div>
                                             </label>
-                                            <select
-                                              className="form-select text-muted"
-                                              name="choices-single-default"
-                                              id="statusSelect"
-                                              required
-                                            >
-                                              <option value="">Owner</option>
-                                              <option value="Pickups">
-                                                Owned
-                                              </option>
-                                              <option value="Pending">
-                                                Rented
-                                              </option>
-                                              <option value="Shipping">
-                                                Leasing
-                                              </option>
-                                            </select>
+                                            {showOwnership && (
+                                              <select
+                                                className="form-select text-muted"
+                                                name="ownership"
+                                                id="ownership"
+                                                onChange={handleSelectOwnership}
+                                              >
+                                                <option value="">Select</option>
+                                                <option value="Owned">
+                                                  Owned
+                                                </option>
+                                                <option value="Rented">
+                                                  Rented
+                                                </option>
+                                              </select>
+                                            )}
                                           </div>
                                         </Col>
                                         {/* Owner  == Done */}
@@ -669,8 +1871,8 @@ const EditVehicle = () => {
                                             <Form.Control
                                               type="text"
                                               id="supplierName-field"
-                                              // placeholder="Enter owner name"
-                                              required
+                                              value={ownedOwnerName}
+                                              onChange={handleOwnedOwnerName}
                                             />
                                           </div>
                                         </Col>
@@ -679,13 +1881,16 @@ const EditVehicle = () => {
                                         {/* Note  == Done */}
                                         <Col lg={12}>
                                           <div className="mb-3">
-                                            <Form.Label htmlFor="supplierName-field">
+                                            <Form.Label htmlFor="note">
                                               Note
                                             </Form.Label>
                                             <div>
                                               <textarea
                                                 className="form-control"
-                                                id="exampleFormControlTextarea5"
+                                                id="note"
+                                                name="note"
+                                                value={vehicleNotes}
+                                                onChange={handleVehicleNotes}
                                                 rows={3}
                                               ></textarea>
                                             </div>
@@ -693,176 +1898,28 @@ const EditVehicle = () => {
                                         </Col>
                                       </Row>
                                       <Row>
-                                        {/* Extra  == Done */}
+                                        {/* Extra  === !Done */}
                                         <Col lg={12}>
-                                          <div className="input-group mb-3">
-                                            <Form.Label htmlFor="supplierName-field">
-                                              Extra
-                                            </Form.Label>
-                                            {/* <Select
+                                          <Form.Label htmlFor="supplierName-field">
+                                            Extra
+                                          </Form.Label>
+                                          {/* <Select
                                               isMulti
                                               options={colourOptions}
                                             /> */}
-                                            <div className="input-group">
-                                              <input
-                                                type="text"
-                                                className="form-control"
-                                                aria-label="Recipient's username"
-                                                aria-describedby="button-addon2"
-                                              />
-                                              <button
-                                                className="btn btn-darken-success"
-                                                type="button"
-                                                id="button-addon2"
-                                                onClick={() => tog_AddExtra()}
-                                              >
-                                                <span className="mdi mdi-plus"></span>
-                                              </button>
-                                            </div>
-                                          </div>
                                         </Col>
-                                      </Row>
-                                      <Row>
-                                        {/* Wifi == Done*/}
-                                        <Col lg={2}>
-                                          <div className="mb-3">
-                                            <button
-                                              onClick={handleClick}
-                                              type="button"
-                                              className={`btn btn-darken-success custom-toggle btn-sm ${
-                                                changeColor === false
-                                                  ? "btn-darken-success"
-                                                  : "btn-darken-danger"
-                                              }`}
-                                              data-bs-toggle="button"
-                                            >
-                                              <span className="icon-on">
-                                                <i
-                                                  className={`${
-                                                    changeColor === false
-                                                      ? "mdi mdi-wifi align-bottom me-1"
-                                                      : "mdi mdi-wifi-off align-bottom me-1"
-                                                  }`}
-                                                ></i>
-                                                {changeColor === false
-                                                  ? "Wifi"
-                                                  : "No Wifi"}
-                                              </span>
-                                            </button>
-                                          </div>
-                                        </Col>
-                                        {/* Frigo  == Done  */}
-                                        <Col lg={2}>
-                                          <div className="mb-3">
-                                            <button
-                                              type="button"
-                                              onClick={handleClickFrigo}
-                                              className={`btn btn-darken-success custom-toggle btn-sm ${
-                                                changeColorFrigo === false
-                                                  ? "btn-darken-success"
-                                                  : "btn-darken-danger"
-                                              }`}
-                                              data-bs-toggle="button"
-                                            >
-                                              <span className="icon-on">
-                                                <i
-                                                  className={`${
-                                                    changeColorFrigo === false
-                                                      ? "mdi mdi-fridge-industrial-outline align-bottom me-1"
-                                                      : "mdi mdi-fridge-off-outline align-bottom me-1"
-                                                  }`}
-                                                ></i>
-                                                {changeColorFrigo === false
-                                                  ? "Fridge"
-                                                  : "No Fridge"}
-                                              </span>
-                                            </button>
-                                          </div>
-                                        </Col>
-                                        {/* Smart_Screen  == Done */}
-                                        <Col lg={3}>
-                                          <div className="mb-3">
-                                            <button
-                                              type="button"
-                                              onClick={handleClickScreen}
-                                              className={`btn btn-darken-success custom-toggle btn-sm ${
-                                                changeColorScreen === false
-                                                  ? "btn-darken-success"
-                                                  : "btn-darken-danger"
-                                              }`}
-                                              data-bs-toggle="button"
-                                            >
-                                              <span className="icon-on">
-                                                <i
-                                                  className={`${
-                                                    changeColorScreen === false
-                                                      ? "mdi mdi-monitor align-bottom me-1"
-                                                      : "mdi mdi-monitor-off align-bottom me-1"
-                                                  }`}
-                                                ></i>
-                                                {changeColorScreen === false
-                                                  ? "Smart Screen"
-                                                  : "No Smart Screen"}
-                                              </span>
-                                            </button>
-                                          </div>
-                                        </Col>
-                                        {/* Air_Conditionner  == Done */}
-                                        <Col lg={3}>
-                                          <div className="mb-3">
-                                            <button
-                                              type="button"
-                                              onClick={handleClickAC}
-                                              className={`btn btn-darken-success custom-toggle btn-sm ${
-                                                changeColorAC === false
-                                                  ? "btn-darken-success"
-                                                  : "btn-darken-danger"
-                                              }`}
-                                              data-bs-toggle="button"
-                                            >
-                                              <span className="icon-on">
-                                                <i
-                                                  className={`${
-                                                    changeColorAC === false
-                                                      ? "mdi mdi-air-purifier align-bottom me-1"
-                                                      : "mdi mdi-snowflake-off align-bottom me-1"
-                                                  }`}
-                                                ></i>
-                                                {changeColorAC === false
-                                                  ? "Air Conditioned"
-                                                  : "No Air Conditioner"}
-                                              </span>
-                                            </button>
-                                          </div>
-                                        </Col>
-                                        {/* Automatic  == Done */}
-                                        <Col lg={2}>
-                                          <div className="mb-3">
-                                            <button
-                                              type="button"
-                                              onClick={handleClickAutomatic}
-                                              className={`btn btn-darken-success custom-toggle btn-sm ${
-                                                changeColorAutomatic === false
-                                                  ? "btn-darken-success"
-                                                  : "btn-darken-danger"
-                                              }`}
-                                              data-bs-toggle="button"
-                                            >
-                                              <span className="icon-on">
-                                                <i
-                                                  className={`fs-11 ${
-                                                    changeColorAutomatic ===
-                                                    false
-                                                      ? "mdi mdi-arrow-decision-auto-outline align-bottom me-1"
-                                                      : "mdi mdi-car-shift-pattern align-bottom me-1"
-                                                  }`}
-                                                ></i>
-                                                {changeColorAutomatic === false
-                                                  ? "Automatic"
-                                                  : "Manual"}
-                                              </span>
-                                            </button>
-                                          </div>
+                                        <Col lg={12}>
+                                          <Select
+                                            closeMenuOnSelect={false}
+                                            isMulti
+                                            options={allExtraOptions} // Provide all possible options to select from
+                                            styles={customStyles}
+                                            onChange={
+                                              handleSelectValueColumnChange
+                                            }
+                                            placeholder="Filter Columns"
+                                            defaultValue={defaultExtraOptions} // Pre-select the options based on the extra array
+                                          />
                                         </Col>
                                       </Row>
                                     </Row>
@@ -884,7 +1941,7 @@ const EditVehicle = () => {
                                     <Row>
                                       <Col lg={6}>
                                         <table>
-                                          {/* MOT Expiry  == Done */}
+                                          {/* MOT Expiry  === Done */}
                                           <tr>
                                             <td>
                                               <span className="fw-bold">
@@ -892,21 +1949,96 @@ const EditVehicle = () => {
                                               </span>
                                             </td>
                                             <td>
-                                              <input
-                                                type="date"
-                                                className="form-control mb-2"
-                                                id="exampleInputdate"
-                                              />
+                                              <span>
+                                                {
+                                                  vehicleLocation.state
+                                                    .mot_expiry
+                                                }
+                                              </span>
+                                              <div
+                                                className="d-flex justify-content-start mt-n3"
+                                                style={{ marginLeft: "180px" }}
+                                              >
+                                                <label
+                                                  htmlFor="id_file"
+                                                  className="mb-0"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="right"
+                                                  title="Select Driver Status"
+                                                >
+                                                  <span
+                                                    className="d-inline-block"
+                                                    onClick={() =>
+                                                      setShowMOTExpiry(
+                                                        !showMOTExpiry
+                                                      )
+                                                    }
+                                                  >
+                                                    <span className="text-success cursor-pointer">
+                                                      <i className="bi bi-pen fs-14"></i>
+                                                    </span>
+                                                  </span>
+                                                </label>
+                                              </div>
+                                              {showMOTExpiry && (
+                                                <Flatpickr
+                                                  className="form-control flatpickr-input"
+                                                  placeholder="Select Date"
+                                                  options={{
+                                                    dateFormat: "d M, Y",
+                                                  }}
+                                                  onChange={
+                                                    handleMOTExpiryDateChange
+                                                  }
+                                                />
+                                              )}
                                             </td>
                                           </tr>
                                           <tr>
-                                            <td> </td>
+                                            <td className="fw-bold">
+                                              MOT File{" "}
+                                            </td>
                                             <td>
-                                              <input
-                                                className="form-control mb-2"
-                                                type="file"
-                                                id="formFile"
-                                              />
+                                              <Button
+                                                variant="soft-danger"
+                                                onClick={() => {
+                                                  tog_MOTFileModal();
+                                                }}
+                                              >
+                                                <i className="bi bi-filetype-pdf align-middle fs-22"></i>
+                                              </Button>
+                                              <div
+                                                className="d-flex justify-content-start mt-n2"
+                                                style={{ marginLeft: "50px" }}
+                                              >
+                                                <label
+                                                  htmlFor="mot_file_base64_string"
+                                                  className="mb-0"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="right"
+                                                  title="Select MOT File"
+                                                >
+                                                  <span className="d-inline-block">
+                                                    <span className="text-success cursor-pointer">
+                                                      <i className="bi bi-pen fs-14"></i>
+                                                    </span>
+                                                  </span>
+                                                </label>
+                                                <input
+                                                  className="form-control d-none"
+                                                  type="file"
+                                                  name="mot_file_base64_string"
+                                                  id="mot_file_base64_string"
+                                                  accept=".pdf"
+                                                  onChange={(e) =>
+                                                    handleFileUploadMotFile(e)
+                                                  }
+                                                  style={{
+                                                    width: "210px",
+                                                    height: "120px",
+                                                  }}
+                                                />
+                                              </div>
                                             </td>
                                           </tr>
                                           {/* Tax Expiry  == Done */}
@@ -915,21 +2047,94 @@ const EditVehicle = () => {
                                               Tax Expiry
                                             </td>
                                             <td>
-                                              <input
-                                                type="date"
-                                                className="form-control mb-2"
-                                                id="exampleInputdate"
-                                              />
+                                              <span>
+                                                {
+                                                  vehicleLocation.state
+                                                    .tax_expiry
+                                                }
+                                              </span>
+                                              <div
+                                                className="d-flex justify-content-start mt-n3"
+                                                style={{ marginLeft: "180px" }}
+                                              >
+                                                <label
+                                                  htmlFor="id_file"
+                                                  className="mb-0"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="right"
+                                                  title="Select Driver Status"
+                                                >
+                                                  <span
+                                                    className="d-inline-block"
+                                                    onClick={() =>
+                                                      setShowTaxExpiry(
+                                                        !showTaxExpiry
+                                                      )
+                                                    }
+                                                  >
+                                                    <span className="text-success cursor-pointer">
+                                                      <i className="bi bi-pen fs-14"></i>
+                                                    </span>
+                                                  </span>
+                                                </label>
+                                              </div>
+                                              {showTaxExpiry && (
+                                                <Flatpickr
+                                                  className="form-control flatpickr-input"
+                                                  placeholder="Select Date"
+                                                  options={{
+                                                    dateFormat: "d M, Y",
+                                                  }}
+                                                  onChange={handleTaxDateChange}
+                                                />
+                                              )}
                                             </td>
                                           </tr>
                                           <tr>
-                                            <td></td>
+                                            <td className="fw-bold">
+                                              Tax File
+                                            </td>
                                             <td>
-                                              <input
-                                                className="form-control mb-2"
-                                                type="file"
-                                                id="formFile"
-                                              />
+                                              <Button
+                                                variant="soft-danger"
+                                                onClick={() => {
+                                                  tog_TaxFileModal();
+                                                }}
+                                              >
+                                                <i className="bi bi-filetype-pdf align-middle fs-22"></i>
+                                              </Button>
+                                              <div
+                                                className="d-flex justify-content-start mt-n2"
+                                                style={{ marginLeft: "50px" }}
+                                              >
+                                                <label
+                                                  htmlFor="tax_file_base64_string"
+                                                  className="mb-0"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="right"
+                                                  title="Select Driving License"
+                                                >
+                                                  <span className="d-inline-block">
+                                                    <span className="text-success cursor-pointer">
+                                                      <i className="bi bi-pen fs-14"></i>
+                                                    </span>
+                                                  </span>
+                                                </label>
+                                                <input
+                                                  className="form-control d-none"
+                                                  type="file"
+                                                  name="tax_file_base64_string"
+                                                  id="tax_file_base64_string"
+                                                  accept=".pdf"
+                                                  onChange={(e) =>
+                                                    handleFileUploadTaxFile(e)
+                                                  }
+                                                  style={{
+                                                    width: "210px",
+                                                    height: "120px",
+                                                  }}
+                                                />
+                                              </div>
                                             </td>
                                           </tr>
                                           {/* Insurance Expiry == Done */}
@@ -938,21 +2143,98 @@ const EditVehicle = () => {
                                               Insurance Expiry
                                             </td>
                                             <td>
-                                              <input
-                                                type="date"
-                                                className="form-control mb-2"
-                                                id="exampleInputdate"
-                                              />
+                                              <span>
+                                                {
+                                                  vehicleLocation.state
+                                                    .insurance_expiry
+                                                }
+                                              </span>
+                                              <div
+                                                className="d-flex justify-content-start mt-n3"
+                                                style={{ marginLeft: "180px" }}
+                                              >
+                                                <label
+                                                  htmlFor="id_file"
+                                                  className="mb-0"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="right"
+                                                  title="Select Driver Status"
+                                                >
+                                                  <span
+                                                    className="d-inline-block"
+                                                    onClick={() =>
+                                                      setShowInsuranceExpiry(
+                                                        !showInsuranceExpiry
+                                                      )
+                                                    }
+                                                  >
+                                                    <span className="text-success cursor-pointer">
+                                                      <i className="bi bi-pen fs-14"></i>
+                                                    </span>
+                                                  </span>
+                                                </label>
+                                              </div>
+                                              {showInsuranceExpiry && (
+                                                <Flatpickr
+                                                  className="form-control flatpickr-input"
+                                                  placeholder="Select Date"
+                                                  options={{
+                                                    dateFormat: "d M, Y",
+                                                  }}
+                                                  onChange={
+                                                    handleInsuranceDateChange
+                                                  }
+                                                />
+                                              )}
                                             </td>
                                           </tr>
                                           <tr>
-                                            <td></td>
+                                            <td className="fw-bold">
+                                              Insurance File
+                                            </td>
                                             <td>
-                                              <input
-                                                className="form-control mb-2"
-                                                type="file"
-                                                id="formFile"
-                                              />
+                                              <Button
+                                                variant="soft-danger"
+                                                onClick={() => {
+                                                  tog_InsuranceFileModal();
+                                                }}
+                                              >
+                                                <i className="bi bi-filetype-pdf align-middle fs-22"></i>
+                                              </Button>
+                                              <div
+                                                className="d-flex justify-content-start mt-n2"
+                                                style={{ marginLeft: "50px" }}
+                                              >
+                                                <label
+                                                  htmlFor="insurance_file_base64_string"
+                                                  className="mb-0"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="right"
+                                                  title="Select Driving License"
+                                                >
+                                                  <span className="d-inline-block">
+                                                    <span className="text-success cursor-pointer">
+                                                      <i className="bi bi-pen fs-14"></i>
+                                                    </span>
+                                                  </span>
+                                                </label>
+                                                <input
+                                                  className="form-control d-none"
+                                                  type="file"
+                                                  name="insurance_file_base64_string"
+                                                  id="insurance_file_base64_string"
+                                                  accept=".pdf"
+                                                  onChange={(e) =>
+                                                    handleFileUploadInsuranceFile(
+                                                      e
+                                                    )
+                                                  }
+                                                  style={{
+                                                    width: "210px",
+                                                    height: "120px",
+                                                  }}
+                                                />
+                                              </div>
                                             </td>
                                           </tr>
                                           <tr>
@@ -960,11 +2242,49 @@ const EditVehicle = () => {
                                               Inspection Due
                                             </td>
                                             <td>
-                                              <input
-                                                type="date"
-                                                className="form-control mb-2"
-                                                id="exampleInputdate"
-                                              />
+                                              <span>
+                                                {
+                                                  vehicleLocation.state
+                                                    .inspection_due
+                                                }
+                                              </span>
+                                              <div
+                                                className="d-flex justify-content-start mt-n3"
+                                                style={{ marginLeft: "180px" }}
+                                              >
+                                                <label
+                                                  htmlFor="id_file"
+                                                  className="mb-0"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="right"
+                                                  title="Select Driver Status"
+                                                >
+                                                  <span
+                                                    className="d-inline-block"
+                                                    onClick={() =>
+                                                      setShowInspectionDue(
+                                                        !showInspectionDue
+                                                      )
+                                                    }
+                                                  >
+                                                    <span className="text-success cursor-pointer">
+                                                      <i className="bi bi-pen fs-14"></i>
+                                                    </span>
+                                                  </span>
+                                                </label>
+                                              </div>
+                                              {showInspectionDue && (
+                                                <Flatpickr
+                                                  className="form-control flatpickr-input"
+                                                  placeholder="Select Date"
+                                                  options={{
+                                                    dateFormat: "d M, Y",
+                                                  }}
+                                                  onChange={
+                                                    handleInspectionDateChange
+                                                  }
+                                                />
+                                              )}
                                             </td>
                                           </tr>
                                           <tr>
@@ -972,11 +2292,49 @@ const EditVehicle = () => {
                                               Service Due
                                             </td>
                                             <td>
-                                              <input
-                                                type="date"
-                                                className="form-control mb-2"
-                                                id="exampleInputdate"
-                                              />
+                                              <span>
+                                                {
+                                                  vehicleLocation.state
+                                                    .service_due
+                                                }
+                                              </span>
+                                              <div
+                                                className="d-flex justify-content-start mt-n3"
+                                                style={{ marginLeft: "180px" }}
+                                              >
+                                                <label
+                                                  htmlFor="id_file"
+                                                  className="mb-0"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="right"
+                                                  title="Select Driver Status"
+                                                >
+                                                  <span
+                                                    className="d-inline-block"
+                                                    onClick={() =>
+                                                      setServiceDue(
+                                                        !showServiceDue
+                                                      )
+                                                    }
+                                                  >
+                                                    <span className="text-success cursor-pointer">
+                                                      <i className="bi bi-pen fs-14"></i>
+                                                    </span>
+                                                  </span>
+                                                </label>
+                                              </div>
+                                              {showServiceDue && (
+                                                <Flatpickr
+                                                  className="form-control flatpickr-input"
+                                                  placeholder="Select Date"
+                                                  options={{
+                                                    dateFormat: "d M, Y",
+                                                  }}
+                                                  onChange={
+                                                    handleServiceDueDateChange
+                                                  }
+                                                />
+                                              )}
                                             </td>
                                           </tr>
                                           <tr>
@@ -984,11 +2342,49 @@ const EditVehicle = () => {
                                               Tacho calibration Due
                                             </td>
                                             <td>
-                                              <input
-                                                type="date"
-                                                className="form-control"
-                                                id="exampleInputdate"
-                                              />
+                                              <span>
+                                                {
+                                                  vehicleLocation.state
+                                                    .tacho_calibration_due
+                                                }
+                                              </span>
+                                              <div
+                                                className="d-flex justify-content-start mt-n3"
+                                                style={{ marginLeft: "180px" }}
+                                              >
+                                                <label
+                                                  htmlFor="id_file"
+                                                  className="mb-0"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="right"
+                                                  title="Select Driver Status"
+                                                >
+                                                  <span
+                                                    className="d-inline-block"
+                                                    onClick={() =>
+                                                      setShowTachoCalibratio(
+                                                        !showTachoCalibration
+                                                      )
+                                                    }
+                                                  >
+                                                    <span className="text-success cursor-pointer">
+                                                      <i className="bi bi-pen fs-14"></i>
+                                                    </span>
+                                                  </span>
+                                                </label>
+                                              </div>
+                                              {showTachoCalibration && (
+                                                <Flatpickr
+                                                  className="form-control flatpickr-input"
+                                                  placeholder="Select Date"
+                                                  options={{
+                                                    dateFormat: "d M, Y",
+                                                  }}
+                                                  onChange={
+                                                    handleTachoCalibrationDateChange
+                                                  }
+                                                />
+                                              )}
                                             </td>
                                           </tr>
                                         </table>
@@ -1002,10 +2398,13 @@ const EditVehicle = () => {
                                             <td>
                                               <Form.Control
                                                 type="text"
-                                                id="supplierName-field"
+                                                id="coif_certificate_number"
+                                                name="coif_certificate_number"
                                                 className="form-control mb-2"
-                                                // placeholder="Enter owner name"
-                                                required
+                                                value={cOIFCertificateNumber}
+                                                onChange={
+                                                  handleCOIFCertificateNumber
+                                                }
                                               />
                                             </td>
                                           </tr>
@@ -1014,11 +2413,49 @@ const EditVehicle = () => {
                                               COIF Certificate Date
                                             </td>
                                             <td>
-                                              <input
-                                                type="date"
-                                                className="form-control mb-2"
-                                                id="exampleInputdate"
-                                              />
+                                              <span>
+                                                {
+                                                  vehicleLocation.state
+                                                    .coif_certificate_date
+                                                }
+                                              </span>
+                                              <div
+                                                className="d-flex justify-content-start mt-n3"
+                                                style={{ marginLeft: "180px" }}
+                                              >
+                                                <label
+                                                  htmlFor="id_file"
+                                                  className="mb-0"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="right"
+                                                  title="Select Driver Status"
+                                                >
+                                                  <span
+                                                    className="d-inline-block"
+                                                    onClick={() =>
+                                                      setShowCOIFCertificateDate(
+                                                        !showCOIFCertificateDate
+                                                      )
+                                                    }
+                                                  >
+                                                    <span className="text-success cursor-pointer">
+                                                      <i className="bi bi-pen fs-14"></i>
+                                                    </span>
+                                                  </span>
+                                                </label>
+                                              </div>
+                                              {showCOIFCertificateDate && (
+                                                <Flatpickr
+                                                  className="form-control flatpickr-input"
+                                                  placeholder="Select Date"
+                                                  options={{
+                                                    dateFormat: "d M, Y",
+                                                  }}
+                                                  onChange={
+                                                    handleCOIFCertificateDateChange
+                                                  }
+                                                />
+                                              )}
                                             </td>
                                           </tr>
                                           <tr>
@@ -1026,11 +2463,49 @@ const EditVehicle = () => {
                                               HP Start Date
                                             </td>
                                             <td>
-                                              <input
-                                                type="date"
-                                                className="form-control mb-2"
-                                                id="exampleInputdate"
-                                              />
+                                              <span>
+                                                {
+                                                  vehicleLocation.state
+                                                    .hp_start_date
+                                                }
+                                              </span>
+                                              <div
+                                                className="d-flex justify-content-start mt-n3"
+                                                style={{ marginLeft: "180px" }}
+                                              >
+                                                <label
+                                                  htmlFor="id_file"
+                                                  className="mb-0"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="right"
+                                                  title="Select Driver Status"
+                                                >
+                                                  <span
+                                                    className="d-inline-block"
+                                                    onClick={() =>
+                                                      setHPStartDate(
+                                                        !showHPStartDate
+                                                      )
+                                                    }
+                                                  >
+                                                    <span className="text-success cursor-pointer">
+                                                      <i className="bi bi-pen fs-14"></i>
+                                                    </span>
+                                                  </span>
+                                                </label>
+                                              </div>
+                                              {showHPStartDate && (
+                                                <Flatpickr
+                                                  className="form-control flatpickr-input"
+                                                  placeholder="Select Date"
+                                                  options={{
+                                                    dateFormat: "d M, Y",
+                                                  }}
+                                                  onChange={
+                                                    handleHPStarDateChange
+                                                  }
+                                                />
+                                              )}
                                             </td>
                                           </tr>
                                           <tr>
@@ -1038,11 +2513,49 @@ const EditVehicle = () => {
                                               HP End Date
                                             </td>
                                             <td>
-                                              <input
-                                                type="date"
-                                                className="form-control mb-2"
-                                                id="exampleInputdate"
-                                              />
+                                              <span>
+                                                {
+                                                  vehicleLocation.state
+                                                    .hp_end_date
+                                                }
+                                              </span>
+                                              <div
+                                                className="d-flex justify-content-start mt-n3"
+                                                style={{ marginLeft: "180px" }}
+                                              >
+                                                <label
+                                                  htmlFor="id_file"
+                                                  className="mb-0"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="right"
+                                                  title="Select Driver Status"
+                                                >
+                                                  <span
+                                                    className="d-inline-block"
+                                                    onClick={() =>
+                                                      setShowHPEndDate(
+                                                        !showHPEndDate
+                                                      )
+                                                    }
+                                                  >
+                                                    <span className="text-success cursor-pointer">
+                                                      <i className="bi bi-pen fs-14"></i>
+                                                    </span>
+                                                  </span>
+                                                </label>
+                                              </div>
+                                              {showHPEndDate && (
+                                                <Flatpickr
+                                                  className="form-control flatpickr-input"
+                                                  placeholder="Select Date"
+                                                  options={{
+                                                    dateFormat: "d M, Y",
+                                                  }}
+                                                  onChange={
+                                                    handleHPEndDateChange
+                                                  }
+                                                />
+                                              )}
                                             </td>
                                           </tr>
                                           <tr>
@@ -1052,24 +2565,28 @@ const EditVehicle = () => {
                                             <td>
                                               <Form.Control
                                                 type="text"
-                                                id="supplierName-field"
+                                                id="hp_reference_no"
+                                                name="hp_reference_no"
                                                 className="form-control mb-2"
-                                                // placeholder="Enter owner name"
-                                                required
+                                                value={hPReferenceNo}
+                                                onChange={handleHPReferenceNo}
                                               />
                                             </td>
                                           </tr>
                                           <tr>
                                             <td className="fw-bold">
-                                              Monthly Repayment amount
+                                              Monthly Repayment Amount
                                             </td>
                                             <td>
                                               <Form.Control
-                                                type="number"
+                                                type="text"
                                                 className="form-control mb-2"
-                                                id="supplierName-field"
-                                                placeholder="£"
-                                                required
+                                                id="monthly_repayment_amount"
+                                                name="monthly_repayment_amount"
+                                                value={monthlyRepaymentAmount}
+                                                onChange={
+                                                  handleMonthlyRepaymentAmount
+                                                }
                                               />
                                             </td>
                                           </tr>
@@ -1080,10 +2597,11 @@ const EditVehicle = () => {
                                             <td>
                                               <Form.Control
                                                 type="text"
-                                                id="supplierName-field"
+                                                id="hp_company"
+                                                name="hp_company"
                                                 className="form-control"
-                                                // placeholder="Enter owner name"
-                                                required
+                                                value={hpCompany}
+                                                onChange={handleHpCompany}
                                               />
                                             </td>
                                           </tr>
@@ -1100,67 +2618,110 @@ const EditVehicle = () => {
                     </Tab.Content>
                   </Tab.Container>
                 </Card.Body>
-              </Card>
-            </Row>
-          </form>
-          <Modal
-            className="fade zoomIn"
-            size="sm"
-            show={modal_AddExtra}
-            onHide={() => {
-              tog_AddExtra();
-            }}
-            centered
-          >
-            <Modal.Header className="px-4 pt-4" closeButton>
-              <h5 className="modal-title fs-18" id="exampleModalLabel">
-                Add New Vehicle Extra
-              </h5>
-            </Modal.Header>
-            <Modal.Body className="p-4">
-              <div
-                id="alert-error-msg"
-                className="d-none alert alert-danger py-2"
-              ></div>
-              <Form className="tablelist-form">
-                <input type="hidden" id="id-field" />
-                <Row>
-                  <Col lg={12}>
-                    <div className="mb-3">
-                      <Form.Label htmlFor="customerName-field">
-                        Extra Name
-                      </Form.Label>
-                      <Form.Control
-                        type="text"
-                        id="customerName-field"
-                        // placeholder="Enter Limit"
-                        required
-                      />
-                    </div>
-                  </Col>
-                  <Col lg={12}>
-                    <div className="hstack gap-2 justify-content-end">
-                      <Button
-                        className="btn-ghost-danger"
-                        onClick={() => {
-                          tog_AddExtra();
-                        }}
-                        data-bs-dismiss="modal"
-                      >
-                        <i className="ri-close-line align-bottom me-1"></i>{" "}
-                        Close
-                      </Button>
-                      <Button variant="primary" id="add-btn">
-                        Add
-                      </Button>
-                    </div>
-                  </Col>
-                </Row>
+                <Card.Footer className="d-flex justify-content-center">
+                  <button
+                    type="submit"
+                    className="d-flex justify-content-center btn btn-info btn-label"
+                  >
+                    <i className="ri-check-fill label-icon align-middle fs-16 me-2"></i>{" "}
+                    Apply
+                  </button>
+                </Card.Footer>
               </Form>
-            </Modal.Body>
-          </Modal>
+            </Card>
+          </Row>
         </Container>
       </div>
+      {/* MOT File */}
+      <Modal
+        className="fade zoomIn"
+        size="xl"
+        show={modal_MOTFile}
+        onHide={() => {
+          tog_MOTFileModal();
+        }}
+        centered
+      >
+        <Modal.Header className="px-4 pt-4" closeButton>
+          <h5 className="modal-title fs-18" id="exampleModalLabel">
+            MOT
+          </h5>
+        </Modal.Header>
+        <Modal.Body className="p-4">
+          <div
+            id="alert-error-msg"
+            className="d-none alert alert-danger py-2"
+          ></div>
+          <div>
+            <Document
+              file={`${process.env.REACT_APP_BASE_URL}/VehicleFiles/motFiles/${vehicleLocation.state.mot_file}`}
+              onLoadSuccess={onDocumentLoadSuccess}
+            >
+              <Page pageNumber={1} />
+            </Document>
+          </div>
+        </Modal.Body>
+      </Modal>
+      {/* Tax File */}
+      <Modal
+        className="fade zoomIn"
+        size="xl"
+        show={modal_TaxFile}
+        onHide={() => {
+          tog_TaxFileModal();
+        }}
+        centered
+      >
+        <Modal.Header className="px-4 pt-4" closeButton>
+          <h5 className="modal-title fs-18" id="exampleModalLabel">
+            Tax
+          </h5>
+        </Modal.Header>
+        <Modal.Body className="p-4">
+          <div
+            id="alert-error-msg"
+            className="d-none alert alert-danger py-2"
+          ></div>
+          <div>
+            <Document
+              file={`${process.env.REACT_APP_BASE_URL}/VehicleFiles/taxFiles/${vehicleLocation.state.tax_file}`}
+              onLoadSuccess={onDocumentLoadSuccess}
+            >
+              <Page pageNumber={1} />
+            </Document>
+          </div>
+        </Modal.Body>
+      </Modal>
+      {/* Insurance File */}
+      <Modal
+        className="fade zoomIn"
+        size="xl"
+        show={modal_InsuranceFile}
+        onHide={() => {
+          tog_InsuranceFileModal();
+        }}
+        centered
+      >
+        <Modal.Header className="px-4 pt-4" closeButton>
+          <h5 className="modal-title fs-18" id="exampleModalLabel">
+            Insurance
+          </h5>
+        </Modal.Header>
+        <Modal.Body className="p-4">
+          <div
+            id="alert-error-msg"
+            className="d-none alert alert-danger py-2"
+          ></div>
+          <div>
+            <Document
+              file={`${process.env.REACT_APP_BASE_URL}/VehicleFiles/insuranceFiles/${vehicleLocation.state.insurance_file}`}
+              onLoadSuccess={onDocumentLoadSuccess}
+            >
+              <Page pageNumber={1} />
+            </Document>
+          </div>
+        </Modal.Body>
+      </Modal>
     </React.Fragment>
   );
 };

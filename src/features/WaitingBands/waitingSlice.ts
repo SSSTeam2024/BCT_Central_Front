@@ -38,6 +38,14 @@ export const waitingBandSlice = createApi({
         }),
         invalidatesTags: ["WaitingBand"],
       }),
+      updateWaitingBand: builder.mutation<void, WaitingBand>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updateWaitingBand/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["WaitingBand"],
+      }),
     };
   },
 });
@@ -46,4 +54,5 @@ export const {
   useAddNewWaitingBandMutation,
   useDeleteWaitingBandMutation,
   useGetAllWaitingBandsQuery,
+  useUpdateWaitingBandMutation
 } = waitingBandSlice;

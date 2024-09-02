@@ -58,6 +58,9 @@ const Maptracking = (props: any) => {
     });
     //For Active present drivers
     socket.on("live-tracking-listening", (socketData: any) => {
+      console.log("socketData", socketData);
+
+      console.log("Date:", new Date());
       let tripExists = false;
       let counter = 0;
       let temparkers = [...markers];

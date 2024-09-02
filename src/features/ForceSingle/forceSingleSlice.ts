@@ -39,6 +39,14 @@ export const forceSingleSlice = createApi({
         }),
         invalidatesTags: ["ForceSingle"],
       }),
+      updateForceSingle: builder.mutation<void, ForceSingle>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updateForceSingle/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["ForceSingle"],
+      }),
     };
   },
 });
@@ -47,4 +55,5 @@ export const {
   useAddNewForceSingleMutation,
   useDeleteForceSingleMutation,
   useGetAllForceSinglesQuery,
+  useUpdateForceSingleMutation
 } = forceSingleSlice;

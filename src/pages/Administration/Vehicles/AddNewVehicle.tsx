@@ -19,6 +19,7 @@ import {
   useGetAllExtrasQuery,
 } from "features/VehicleExtraLuxury/extraSlice";
 import { useAddNewVehicleMutation } from "features/Vehicles/vehicleSlice";
+import Dropzone from "react-dropzone";
 
 const AddNewVehicle = () => {
   document.title = "Create Vehicle | Bouden Coach Travel";
@@ -322,9 +323,9 @@ const AddNewVehicle = () => {
     owner_name: "",
     note: "",
     extra: [""],
-    vehicle_images_base64_string: "",
-    vehicle_images_extension: "",
-    vehicle_images: "",
+    vehicle_images_base64_string: [],
+    vehicle_images_extension: [],
+    vehicle_images: [],
     mot_expiry: "",
     mot_file_base64_string: "",
     mot_file_extension: "",
@@ -413,23 +414,48 @@ const AddNewVehicle = () => {
   };
 
   // Mot File
-  const handleVehicleImagesUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = (
-      document.getElementById("vehicle_images_base64_string") as HTMLFormElement
-    ).files[0];
-    if (file) {
-      const { base64Data, extension } = await convertToBase64(file);
-      const vehicleImages = base64Data + "." + extension;
-      console.log(vehicleImages);
-      setVehicle({
-        ...vehicle,
-        vehicle_images: vehicleImages,
-        vehicle_images_base64_string: base64Data,
-        vehicle_images_extension: extension,
-      });
-    }
+  const handleVehicleImagesUpload = async (files: File[]) => {
+    const base64Images = await Promise.all(
+      files.map(async (file: File) => {
+        const { base64Data, extension } = await convertToBase64(file);
+        return {
+          base64Data,
+          extension,
+          fileName: file.name,
+        };
+      })
+    );
+
+    setVehicle((prevState: any) => ({
+      ...prevState,
+      vehicle_images: base64Images.map(
+        (img) => `data:image/${img.extension};base64,${img.base64Data}`
+      ),
+      vehicle_images_base64_string: base64Images.map((img) => img.base64Data),
+      vehicle_images_extension: base64Images.map((img) => img.extension),
+    }));
+  };
+
+  const handleDeleteFile = (indexToRemove: number) => {
+    setVehicle((prevData) => {
+      const newGallery = prevData.vehicle_images?.filter(
+        (_, index) => index !== indexToRemove
+      );
+      const newGalleryBase64Strings =
+        prevData.vehicle_images_base64_string?.filter(
+          (_, index) => index !== indexToRemove
+        );
+      const newGalleryExtension = prevData.vehicle_images_extension?.filter(
+        (_, index) => index !== indexToRemove
+      );
+
+      return {
+        ...prevData,
+        vehicle_images: newGallery,
+        vehicle_images_base64_string: newGalleryBase64Strings,
+        vehicle_images_extension: newGalleryExtension,
+      };
+    });
   };
 
   // Mot File
@@ -575,57 +601,58 @@ const AddNewVehicle = () => {
                                         </Form.Label>
                                       </Col>
                                       <Col lg={12}>
-                                        <div className="text-center mb-3">
-                                          <div className="position-relative d-inline-block">
-                                            <div className="position-absolute top-50 start-50 translate-middle">
-                                              <label
-                                                htmlFor="vehicle_images_base64_string"
-                                                className="mb-0"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-placement="right"
-                                                title="Select company logo"
-                                              >
-                                                <span className="avatar-xs d-inline-block">
-                                                  <span className="avatar-title bg-light border rounded-circle text-muted cursor-pointer">
-                                                    <i className="ri-image-fill"></i>
-                                                  </span>
-                                                </span>
-                                              </label>
-                                              <input
-                                                className="form-control d-none"
-                                                type="file"
-                                                name="vehicle_images_base64_string"
-                                                id="vehicle_images_base64_string"
-                                                accept="image/*"
-                                                onChange={(e) =>
-                                                  handleVehicleImagesUpload(e)
-                                                }
-                                                style={{
-                                                  width: "210px",
-                                                  height: "120px",
-                                                }}
-                                              />
-                                            </div>
-                                            <div className="avatar-lg">
-                                              <div className="avatar-title bg-light rounded-3">
-                                                <Link
-                                                  to={`${process.env.REACT_APP_BASE_URL}/vehicleImages/${vehicle.vehicle_images}`}
-                                                >
-                                                  <img
-                                                    src={`data:image/jpeg;base64, ${vehicle.vehicle_images_base64_string}`}
-                                                    alt={vehicle.vehicle_images}
-                                                    id="vehicle_images_base64_string"
-                                                    className="avatar-xl h-auto rounded-3 object-fit-cover"
-                                                    style={{
-                                                      width: "210px",
-                                                      height: "120px",
-                                                      zIndex: 5000,
-                                                    }}
-                                                  />
-                                                </Link>
+                                        <Dropzone
+                                          onDrop={(acceptedFiles) =>
+                                            handleVehicleImagesUpload(
+                                              acceptedFiles
+                                            )
+                                          }
+                                        >
+                                          {({
+                                            getRootProps,
+                                            getInputProps,
+                                          }) => (
+                                            <div
+                                              className="dropzone dz-clickable text-center"
+                                              {...getRootProps()}
+                                            >
+                                              <div className="dz-message needsclick">
+                                                <div className="mb-3">
+                                                  <i className="display-4 text-muted ri-upload-cloud-2-fill" />
+                                                </div>
+                                                <h5>
+                                                  Drop photos here or click to
+                                                  upload.
+                                                </h5>
                                               </div>
+                                              <input {...getInputProps()} />
                                             </div>
-                                          </div>
+                                          )}
+                                        </Dropzone>
+                                        <div className="mt-3">
+                                          {vehicle.vehicle_images?.map(
+                                            (image, index) => (
+                                              <div
+                                                key={index}
+                                                className="image-preview"
+                                              >
+                                                <img
+                                                  src={image}
+                                                  alt={`Image ${index + 1}`}
+                                                  className="img-thumbnail"
+                                                />
+                                                <Button
+                                                  variant="danger"
+                                                  size="sm"
+                                                  onClick={() =>
+                                                    handleDeleteFile(index)
+                                                  }
+                                                >
+                                                  Delete
+                                                </Button>
+                                              </div>
+                                            )
+                                          )}
                                         </div>
                                       </Col>
                                     </Row>

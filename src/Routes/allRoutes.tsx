@@ -87,18 +87,22 @@ import AffilaiteDetails from "pages/Corporate/Subcontractor/AffiliateDetails";
 import NewEmail from "pages/Messages/NewEmail";
 import EmailsSent from "pages/Messages/EmailsSent";
 import CancelledJobs from "pages/CancelledJobs";
-import Test from "pages/Test";
 import AddNewDefect from "pages/Administration/Vehicles/AddNewDefect";
+import EditTeam from "pages/Administration/Team/EditTeam";
+import EditDriver from "pages/Administration/Driver/EditDriver";
+import EditDefect from "pages/Administration/Vehicles/EditDefect";
+import QuoteCalendar from "pages/QuoteCalendar";
+import Calendar from "pages/QuoteCalendar";
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: <Dashboard /> },
   { path: "/requested-features", component: <RequestFeature /> },
-  { path: "/report-error", component: <ReportError /> },
+  { path: "/errors-reported", component: <ReportError /> },
   { path: "/user-manual", component: <UserManual /> },
   { path: "/defects-management", component: <DefectsManagement /> },
   { path: "/new-vehicle-defect", component: <AddNewDefect /> },
   { path: "/contract/:name", component: <ContractDetails /> },
-
+  { path: "/edit-defect", component: <EditDefect /> },
   //? Tracking
   { path: "/map-tracking", component: <Maptracking /> },
   { path: "/delays&changes", component: <Delayschanges /> },
@@ -143,7 +147,8 @@ const authProtectedRoutes = [
   { path: "/new-offer", component: <AddNewOffer /> },
   { path: "/offer-details/:name", component: <OfferDetails /> },
   { path: "/edit-offer/:name", component: <AddNewOffer /> },
-
+  { path: "/edit-team/:name", component: <EditTeam /> },
+  { path: "/edit-driver/:name", component: <EditDriver /> },
   //? Corporate
   { path: "/schools", component: <Schools /> },
   { path: "/edit-school/:name", component: <EditSchool /> },
@@ -218,6 +223,9 @@ const authProtectedRoutes = [
     path: "/emails-sent",
     component: <EmailsSent />,
   },
+
+  { path: "/calendar", component: <QuoteCalendar /> },
+
   // this route should be at the end of all other routes
   // eslint-disable-next-line react/display-name
   { path: "/", exact: true, component: <Navigate to="/dashboard" /> },

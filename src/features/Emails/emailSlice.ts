@@ -51,7 +51,7 @@ export const emailSlice = createApi({
       updateEmailTemplate: builder.mutation<void, Email>({
         query: ({ _id, ...rest }) => ({
           url: `/updateEmailTemplate/${_id}`,
-          method: "PUT",
+          method: "PATCH",
           body: rest,
         }),
         invalidatesTags: ["Email"],

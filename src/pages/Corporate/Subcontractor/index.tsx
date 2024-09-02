@@ -258,7 +258,7 @@ const Subcontractors = () => {
           ) : (
             <li>
               <button
-                title="New Quote"
+                title="Block Affiliate"
                 type="button"
                 className="btn btn-soft-warning btn-icon fs-10"
                 disabled
@@ -267,14 +267,6 @@ const Subcontractors = () => {
               </button>
             </li>
           )}
-          <li>
-            <Link
-              to="#"
-              className="badge badge-soft-success edit-item-btn fs-15"
-            >
-              <i className="ri-edit-2-line"></i>
-            </Link>
-          </li>
           <li>
             <Link
               to="#"

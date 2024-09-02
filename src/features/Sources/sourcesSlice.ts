@@ -36,6 +36,14 @@ export const sourcesSlice = createApi({
         }),
         invalidatesTags: ["Sources"],
       }),
+      updateSources: builder.mutation<void, Sources>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updateSource/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["Sources"],
+      }),
     };
   },
 });
@@ -44,4 +52,5 @@ export const {
   useAddNewSourceMutation,
   useDeleteSourceMutation,
   useGetAllSourcesQuery,
+  useUpdateSourcesMutation
 } = sourcesSlice;

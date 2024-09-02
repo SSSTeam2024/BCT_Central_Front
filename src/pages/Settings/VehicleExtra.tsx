@@ -2,11 +2,12 @@ import {
   useAddNewExtraMutation,
   useDeleteExtraMutation,
   useGetAllExtrasQuery,
+  useUpdateExtraMutation,
 } from "features/VehicleExtraLuxury/extraSlice";
 import React, { useState, useEffect } from "react";
 import { Form, Row, Card, Col, Button, Modal } from "react-bootstrap";
 import DataTable from "react-data-table-component";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 
 const VehicleExtra = () => {
@@ -15,6 +16,16 @@ const VehicleExtra = () => {
       position: "center",
       icon: "success",
       title: "Extra is created successfully",
+      showConfirmButton: false,
+      timer: 2500,
+    });
+  };
+
+  const notifyUpdateSuccess = () => {
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: "Extra is updated successfully",
       showConfirmButton: false,
       timer: 2500,
     });
@@ -37,6 +48,7 @@ const VehicleExtra = () => {
     useState<any[]>(allExtra);
 
   const [createExtra] = useAddNewExtraMutation();
+  const [updateExtra] = useUpdateExtraMutation();
 
   const initialExtra = {
     name: "",
@@ -58,6 +70,37 @@ const VehicleExtra = () => {
     try {
       createExtra(extra).then(() => setExtra(initialExtra));
       notifySuccess();
+    } catch (error) {
+      notifyError(error);
+    }
+  };
+
+  const [extraName, setExtraName] = useState<string>("");
+  const [extraId, setExtraId] = useState<string>("");
+  const extraLocation = useLocation();
+
+  useEffect(() => {
+    if (extraLocation?.state) {
+      setExtraId(extraLocation.state._id || "");
+      setExtraName(extraLocation.state.name || "");
+    }
+  }, [extraLocation]);
+
+  const handleName = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setExtraName(e.target.value);
+  };
+
+  const onSubmitUpdateExtra = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const source = {
+        _id: extraId || extraLocation.state._id,
+        name: extraName || extraLocation.state.name,
+      };
+      updateExtra(source).then(() => setExtra(initialExtra));
+      notifyUpdateSuccess();
     } catch (error) {
       notifyError(error);
     }
@@ -114,16 +157,16 @@ const VehicleExtra = () => {
       cell: (cellProps: any) => {
         return (
           <ul className="hstack gap-2 list-unstyled mb-0">
-            {/* <li>
-              <Link to="#" className="badge badge-soft-primary edit-item-btn">
-                <i className="ri-eye-line"></i>
-              </Link>
-            </li> */}
-            {/* <li>
-              <Link to="#" className="badge badge-soft-success edit-item-btn">
+            <li>
+              <Link
+                to="#"
+                className="badge badge-soft-success edit-item-btn"
+                state={cellProps}
+                onClick={tog_UpdateExtra}
+              >
                 <i className="ri-edit-2-line"></i>
               </Link>
-            </li> */}
+            </li>
             <li>
               <Link
                 to="#"
@@ -142,6 +185,11 @@ const VehicleExtra = () => {
   const [modal_AddExtra, setmodal_AddExtra] = useState<boolean>(false);
   function tog_AddExtra() {
     setmodal_AddExtra(!modal_AddExtra);
+  }
+
+  const [modal_UpdateExtra, setmodal_UpdateExtra] = useState<boolean>(false);
+  function tog_UpdateExtra() {
+    setmodal_UpdateExtra(!modal_UpdateExtra);
   }
 
   useEffect(() => {
@@ -255,6 +303,66 @@ const VehicleExtra = () => {
                     }}
                   >
                     Add
+                  </Button>
+                </div>
+              </Col>
+            </Row>
+          </Form>
+        </Modal.Body>
+      </Modal>
+      <Modal
+        className="fade zoomIn"
+        size="sm"
+        show={modal_UpdateExtra}
+        onHide={() => {
+          tog_UpdateExtra();
+        }}
+        centered
+      >
+        <Modal.Header className="px-4 pt-4" closeButton>
+          <h5 className="modal-title fs-18" id="exampleModalLabel">
+            Update Vehicle Extra
+          </h5>
+        </Modal.Header>
+        <Modal.Body className="p-4">
+          <div
+            id="alert-error-msg"
+            className="d-none alert alert-danger py-2"
+          ></div>
+          <Form className="tablelist-form" onSubmit={onSubmitUpdateExtra}>
+            <Row>
+              <Col lg={12}>
+                <div className="mb-3">
+                  <Form.Label htmlFor="name">Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={extraName}
+                    onChange={handleName}
+                  />
+                </div>
+              </Col>
+              <Col lg={12}>
+                <div className="hstack gap-2 justify-content-end">
+                  <Button
+                    className="btn-ghost-danger"
+                    onClick={() => {
+                      tog_UpdateExtra();
+                    }}
+                    data-bs-dismiss="modal"
+                  >
+                    <i className="ri-close-line align-bottom me-1"></i> Close
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    id="add-btn"
+                    onClick={() => {
+                      tog_UpdateExtra();
+                    }}
+                  >
+                    Update
                   </Button>
                 </div>
               </Col>

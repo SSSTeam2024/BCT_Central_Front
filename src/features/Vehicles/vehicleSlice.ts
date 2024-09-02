@@ -26,9 +26,9 @@ export interface Vehicle {
   owner_name: string;
   note: string;
   extra: string[];
-  vehicle_images_base64_string: string;
-  vehicle_images_extension: string;
-  vehicle_images: string;
+  vehicle_images_base64_string: string[];
+  vehicle_images_extension: string[];
+  vehicle_images: string[];
   mot_expiry: string;
   mot_file_base64_string: string;
   mot_file_extension: string;
@@ -84,6 +84,14 @@ export const vehicleSlice = createApi({
         },
         invalidatesTags: ["Vehicle"],
       }),
+      updateVehicle: builder.mutation<void, Vehicle>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updateVehicle/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["Vehicle"],
+      }),
       deleteVehicle: builder.mutation<void, Vehicle>({
         query: (_id) => ({
           url: `/deleteVehicle/${_id}`,
@@ -100,4 +108,5 @@ export const {
   useGetAllVehiclesQuery,
   useDeleteVehicleMutation,
   useGetVehicleByIDQuery,
+  useUpdateVehicleMutation
 } = vehicleSlice;

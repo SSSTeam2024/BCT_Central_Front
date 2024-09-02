@@ -45,6 +45,14 @@ export const vehicleTypeSlice = createApi({
         }),
         invalidatesTags: ["VehicleType"],
       }),
+      updateVehicleType: builder.mutation<void, VehicleType>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updateVehicleType/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["VehicleType"],
+      }),
     };
   },
 });
@@ -54,4 +62,5 @@ export const {
   useAddNewVehicleTypeMutation,
   useDeleteVehicleTypeMutation,
   useFetchVehicleTypeByIdQuery,
+  useUpdateVehicleTypeMutation
 } = vehicleTypeSlice;

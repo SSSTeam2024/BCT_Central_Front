@@ -50,6 +50,14 @@ export const passengerAndLuggageSlice = createApi({
         }),
         invalidatesTags: ["PassengerAndLuggage"],
       }),
+      updatePassengerAndLuggage: builder.mutation<void, PassengerAndLuggage>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updatePassengerLuggageLimit/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["PassengerAndLuggage"],
+      }),
     };
   },
 });
@@ -58,4 +66,5 @@ export const {
   useAddNewPassengerAndLuggageMutation,
   useDeletePassengerAndLuggageMutation,
   useGetAllPassengerAndLuggagesQuery,
+  useUpdatePassengerAndLuggageMutation
 } = passengerAndLuggageSlice;

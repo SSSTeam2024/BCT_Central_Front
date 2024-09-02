@@ -80,13 +80,15 @@ const DefectsManagement = () => {
       sortable: true,
       selector: (cell: any) => {
         switch (cell.level) {
-          case "Not Paid":
-            return <span className="badge bg-danger"> {cell.level} </span>;
-          case "Medium":
-            return <span className="badge bg-info"> {cell.level} </span>;
-          case "Low":
+          case "Level 1":
             return <span className="badge bg-success"> {cell.level} </span>;
-          default:
+          case "Level 2":
+            return <span className="badge bg-info"> {cell.level} </span>;
+          case "Level 3":
+            return <span className="badge bg-primary"> {cell.level} </span>;
+          case "Level 4":
+            return <span className="badge bg-warning"> {cell.level} </span>;
+          case "Level 5":
             return <span className="badge bg-danger"> {cell.level} </span>;
         }
       },
@@ -104,15 +106,15 @@ const DefectsManagement = () => {
             return (
               <span className="badge bg-danger"> {cell.defectStatus} </span>
             );
-          case "Medium":
+          case "Work Shop":
             return <span className="badge bg-info"> {cell.defectStatus} </span>;
-          case "Low":
+          case "Confirmed":
             return (
               <span className="badge bg-success"> {cell.defectStatus} </span>
             );
           default:
             return (
-              <span className="badge bg-danger"> {cell.defectStatus} </span>
+              <span className="badge bg-secondary"> {cell.defectStatus} </span>
             );
         }
       },
@@ -138,6 +140,15 @@ const DefectsManagement = () => {
                 onClick={() => setShowDetails(!showDetails)}
               >
                 <i className="ri-eye-line"></i>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/edit-defect"
+                className="badge badge-soft-success edit-item-btn"
+                state={row}
+              >
+                <i className="ri-edit-line"></i>
               </Link>
             </li>
             <li>

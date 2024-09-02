@@ -50,6 +50,14 @@ export const pricingPostalCodeSlice = createApi({
         }),
         invalidatesTags: ["PricingPostalCode"],
       }),
+      updatePricingPostalCode: builder.mutation<void, PricingPostalCode>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updatePricingPostalCode/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["PricingPostalCode"],
+      }),
     };
   },
 });
@@ -59,4 +67,5 @@ export const {
   useDeletePricingPostalCodeMutation,
   useGetAllPricingPostalCodesQuery,
   useGetPricingPostalCodeQuery,
+  useUpdatePricingPostalCodeMutation
 } = pricingPostalCodeSlice;

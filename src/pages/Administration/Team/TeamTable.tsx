@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Card, Col, Image, Modal, Row } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import avtar1 from "assets/images/users/avatar-1.jpg";
 import { useDeleteTeamMutation } from "features/Team/teamSlice";
 import Swal from "sweetalert2";
 
@@ -9,7 +8,6 @@ const TeamTable = ({ team }: any) => {
   const noresult: any = useRef();
   const teamList: any = useRef();
   const [brandList, setBrandList] = useState([]);
-  const [show, setShow] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(15);
@@ -201,16 +199,16 @@ const TeamTable = ({ team }: any) => {
                       <i className="ri-eye-line ri-xl"></i>
                     </button>
                   </Link>
-                  <Link to="#">
+                  <Link to={`/edit-team/${item.firstName}`} state={item}>
                     <button type="button" className="btn btn-outline-secondary">
                       <i className="ri-edit-2-line ri-xl"></i>
                     </button>
                   </Link>
-                  <Link to="#">
+                  {/* <Link to="#">
                     <button type="button" className="btn btn-outline-dark">
                       <i className="ri-settings-5-line ri-xl"></i>
                     </button>
-                  </Link>
+                  </Link> */}
                   <Link to="#" onClick={() => AlertDelete(item?._id!)}>
                     <button type="button" className="btn btn-outline-danger">
                       <i className="ri-delete-bin-5-line ri-xl" />

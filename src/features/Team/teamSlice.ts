@@ -57,6 +57,14 @@ export const teamSlice = createApi({
         },
         invalidatesTags: ["Team"],
       }),
+      updateTeam: builder.mutation<void, Team>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updateTeam/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["Team"],
+      }),
       deleteTeam: builder.mutation<void, Team>({
         query: (_id) => ({
           url: `/deleteTeam/${_id}`,
@@ -72,4 +80,5 @@ export const {
   useAddNewTeamMutation,
   useGetAllTeamQuery,
   useDeleteTeamMutation,
+  useUpdateTeamMutation
 } = teamSlice;

@@ -42,6 +42,14 @@ export const mileageBandSlice = createApi({
         }),
         invalidatesTags: ["MileageBand"],
       }),
+      updateMileageBand: builder.mutation<void, MileageBand>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updateMileageBand/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["MileageBand"],
+      }),
     };
   },
 });
@@ -50,4 +58,5 @@ export const {
   useAddNewMileageBandMutation,
   useDeleteMileageBandMutation,
   useGetAllMileageBandsQuery,
+  useUpdateMileageBandMutation
 } = mileageBandSlice;

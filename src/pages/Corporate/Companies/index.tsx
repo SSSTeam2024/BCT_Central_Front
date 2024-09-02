@@ -166,7 +166,7 @@ const Companies = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          <Breadcrumb title="Companies" pageTitle="Corporate" />
+          <Breadcrumb title="Companies" pageTitle="Accounts" />
           <Card id="shipmentsList">
             <Card.Header className="border-bottom-dashed">
               <Row className="g-3">

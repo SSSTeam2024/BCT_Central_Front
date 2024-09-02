@@ -85,6 +85,14 @@ export const driverSlice = createApi({
         }),
         invalidatesTags: ["Driver"],
       }),
+      updateDriver: builder.mutation<void, Driver>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updateProfileDriver/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["Driver"],
+      }),
     };
   },
 });
@@ -94,4 +102,5 @@ export const {
   useGetAllDriverQuery,
   useDeleteDriverMutation,
   useGetDriverByIDQuery,
+  useUpdateDriverMutation
 } = driverSlice;

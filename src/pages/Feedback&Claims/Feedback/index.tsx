@@ -12,7 +12,7 @@ const Feedback = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-          <BreadCrumb title="Feedback" pageTitle="Feedback & Claims" />
+          <BreadCrumb title="Feedbacks" pageTitle="Releveance" />
           <Row>
             <Feedbacktable reviews={reviews} />
           </Row>

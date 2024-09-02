@@ -1,52 +1,48 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { Button, Card, Col, Image, Modal, Row } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import avtar1 from "assets/images/users/avatar-1.jpg";
-import driverAnimation from "../../../assets/images/Fatmahhhh.json";
 import Swal from "sweetalert2";
 import Lottie, { LottieRefCurrentProps } from "lottie-react";
 import { Driver, useDeleteDriverMutation } from "features/Driver/driverSlice";
 
 const DriverTable = ({ driver }: any) => {
-  const noresult: any = useRef();
-  const teamList: any = useRef();
+  const noresult = useRef<HTMLDivElement>(null);
+  const teamList = useRef();
   const [brandList, setBrandList] = useState([]);
-  const [show, setShow] = useState(false);
-  const lottieRef3 = useRef<LottieRefCurrentProps>(null);
+  const lottieRef3 = useRef(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(15);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleSearchChange = (event: any) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const getFilteredDriver = useMemo(() => {
+    let filteredDrivers = driver;
+
+    if (searchTerm) {
+      filteredDrivers = filteredDrivers.filter(
+        (driver: any) =>
+          driver?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          driver?.surname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          driver?.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          driver?.phonenumber.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    return filteredDrivers;
+  }, [driver, searchTerm]);
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedData = driver.slice(startIndex, endIndex);
-  const totalPages = Math.ceil(driver.length / itemsPerPage);
+  const paginatedData = getFilteredDriver.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(getFilteredDriver.length / itemsPerPage);
 
-  console.log("paginatedData", paginatedData);
   useEffect(() => {
-    setBrandList(driver);
+    setBrandList(getFilteredDriver);
     setItemsPerPage(15);
-  }, [driver]);
-
-  const handleSearchClick = (event: any) => {
-    setCurrentPage(1);
-    let inputVal = event.toLowerCase();
-
-    const filterItems = (arr: any, query: any) => {
-      return arr.filter((el: any) => {
-        return el.brandName.toLowerCase().indexOf(query.toLowerCase()) !== -1;
-      });
-    };
-
-    let filterData = filterItems(driver, inputVal);
-    setBrandList(filterData);
-    if (filterData.length === 0) {
-      noresult.current.style.display = "block";
-      teamList.current.style.display = "none";
-    } else {
-      noresult.current.style.display = "none";
-      // teamList.current.style.display = "block";
-    }
-  };
+  }, [getFilteredDriver]);
 
   const navigate = useNavigate();
 
@@ -101,12 +97,13 @@ const DriverTable = ({ driver }: any) => {
         <Col xxl={3} lg={4} sm={9}>
           <div className="search-box mb-3 mb-sm-0">
             <input
-              onChange={(e: any) => handleSearchClick(e.target.value)}
               type="text"
               className="form-control"
               id="searchInputList"
               autoComplete="off"
               placeholder="Search drivers..."
+              value={searchTerm}
+              onChange={handleSearchChange}
             />
             <i className="ri-search-line search-icon"></i>
           </div>
@@ -195,16 +192,16 @@ const DriverTable = ({ driver }: any) => {
                     <i className="ri-eye-line ri-xl"></i>
                   </button>
                 </Link>
-                <Link to="#">
+                <Link to={`/edit-driver/${item.firstname}`} state={item}>
                   <button type="button" className="btn btn-outline-secondary">
                     <i className="ri-edit-2-line ri-xl"></i>
                   </button>
                 </Link>
-                <Link to="#">
+                {/* <Link to="#">
                   <button type="button" className="btn btn-outline-dark">
                     <i className="ri-settings-5-line ri-xl"></i>
                   </button>
-                </Link>
+                </Link> */}
                 <Link to="#" onClick={() => AlertDelete(item?._id!)}>
                   <button type="button" className="btn btn-outline-danger">
                     <i className="ri-delete-bin-5-line ri-xl" />

@@ -361,13 +361,13 @@ const AddNewDriver = () => {
                         <Row>
                           <div className="text-center mb-3">
                             <div className="position-relative d-inline-block">
-                              <div className="position-absolute top-50 start-50 translate-middle">
+                              <div className="position-absolute top-100 start-100 translate-middle">
                                 <label
                                   htmlFor="profile_image_base64_string"
                                   className="mb-0"
                                   data-bs-toggle="tooltip"
                                   data-bs-placement="right"
-                                  title="Select company logo"
+                                  title="Select driver avatar"
                                   // style={{width: "0px"}}
                                 >
                                   <span className="avatar-xs d-inline-block">
@@ -396,7 +396,6 @@ const AddNewDriver = () => {
                                     style={{
                                       width: "210px",
                                       height: "120px",
-                                      zIndex: 5000,
                                     }}
                                   />
                                 </div>

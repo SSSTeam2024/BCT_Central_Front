@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Button, Card, Col, Container, Row } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import { Link, useNavigate } from "react-router-dom";
@@ -187,6 +187,39 @@ const Vehicles = () => {
     []
   );
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const getFilteredVehicles = () => {
+    let filteredVehicles = data;
+    if (searchTerm) {
+      filteredVehicles = filteredVehicles.filter(
+        (vehicle: any) =>
+          vehicle?.registration_number
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          vehicle.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          vehicle.color.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          vehicle.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          vehicle.max_passengers
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          vehicle.fleet_number
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          vehicle.mileage.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          vehicle.engine_number
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          vehicle.ownership.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    return filteredVehicles;
+  };
+
   return (
     <React.Fragment>
       <div className="page-content">
@@ -201,6 +234,8 @@ const Vehicles = () => {
                       type="text"
                       className="form-control search"
                       placeholder="Search for something..."
+                      value={searchTerm}
+                      onChange={handleSearchChange}
                     />
                     <i className="ri-search-line search-icon"></i>
                   </div>
@@ -238,7 +273,7 @@ const Vehicles = () => {
                 <div className="table-responsive table-card">
                   <TableContainer
                     columns={columns || []}
-                    data={data || []}
+                    data={getFilteredVehicles() || []}
                     // isGlobalFilter={false}
                     iscustomPageSize={false}
                     isBordered={false}

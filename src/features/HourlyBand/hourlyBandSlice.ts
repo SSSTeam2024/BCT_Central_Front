@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export interface HourBand {
+  _id?: string;
   vehicle_type: string;
   hours_limit: string;
   price: string;
@@ -37,6 +38,14 @@ export const hourlyBandSlice = createApi({
         }),
         invalidatesTags: ["HourBand"],
       }),
+      updateHourBand: builder.mutation<void, HourBand>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updateHourlyBand/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["HourBand"],
+      }),
     };
   },
 });
@@ -45,4 +54,5 @@ export const {
   useGetAllHourBandQuery,
   useAddNewHourBandMutation,
   useDeleteHourBandMutation,
+  useUpdateHourBandMutation
 } = hourlyBandSlice;

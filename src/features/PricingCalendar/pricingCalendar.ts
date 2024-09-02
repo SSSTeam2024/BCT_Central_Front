@@ -52,6 +52,14 @@ export const pricingCalendarSlice = createApi({
         }),
         invalidatesTags: ["PricingCalendar"],
       }),
+      updatePricingCalendar: builder.mutation<void, PricingCalendar>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updatePricingCalendar/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["PricingCalendar"],
+      }),
     };
   },
 });
@@ -60,4 +68,5 @@ export const {
   useAddNewPricingCalendarMutation,
   useDeletePricingCalendarMutation,
   useGetAllPricingCalendarsQuery,
+  useUpdatePricingCalendarMutation
 } = pricingCalendarSlice;

@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Row, Card, Col, Button, Modal } from "react-bootstrap";
 import DataTable from "react-data-table-component";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   useAddNewLuggageMutation,
   useDeleteLuggageMutation,
   useGetAllLuggageQuery,
+  useUpdateLuggageMutation,
 } from "features/luggage/luggageSlice";
 import Swal from "sweetalert2";
 
@@ -16,6 +17,16 @@ const LuggageTypes = () => {
       position: "center",
       icon: "success",
       title: "Luggage is created successfully",
+      showConfirmButton: false,
+      timer: 2500,
+    });
+  };
+
+  const notifyUpdateSuccess = () => {
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: "Luggage is updated successfully",
       showConfirmButton: false,
       timer: 2500,
     });
@@ -93,7 +104,12 @@ const LuggageTypes = () => {
         return (
           <ul className="hstack gap-2 list-unstyled mb-0">
             <li>
-              <Link to="#" className="badge badge-soft-success edit-item-btn">
+              <Link
+                to="#"
+                className="badge badge-soft-success edit-item-btn"
+                state={row}
+                onClick={tog_UpdateLuggage}
+              >
                 <i className="ri-edit-2-line"></i>
               </Link>
             </li>
@@ -117,8 +133,14 @@ const LuggageTypes = () => {
     setmodal_AddLuggage(!modal_AddLuggage);
   }
 
-  const [createLuggage] = useAddNewLuggageMutation();
+  const [modal_UpdateLuggage, setmodal_UpdateLuggage] =
+    useState<boolean>(false);
+  function tog_UpdateLuggage() {
+    setmodal_UpdateLuggage(!modal_UpdateLuggage);
+  }
 
+  const [createLuggage] = useAddNewLuggageMutation();
+  const [updateLuggage] = useUpdateLuggageMutation();
   const initialLuggage = {
     description: "",
     size: "",
@@ -146,6 +168,68 @@ const LuggageTypes = () => {
     }
   };
 
+  const [luggage_desc, setLuggageDesc] = useState<string>("");
+  const [luggage_id, setLuggageId] = useState<string>("");
+  const [luggage_size, setLuggageSize] = useState<string>("");
+  const luggageLocation = useLocation();
+
+  useEffect(() => {
+    if (luggageLocation?.state) {
+      setLuggageId(luggageLocation.state._id || "");
+      setLuggageDesc(luggageLocation.state.description || "");
+      setLuggageSize(luggageLocation.state.size || "");
+    }
+  }, [luggageLocation]);
+
+  const handleDesc = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setLuggageDesc(e.target.value);
+  };
+
+  const handleSize = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setLuggageSize(e.target.value);
+  };
+
+  const onSubmitUpdateLuggage = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const luggage = {
+        _id: luggage_id || luggageLocation.state._id,
+        description: luggage_desc || luggageLocation.state.description,
+        size: luggage_size || luggageLocation.state.size,
+      };
+      updateLuggage(luggage)
+        .then(() => notifyUpdateSuccess())
+        .then(() => setLuggage(initialLuggage));
+    } catch (error) {
+      notifyError(error);
+    }
+  };
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const getFilteredLuggageType = () => {
+    let filteredLuggage = data;
+    if (searchTerm) {
+      filteredLuggage = filteredLuggage.filter(
+        (luggage: any) =>
+          (luggage?.description &&
+            luggage.description
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase())) ||
+          (luggage?.size &&
+            luggage.size.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+    return filteredLuggage;
+  };
+
   return (
     <React.Fragment>
       <Col lg={12}>
@@ -158,6 +242,8 @@ const LuggageTypes = () => {
                     type="text"
                     className="form-control search"
                     placeholder="Search for something..."
+                    value={searchTerm}
+                    onChange={handleSearchChange}
                   />
                   <i className="ri-search-line search-icon"></i>
                 </div>
@@ -182,7 +268,11 @@ const LuggageTypes = () => {
             </Row>
           </Card.Header>
           <Card.Body>
-            <DataTable columns={columns} data={data} pagination />
+            <DataTable
+              columns={columns}
+              data={getFilteredLuggageType()}
+              pagination
+            />
           </Card.Body>
         </Card>
       </Col>
@@ -260,6 +350,80 @@ const LuggageTypes = () => {
                   </Button>
                 </div>
               </Col>
+            </Row>
+          </Form>
+        </Modal.Body>
+      </Modal>
+      <Modal
+        className="fade"
+        id="createModal"
+        show={modal_UpdateLuggage}
+        onHide={() => {
+          tog_UpdateLuggage();
+        }}
+        centered
+      >
+        <Modal.Header closeButton>
+          <h1 className="modal-title fs-5" id="createModalLabel">
+            Update Luggage
+          </h1>
+        </Modal.Header>
+        <Modal.Body>
+          <Form className="create-form" onSubmit={onSubmitUpdateLuggage}>
+            <input type="hidden" id="id-field" />
+            <div
+              id="alert-error-msg"
+              className="d-none alert alert-danger py-2"
+            ></div>
+
+            <Row>
+              <Col lg={12} className="d-flex justify-content-center">
+                <div className="mb-3">
+                  <Form.Label htmlFor="description">Description</Form.Label>
+                  <Form.Control
+                    type="text"
+                    id="description"
+                    onChange={handleDesc}
+                    value={luggage_desc}
+                  />
+                </div>
+              </Col>
+            </Row>
+            <Row>
+              <Col lg={12} className="d-flex justify-content-center">
+                <div className="mb-3">
+                  <Form.Label htmlFor="size">Size</Form.Label>
+                  <Form.Control
+                    type="text"
+                    id="size"
+                    onChange={handleSize}
+                    value={luggage_size}
+                  />
+                </div>
+              </Col>
+            </Row>
+            <Row>
+              <div className="hstack gap-2 justify-content-end">
+                <Button
+                  variant="light"
+                  onClick={() => {
+                    tog_UpdateLuggage();
+                    setLuggage(initialLuggage);
+                  }}
+                >
+                  Close
+                </Button>
+                <Button
+                  onClick={() => {
+                    tog_UpdateLuggage();
+                  }}
+                  type="submit"
+                  variant="success"
+                  id="addNew"
+                >
+                  Update
+                </Button>
+              </div>
             </Row>
           </Form>
         </Modal.Body>
