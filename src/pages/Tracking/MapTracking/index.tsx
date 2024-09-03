@@ -69,7 +69,11 @@ const Maptracking = (props: any) => {
         if (element.details.details.id === socketData.details.id) {
           if (socketData.details.progress === "Completed") {
             notify(
-              "Driver " + socketData.details.driver + " has completed this job"
+              "Driver " +
+                socketData.details.driver.firstname +
+                " " +
+                socketData.details.driver.surname +
+                " has completed this job"
             );
           } else {
             element.details.position = socketData.position;
