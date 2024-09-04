@@ -271,7 +271,7 @@ const JobShare = () => {
     {
       name: <span className="font-weight-bold fs-13">Enquiry Date</span>,
       selector: (row: Quote) => {
-        const date = new Date(row.createdAt);
+        const date = new Date(row?.createdAt!);
         return <span>{date.toDateString()}</span>;
       },
       sortable: true,

@@ -10,14 +10,14 @@ export interface Quote {
     placeName: string;
     coordinates: {
       lat: number;
-      lon: number;
+      lng: number;
     };
   };
   start_point: {
     placeName: string;
     coordinates: {
       lat: number;
-      lon: number;
+      lng: number;
     };
   };
   quote_ref?: string;
@@ -35,7 +35,7 @@ export interface Quote {
     groupName?: string;
   };
   notes: string;
-  createdAt: Date;
+  createdAt?: Date;
   luggage_details: string;
   manual_cost: string;
   status: string;
@@ -52,6 +52,7 @@ export interface Quote {
   pushed_price?: string;
   date?: string;
   dropoff_date?: string;
+  return_date?:string;
   return_time?: string;
   pickup_time?: string;
   mid_stations: {
@@ -69,6 +70,7 @@ export interface Quote {
     }[];
   }[];
   type?: string;
+  heard_of_us?: string;
 }
 
 export interface BookEmail {
@@ -149,6 +151,53 @@ export interface DeleteWhiteList {
   Quote_ID: string;
 }
 
+export interface NewQuote {
+  passengers_number: number;
+  journey_type: string;
+  estimated_start_time: string;
+  estimated_return_start_time: string;
+  destination_point: {
+    placeName: string;
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
+  };
+  start_point: {
+    placeName: string;
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
+  };
+  quote_ref?: string;
+  vehicle_type: string;
+  id_visitor: string;
+  notes: string;
+  luggage_details: string;
+  manual_cost: string;
+  status: string;
+  progress: string;
+  balance: string;
+  deposit: string;
+  total_price: string;
+  deposit_percentage: string;
+  automatic_cost: string;
+  deposit_amount: string;
+  category?: string;
+  distance?: string;
+  duration?: string;
+  pushed_price?: string;
+  date?: string;
+  dropoff_date?: string;
+  dropoff_time?: string;
+  return_date?:string;
+  return_time?: string;
+  pickup_time?: string;
+  type?: string;
+  heard_of_us?: string;
+}
+
 export const quoteSlice = createApi({
   reducerPath: "quote",
   baseQuery: fetchBaseQuery({
@@ -169,7 +218,8 @@ export const quoteSlice = createApi({
     "AddAffiliateToWhiteList",
     "DeleteAffiliateFromWhiteList",
     "DeleteWhiteList",
-    "UpdateQuoteProgress"
+    "UpdateQuoteProgress",
+    "NewQuote"
   ],
   endpoints(builder) {
     return {
@@ -263,6 +313,16 @@ export const quoteSlice = createApi({
           };
         },
         invalidatesTags: ["Quote", "AssignDriver"],
+      }),
+      createNewQuote: builder.mutation<void, NewQuote>({
+        query(payload) {
+          return {
+            url: "/newQuote",
+            method: "POST",
+            body: payload,
+          };
+        },
+        invalidatesTags: ["NewQuote"],
       }),
       addDriverToQuote: builder.mutation<void, AssignDriverToQuote>({
         query({ quote_id, id_driver }) {
@@ -409,5 +469,6 @@ export const {
   useGetAllQuotesByVisitorEmailQuery,
   useGetAllQuotesBySchoolEmailQuery,
   useGetAllQuotesByCompanyEmailQuery,
-  useUpdateProgressMutation
+  useUpdateProgressMutation,
+  useCreateNewQuoteMutation
 } = quoteSlice;

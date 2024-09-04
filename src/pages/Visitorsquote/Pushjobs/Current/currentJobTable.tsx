@@ -455,7 +455,7 @@ const CurrentTable = () => {
       name: <span className="font-weight-bold fs-13">Enquiry Date</span>,
       sortable: true,
       selector: (row: Quote) => {
-        const date = new Date(row.createdAt);
+        const date = new Date(row?.createdAt!);
         return <span>{date.toDateString()}</span>;
       },
       width: "125px",

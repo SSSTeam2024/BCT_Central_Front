@@ -4,8 +4,20 @@ export interface Visitor {
   _id?: string;
   estimated_start_time: string;
   estimated_return_start_time: string;
-  destination_point: object;
-  start_point: object;
+  destination_point: {
+    placeName: string;
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
+  };
+  start_point: {
+    placeName: string;
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
+  };
   email: string;
   phone: string;
   name: string;
@@ -41,7 +53,7 @@ export const visitorSlice = createApi({
         },
         providesTags: ["Visitor"],
       }),
-      addNewVisitor: builder.mutation<void, Visitor>({
+      addNewVisitor: builder.mutation<Visitor, Visitor>({
         query(payload) {
           return {
             url: "/newVisitor",
