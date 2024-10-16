@@ -415,7 +415,7 @@ const EditSchool = () => {
                       {/* Category  == Done */}
                       <Col lg={4}>
                         <div className="mb-3">
-                          <Form.Label htmlFor="supplierName-field">
+                          <Form.Label htmlFor="category">
                             Category :{" "}
                             <span className="fs-16">
                               {schoolLocation.state.corporateCategory}
@@ -425,7 +425,7 @@ const EditSchool = () => {
                               style={{ marginLeft: "125px" }}
                             >
                               <label
-                                htmlFor="id_file"
+                                htmlFor="category"
                                 className="mb-0"
                                 data-bs-toggle="tooltip"
                                 data-bs-placement="right"
@@ -458,7 +458,7 @@ const EditSchool = () => {
                       {/* Service_Date  == Done */}
                       <Col lg={3}>
                         <div className="mb-3">
-                          <Form.Label htmlFor="orderDate-field">
+                          <Form.Label htmlFor="service_date">
                             Service Date :{" "}
                             <span className="fs-16">
                               {schoolLocation.state.service_date}
@@ -468,7 +468,7 @@ const EditSchool = () => {
                               style={{ marginLeft: "210px" }}
                             >
                               <label
-                                htmlFor="id_file"
+                                htmlFor="service_date"
                                 className="mb-0"
                                 data-bs-toggle="tooltip"
                                 data-bs-placement="right"
@@ -497,7 +497,7 @@ const EditSchool = () => {
                       {/* Status  == Done */}
                       <Col lg={2}>
                         <div className="mb-3">
-                          <Form.Label htmlFor="supplierName-field">
+                          <Form.Label htmlFor="school_status">
                             Status :{" "}
                             {schoolLocation.state.statusSchool === "Active" ? (
                               <span className="badge badge-soft-success">
@@ -513,7 +513,7 @@ const EditSchool = () => {
                               style={{ marginLeft: "105px" }}
                             >
                               <label
-                                htmlFor="id_file"
+                                htmlFor="school_status"
                                 className="mb-0"
                                 data-bs-toggle="tooltip"
                                 data-bs-placement="right"
