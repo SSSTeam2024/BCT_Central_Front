@@ -546,7 +546,7 @@ const Newquote = () => {
                                     name="deposit_amount"
                                     placeholder="00.00"
                                     readOnly
-                                    value={depositAmount}
+                                    value={depositAmount?.toFixed(2)}
                                   />
                                 </div>
                               </Col>
