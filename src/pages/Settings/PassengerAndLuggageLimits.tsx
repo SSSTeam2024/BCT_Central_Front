@@ -176,7 +176,7 @@ const PassengerAndLuggageLimits = () => {
     if (passNdluggageLocation?.state) {
       setPassNdluggageId(passNdluggageLocation.state._id || "");
       setSelectedVehicle(passNdluggageLocation.state.vehicle_type._id || "");
-      setSelectedLuggage(passNdluggageLocation.state.max_luggage._id || "");
+      setSelectedLuggage(passNdluggageLocation?.state.max_luggage?._id! || "");
       setPassNdluggagePax(passNdluggageLocation.state.max_passengers || "");
     }
   }, [passNdluggageLocation]);
@@ -237,7 +237,7 @@ const PassengerAndLuggageLimits = () => {
     },
     {
       name: <span className="font-weight-bold fs-13">Max Luggage</span>,
-      selector: (row: any) => row.max_luggage.description,
+      selector: (row: any) => row?.max_luggage?.description!,
       sortable: true,
     },
 

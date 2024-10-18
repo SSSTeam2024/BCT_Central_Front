@@ -11,7 +11,7 @@ import {
 import Swal from "sweetalert2";
 
 const Schools = () => {
-  document.title = "Schools | Bouden Coach Travel";
+  document.title = "Schools | Coach Hire Network";
 
   const navigate = useNavigate();
 

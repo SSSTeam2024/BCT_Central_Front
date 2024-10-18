@@ -1,22 +1,21 @@
-import React from 'react';
-import { Container } from 'react-bootstrap';
-import Breadcrumb from 'Common/BreadCrumb';
-import Profile from './Profile';
+import React from "react";
+import { Container } from "react-bootstrap";
+import Breadcrumb from "Common/BreadCrumb";
+import Profile from "./Profile";
 
 const MyAccount = () => {
+  document.title = "Team | Coach Hire Network";
 
-    document.title = "Team | Bouden Coach Travel";
-
-    return (
-        <React.Fragment>
-            <div className="page-content">
-                <Container fluid={true}>
-                    <Breadcrumb title="Team" pageTitle="Administration" />
-                    <h1>Team</h1>
-                </Container>
-            </div>
-        </React.Fragment>
-    );
+  return (
+    <React.Fragment>
+      <div className="page-content">
+        <Container fluid={true}>
+          <Breadcrumb title="Team" pageTitle="Administration" />
+          <h1>Team</h1>
+        </Container>
+      </div>
+    </React.Fragment>
+  );
 };
 
 export default MyAccount;

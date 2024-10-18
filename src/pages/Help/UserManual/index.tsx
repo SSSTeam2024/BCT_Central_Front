@@ -18,9 +18,7 @@ import VehicleExtra from "pages/Settings/VehicleExtra";
 import SupplierRoutingRule from "pages/Settings/SupplierRoutingRule";
 
 const UserManual = () => {
-  document.title = "User Manual | Bouden Coach Travel";
-
- 
+  document.title = "User Manual | Coach Hire Network";
 
   return (
     <React.Fragment>

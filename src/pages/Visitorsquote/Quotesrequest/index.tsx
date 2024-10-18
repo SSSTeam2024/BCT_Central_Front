@@ -27,7 +27,7 @@ import img14 from "assets/images/brands/img-14.png";
 import { Link } from "react-router-dom";
 
 const Quotesrequest = () => {
-  document.title = " Quotes Request | Bouden Coach Travel";
+  document.title = " Quotes Request | Coach Hire Network";
   const columns = [
     {
       name: <span className="font-weight-bold fs-13">SR No.</span>,
@@ -140,8 +140,8 @@ const Quotesrequest = () => {
               <Link to="#" className="badge badge-soft-danger remove-item-btn">
                 Decline
               </Link>
-                </li>
-                <li>
+            </li>
+            <li>
               <Link to="#" className="badge badge-soft-danger remove-item-btn">
                 Push
               </Link>

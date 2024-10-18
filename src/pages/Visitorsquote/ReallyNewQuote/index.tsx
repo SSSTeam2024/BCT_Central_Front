@@ -13,7 +13,7 @@ import { useCreateNewQuoteMutation } from "features/Quotes/quoteSlice";
 import { useAddNewVisitorMutation } from "features/Visitor/visitorSlice";
 
 const ReallyNewQuote = () => {
-  document.title = "Create New Quote | Bouden Coach Travel";
+  document.title = "Create New Quote | Coach Hire Network";
 
   const { data: AllPassengerLimit = [] } = useGetAllPassengerAndLuggagesQuery();
   const { data: AllJourneys = [] } = useGetAllJourneyQuery();

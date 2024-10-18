@@ -59,7 +59,7 @@ const CompanyName = () => {
                           <Form.Control
                             type="text"
                             id="customerName-field"
-                            defaultValue="Bouden Coach Travel"
+                            defaultValue="Coach Hire Network"
                             required
                           />
                         </td>

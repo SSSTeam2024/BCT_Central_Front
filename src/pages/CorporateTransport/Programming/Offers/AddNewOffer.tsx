@@ -9,7 +9,7 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import Select from "react-select";
 
 const AddNewOffer = () => {
-  document.title = "Create New Offer | Bouden Coach Travel";
+  document.title = "Create New Offer | Coach Hire Network";
 
   const [selectedFiles, setselectedFiles] = useState([]);
 

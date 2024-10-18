@@ -19,7 +19,7 @@ interface Column {
 }
 
 const PendingQuotes = () => {
-  document.title = "Pending Quotes | Bouden Coach Travel";
+  document.title = "Pending Quotes | Coach Hire Network";
 
   const customTableStyles = {
     rows: {

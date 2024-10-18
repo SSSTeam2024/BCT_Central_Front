@@ -13,7 +13,7 @@ import {
 import Swal from "sweetalert2";
 
 const Subcontractors = () => {
-  document.title = "Affiliates | Bouden Coach Travel";
+  document.title = "Affiliates | Coach Hire Network";
   const { data: AllAffiliates = [] } = useGetAllAffiliatesQuery();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredSearchResults, setFilteredSearchResults] =

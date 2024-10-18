@@ -12,7 +12,7 @@ const paragraphStyles = {
   display: "-webkit-box",
 };
 const Claims = () => {
-  document.title = "Complains | Bouden Coach Travel";
+  document.title = "Complains | Coach Hire Network";
 
   const { data: allComplains = [] } = useGetAllComplainsQuery();
 

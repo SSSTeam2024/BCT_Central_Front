@@ -5,7 +5,7 @@ import DriverTable from "./DriverTable";
 import { useGetAllDriverQuery } from "features/Driver/driverSlice";
 
 const Driver = () => {
-  document.title = "Drivers | Bouden Coach Travel";
+  document.title = "Drivers | Coach Hire Network";
 
   const { data = [] } = useGetAllDriverQuery();
 

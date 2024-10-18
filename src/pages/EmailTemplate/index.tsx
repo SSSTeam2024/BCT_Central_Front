@@ -5,7 +5,7 @@ import Template from "./Template";
 import { useGetAllEmailQuery } from "features/Emails/emailSlice";
 
 const EmailTemplates = () => {
-  document.title = "Email Templates | Bouden Coach Travel";
+  document.title = "Email Templates | Coach Hire Network";
   const { data: AllEmails = [] } = useGetAllEmailQuery();
   return (
     <React.Fragment>

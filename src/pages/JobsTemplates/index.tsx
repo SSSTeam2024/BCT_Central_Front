@@ -28,15 +28,15 @@ import img14 from "assets/images/brands/img-14.png";
 import { Link } from "react-router-dom";
 
 const JobsTemplates = () => {
-  document.title = "Jobs Templates | Bouden Coach Travel";
- 
+  document.title = "Jobs Templates | Coach Hire Network";
+
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
           <Breadcrumb title="Job Templates" pageTitle="Jobs" />
           <Col lg={12}>
-           <h1>Job Templates</h1>
+            <h1>Job Templates</h1>
           </Col>
         </Container>
       </div>

@@ -18,7 +18,7 @@ interface Column {
 }
 
 const CompletedJobs = () => {
-  document.title = "Completed Jobs | Bouden Coach Travel";
+  document.title = "Completed Jobs | Coach Hire Network";
 
   const customTableStyles = {
     rows: {

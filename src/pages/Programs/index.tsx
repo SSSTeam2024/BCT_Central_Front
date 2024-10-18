@@ -38,7 +38,7 @@ interface ResponseStatus {
 }
 
 const ProgramList = () => {
-  document.title = "List of Suggested Routes | Bouden Coach Travel";
+  document.title = "List of Suggested Routes | Coach Hire Network";
   const user = useSelector((state: RootState) => selectCurrentUser(state));
   const [modal_Pickup, setmodal_Pickup] = useState<boolean>(false);
   const [modal_Destination, setmodal_Destination] = useState<boolean>(false);
@@ -1099,7 +1099,7 @@ const ProgramList = () => {
                 <Col
                   className={
                     "d-flex" +
-                    (notes.sender === "Bouden Coach Travel"
+                    (notes.sender === "Coach Hire Network"
                       ? " justify-content-end mb-2"
                       : " justify-content-start")
                   }

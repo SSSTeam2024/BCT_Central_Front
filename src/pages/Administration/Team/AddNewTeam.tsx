@@ -37,7 +37,7 @@ function convertToBase64(
 }
 
 const AddNewTeam = () => {
-  document.title = "Create Team | Bouden Coach Travel";
+  document.title = "Create Team | Coach Hire Network";
   const navigate = useNavigate();
   const [seletedCountry1, setseletedCountry1] = useState<any>({});
 

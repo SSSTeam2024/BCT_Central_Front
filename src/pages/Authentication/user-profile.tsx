@@ -1,25 +1,10 @@
 import React, { useState, useEffect } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Alert,
-  Button,
-  Form,
-  Table,
-  Dropdown,
-} from "react-bootstrap";
-
-// Formik Validation
+import { Container, Row, Col, Card, Table, Dropdown } from "react-bootstrap";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-
-//redux
 import { useSelector, useDispatch } from "react-redux";
-
 import withRouter from "Common/withRouter";
-import { RootState } from "../../app/store"; // Import your RootState interface
+import { RootState } from "../../app/store";
 import { selectCurrentUser } from "../../features/Account/authSlice";
 import { editProfile, resetProfileFlag } from "slices/thunk";
 

@@ -28,7 +28,7 @@ import img14 from "assets/images/brands/img-14.png";
 import { Link } from "react-router-dom";
 
 const Invoices = () => {
-  document.title = " Invoices | Bouden Coach Travel";
+  document.title = " Invoices | Coach Hire Network";
   const columns = [
     {
       name: <span className="font-weight-bold fs-13">ID Invoice</span>,
@@ -268,7 +268,7 @@ const Invoices = () => {
                         id="idStatus"
                       >
                         <option value="all">All</option>
-                        <option value="Today">Bouden Coach Travel</option>
+                        <option value="Today">Coach Hire Network</option>
                       </select>
                     </Col>
                   </Col>

@@ -33,7 +33,7 @@ function convertToBase64(
 }
 
 const EditSchool = () => {
-  document.title = "Edit School | Bouden Coach Travel";
+  document.title = "Edit School | Coach Hire Network";
 
   const schoolLocation = useLocation();
 

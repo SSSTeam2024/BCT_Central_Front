@@ -17,7 +17,7 @@ import "@react-pdf-viewer/core/lib/styles/index.css";
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const CompanyDetails = () => {
-  document.title = "Company Details | Bouden Coach Travel";
+  document.title = "Company Details | Coach Hire Network";
   const LocationCompany = useLocation();
 
   const [numPages, setNumPages] = useState<number | null>(null);

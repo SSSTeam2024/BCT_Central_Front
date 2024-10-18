@@ -18,7 +18,7 @@ function Loading() {
 }
 
 const Vehicles = () => {
-  document.title = "Vehicles | Bouden Coach Travel";
+  document.title = "Vehicles | Coach Hire Network";
 
   const { data = [], isLoading } = useGetAllVehiclesQuery();
   const navigate = useNavigate();

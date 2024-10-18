@@ -14,7 +14,7 @@ import { useGetAllPricingCalendarsQuery } from "features/PricingCalendar/pricing
 import { useGetAllModePricesQuery } from "features/modePrice/modePriceSlice";
 
 const Newquote = () => {
-  document.title = "Add Price To Quote | Bouden Coach Travel";
+  document.title = "Add Price To Quote | Coach Hire Network";
   const quoteLocation = useLocation();
 
   const { data: AllPricingCalendar = [] } = useGetAllPricingCalendarsQuery();

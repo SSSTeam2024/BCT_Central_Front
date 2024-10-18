@@ -22,7 +22,7 @@ import { useAddNewVehicleMutation } from "features/Vehicles/vehicleSlice";
 import Dropzone from "react-dropzone";
 
 const AddNewVehicle = () => {
-  document.title = "Create Vehicle | Bouden Coach Travel";
+  document.title = "Create Vehicle | Coach Hire Network";
 
   const [selectedColor, setSelectedColor] = useState<string>("#ffffff");
 

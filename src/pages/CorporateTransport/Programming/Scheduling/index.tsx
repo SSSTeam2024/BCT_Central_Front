@@ -301,7 +301,7 @@ const Scheduling = () => {
     }
   };
 
-  document.title = "Scheduling | Bouden Coach Travel";
+  document.title = "Scheduling | Coach Hire Network";
   return (
     <React.Fragment>
       <div className="page-content">
@@ -310,41 +310,41 @@ const Scheduling = () => {
           <Row>
             <Col xl={12}>
               <Card className="card-h-100">
-              <Card.Header className="border-bottom-dashed">
-                <Row className="g-3">
-                <Col xxl={2} lg={6}>
-                    <select
-                      className="form-select text-muted"
-                      data-choices
-                      data-choices-search-false
-                      name="choices-single-default"
-                      id="idStatus"
-                    >
-                      <option value="">Quote</option>
-                      <option value="Pickups">Journey</option>
-                      <option value="Pending">Movement</option>
-                    </select>
-                  </Col>
-                  <Col lg={7}></Col>
-                  <Col>
-                    <div
-                      className="btn-group btn-group-sm mt-2"
-                      role="group"
-                      aria-label="Basic example"
-                    >
-                      <button type="button" className="btn btn-outline-dark">
-                        Excel
-                      </button>
-                      <button type="button" className="btn btn-outline-dark">
-                        PDF
-                      </button>
-                      <button type="button" className="btn btn-outline-dark">
-                        Print
-                      </button>
-                    </div>
-                  </Col>
-                </Row>
-              </Card.Header>
+                <Card.Header className="border-bottom-dashed">
+                  <Row className="g-3">
+                    <Col xxl={2} lg={6}>
+                      <select
+                        className="form-select text-muted"
+                        data-choices
+                        data-choices-search-false
+                        name="choices-single-default"
+                        id="idStatus"
+                      >
+                        <option value="">Quote</option>
+                        <option value="Pickups">Journey</option>
+                        <option value="Pending">Movement</option>
+                      </select>
+                    </Col>
+                    <Col lg={7}></Col>
+                    <Col>
+                      <div
+                        className="btn-group btn-group-sm mt-2"
+                        role="group"
+                        aria-label="Basic example"
+                      >
+                        <button type="button" className="btn btn-outline-dark">
+                          Excel
+                        </button>
+                        <button type="button" className="btn btn-outline-dark">
+                          PDF
+                        </button>
+                        <button type="button" className="btn btn-outline-dark">
+                          Print
+                        </button>
+                      </div>
+                    </Col>
+                  </Row>
+                </Card.Header>
                 <Card.Body>
                   <div id="calendar">
                     <FullCalendar

@@ -29,7 +29,7 @@ interface Column {
 }
 
 const JobShare = () => {
-  document.title = "Job Share | Bouden Coach Travel";
+  document.title = "Job Share | Coach Hire Network";
 
   const swalWithBootstrapButtons = Swal.mixin({
     customClass: {
@@ -481,7 +481,6 @@ const JobShare = () => {
 
     return filteredJobs;
   };
-
   return (
     <React.Fragment>
       <div className="page-content">

@@ -41,7 +41,7 @@ function convertToBase64(
 }
 
 const EditDriver = () => {
-  document.title = "Edit Driver | Bouden Coach Travel";
+  document.title = "Edit Driver | Coach Hire Network";
   const driverLocation = useLocation();
   const [numPages, setNumPages] = useState<number | null>(null);
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {

@@ -18,7 +18,7 @@ import countryData from "Common/country";
 import { useAddNewDriverMutation } from "features/Driver/driverSlice";
 
 const AddNewDriver = () => {
-  document.title = "Create Driver | Bouden Coach Travel";
+  document.title = "Create Driver | Coach Hire Network";
 
   const navigate = useNavigate();
   const notifySuccess = () => {

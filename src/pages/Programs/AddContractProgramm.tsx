@@ -125,7 +125,7 @@ interface stopTime {
 }
 
 const AddContractProgramm = (props: any) => {
-  document.title = "Program | Bouden Coach Travel";
+  document.title = "Program | Coach Hire Network";
   const { data: AllPassengersLimit = [] } =
     useGetAllPassengerAndLuggagesQuery();
 

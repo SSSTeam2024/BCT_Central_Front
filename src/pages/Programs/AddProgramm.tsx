@@ -101,6 +101,7 @@ interface GroupCompany {
   passenger_limit: any[];
   luggages?: any[];
   program: string;
+  // price?: number;
 }
 
 interface GroupSchool {
@@ -112,6 +113,7 @@ interface GroupSchool {
   passenger_limit: any[];
   luggages?: any[];
   program: string;
+  // price?: number;
 }
 
 interface RouteSegment {
@@ -127,7 +129,7 @@ interface stopTime {
 }
 
 const AddProgramm = () => {
-  document.title = "New Suggested Route | Bouden Coach Travel";
+  document.title = "New Suggested Route | Coach Hire Network";
   const { data: AllPassengersLimit = [] } =
     useGetAllPassengerAndLuggagesQuery();
 
@@ -420,61 +422,94 @@ const AddProgramm = () => {
     setSelectedVehicletype(value);
     setDisabledNext(true);
   };
+
+  // const [prices, setPrices] = useState<number[]>([]);
+  // const [totalPrice, setTotalPrice] = useState<number>(0);
+
+  // const handlePriceChange = (index: number, value: string) => {
+  //   const numericValue = value.replace(/[^0-9]/g, "");
+  //   const updatedPrices = [...prices];
+  //   updatedPrices[index] = numericValue === "" ? 0 : Number(numericValue);
+  //   setPrices(updatedPrices);
+  //   const sum = updatedPrices.reduce((acc, curr) => acc + curr, 0);
+  //   setTotalPrice(sum);
+  // };
+
   const generateGroups = () => {
     const filteredVehicleTypeID = AllPassengersLimit.filter(
       (vehcileType) => selectedVehicleType === vehcileType.vehicle_type._id
     );
     let prevRows = [];
     let divisionResult = Math.floor(
-      Number(
-        Number(recommandedCapacityState) /
-          Number(filteredVehicleTypeID[0]?.max_passengers!)
-      )
+      Number(recommandedCapacityState) /
+        Number(filteredVehicleTypeID[0]?.max_passengers!)
     );
     let restResult = Number(
       Number(recommandedCapacityState) %
         Number(filteredVehicleTypeID[0]?.max_passengers!)
     );
-    let totalGroupNumber = 0;
-    if (restResult !== 0) {
-      totalGroupNumber = divisionResult + 1;
-    } else {
-      totalGroupNumber = divisionResult;
-    }
+    let totalGroupNumber =
+      restResult !== 0 ? divisionResult + 1 : divisionResult;
+
     let prevSchoolGroups = [...schoolGroups];
     let prevCompanyGroups = [...companyGroups];
+    let groupsLength = 0;
+
     for (let index = 0; index < totalGroupNumber; index++) {
       if (selectedClientType === "School") {
         prevSchoolGroups.push({
-          groupName: programm_name + "_" + "group" + [index + 1],
+          groupName: programm_name + "_" + "group" + (index + 1),
           id_school: selectSchoolID,
           luggage_details: selectedLuggage,
           vehicle_type: selectedVehicleType,
           student_number: totalGroupNumber.toString(),
           passenger_limit: AllPassengersLimit,
           program: "",
+          // price: 0,
         });
+        groupsLength = prevSchoolGroups.length;
       }
       if (selectedClientType === "Company") {
         prevCompanyGroups.push({
-          groupName: programm_name + "_" + "group" + [index + 1],
+          groupName: programm_name + "_" + "group" + (index + 1),
           id_company: selectCompanyID,
           luggage_details: selectedLuggage,
           vehicle_type: selectedVehicleType,
           passenger_number: totalGroupNumber.toString(),
           passenger_limit: AllPassengersLimit,
           program: "",
+          // price: 0,
         });
+        groupsLength = prevCompanyGroups.length;
       }
-      prevRows.push(<h5>{programm_name + "_" + "group" + [index + 1]}</h5>);
+
+      // Create input fields for each group
+      prevRows.push(
+        <Row key={index} className="hstack gap-2">
+          <Col lg={3}>
+            <h5>{programm_name + "_" + "group" + (index + 1)}</h5>
+          </Col>
+          {/* <Col lg={3}>
+            <Form.Control
+              type="text"
+              placeholder="Enter price"
+              value={prices[index] === 0 ? "" : prices[index]?.toString()} // Ensure value is a string
+              onChange={(e) => handlePriceChange(index, e.target.value)}
+            />
+          </Col> */}
+        </Row>
+      );
     }
+
     if (selectedClientType === "Company") {
       setCompanyGroups(prevCompanyGroups);
     }
     if (selectedClientType === "School") {
       setSchoolGroups(prevSchoolGroups);
     }
+
     setRows(prevRows);
+    // setPrices(new Array(groupsLength).fill(0)); // Initialize prices array for groups
     setDisabledNext(false);
   };
 
@@ -2534,6 +2569,16 @@ const AddProgramm = () => {
                             </Col>
                           </Row>
                           <Row>{rows}</Row>
+                          {/* <Row>
+                            <Col>
+                              <span className="fw-bold fs-16">
+                                Total Price:
+                              </span>{" "}
+                              <span className="fw-medium fs-15">
+                                £ {totalPrice}
+                              </span>
+                            </Col>
+                          </Row> */}
                           <hr className="text-muted" />
                         </>
                       ) : selectedGroupCreationMode === "Custom" ? (
@@ -2587,7 +2632,7 @@ const AddProgramm = () => {
                             {selectedClientType === "School"
                               ? schoolGroups.map((group, index) => (
                                   <Row key={index}>
-                                    <Col lg={3}>
+                                    <Col lg={2}>
                                       <Form.Label htmlFor="customerName-field">
                                         Group Name
                                       </Form.Label>
@@ -2686,6 +2731,21 @@ const AddProgramm = () => {
                                         </select>
                                       </div>
                                     </Col>
+                                    {/* <Col lg={1}>
+                                      <div>
+                                        <Form.Label htmlFor="price">
+                                          Price
+                                        </Form.Label>
+                                        <Form.Control
+                                          type="text"
+                                          id="price"
+                                          className="mb-2"
+                                          name="price"
+                                          value={group.price || ""}
+                                          onChange={(e) => onChangeGroupPrice(e, index)}
+                                        />
+                                      </div>
+                                    </Col> */}
                                     <Col lg={1}>
                                       <button
                                         type="button"
@@ -2706,7 +2766,7 @@ const AddProgramm = () => {
                                 ))
                               : companyGroups.map((group, index) => (
                                   <Row key={index}>
-                                    <Col lg={3}>
+                                    <Col lg={2}>
                                       <Form.Label htmlFor="customerName-field">
                                         Group Name
                                       </Form.Label>
@@ -2805,6 +2865,21 @@ const AddProgramm = () => {
                                         </select>
                                       </div>
                                     </Col>
+                                    {/* <Col lg={1}>
+                                      <div>
+                                        <Form.Label htmlFor="price">
+                                          Price
+                                        </Form.Label>
+                                        <Form.Control
+                                          type="text"
+                                          id="price"
+                                          className="mb-2"
+                                          name="price"
+                                          value={group.price || ""}
+                                          onChange={(e) => onChangeGroupPrice(e, index)}
+                                        />
+                                      </div>
+                                    </Col> */}
                                     <Col lg={1}>
                                       <button
                                         type="button"

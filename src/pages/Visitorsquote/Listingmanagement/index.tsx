@@ -5,7 +5,7 @@ import Breadcrumb from "Common/BreadCrumb";
 import { Link } from "react-router-dom";
 
 const Listingmanagement = () => {
-  document.title = " Listing & Management | Bouden Coach Travel";
+  document.title = " Listing & Management | Coach Hire Network";
   const columns = [
     {
       name: <span className="font-weight-bold fs-13">SR No.</span>,

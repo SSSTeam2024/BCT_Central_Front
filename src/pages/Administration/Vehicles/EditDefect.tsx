@@ -6,7 +6,7 @@ import { useGetAllVehiclesQuery } from "features/Vehicles/vehicleSlice";
 import { useUpdateDefectMutation } from "features/Defects/defectSlice";
 
 const EditDefect = () => {
-  document.title = "Edit Defect | Bouden Coach Travel";
+  document.title = "Edit Defect | Coach Hire Network";
 
   const navigate = useNavigate();
   const { data: AllVehicles = [] } = useGetAllVehiclesQuery();

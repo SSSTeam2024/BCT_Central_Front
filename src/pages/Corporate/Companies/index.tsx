@@ -11,7 +11,7 @@ import {
 import Swal from "sweetalert2";
 
 const Companies = () => {
-  document.title = "Companies | Bouden Coach Travel";
+  document.title = "Companies | Coach Hire Network";
 
   const navigate = useNavigate();
   const { data: AllCompanies = [] } = useGetAllCompanyQuery();

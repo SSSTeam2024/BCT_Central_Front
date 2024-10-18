@@ -33,7 +33,7 @@ import {
 import AddContractProgramm from "pages/Programs/AddContractProgramm";
 
 const AddNewContract = () => {
-  document.title = "Create Contract | Bouden Coach Travel";
+  document.title = "Create Contract | Coach Hire Network";
   const { data: AllCompany = [] } = useGetAllCompanyQuery();
   const { data: AllSchools = [] } = useGetAllSchoolsQuery();
   const { data: AllTeams = [] } = useGetAllTeamQuery();

@@ -1,14 +1,10 @@
 import React from "react";
-import {
-  Container,
-  Card,
-  Col,
-} from "react-bootstrap";
+import { Container, Card, Col } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import Breadcrumb from "Common/BreadCrumb";
 
 const Outstanding = () => {
-  document.title = " Outstanding | Bouden Coach Travel";
+  document.title = " Outstanding | Coach Hire Network";
   const columns = [
     {
       name: <span className="font-weight-bold fs-13">Quote</span>,

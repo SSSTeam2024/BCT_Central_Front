@@ -21,7 +21,7 @@ import { pdfjs } from "react-pdf";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 
 const RequestFeature = () => {
-  document.title = "Features Requested | Bouden Coach Travel";
+  document.title = "Features Requested | Coach Hire Network";
 
   const { data: allRequestedFeatures = [] } = useGetAllRequestFeaturesQuery();
 

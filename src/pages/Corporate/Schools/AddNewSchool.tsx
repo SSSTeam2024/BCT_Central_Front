@@ -33,7 +33,7 @@ function convertToBase64(
 }
 
 const AddNewSchool = () => {
-  document.title = "Create School | Bouden Coach Travel";
+  document.title = "Create School | Coach Hire Network";
 
   // DateOfBirth
   const [selectedJoiningDate, setSelectedJoiningDate] = useState<Date | null>(

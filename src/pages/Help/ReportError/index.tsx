@@ -22,7 +22,7 @@ import "@react-pdf-viewer/core/lib/styles/index.css";
 import { useGetAllErrorReportsQuery } from "features/ErrorReport/errorReportSlice";
 
 const ReportError = () => {
-  document.title = "Errors Reported | Bouden Coach Travel";
+  document.title = "Errors Reported | Coach Hire Network";
 
   const { data: allRequestedFeatures = [] } = useGetAllErrorReportsQuery();
 

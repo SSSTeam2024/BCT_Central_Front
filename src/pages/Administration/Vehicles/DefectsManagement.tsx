@@ -11,7 +11,7 @@ import Swal from "sweetalert2";
 import { useGetAllVehiclesQuery } from "features/Vehicles/vehicleSlice";
 
 const DefectsManagement = () => {
-  document.title = " Defects Management | Bouden Coach Travel";
+  document.title = " Defects Management | Coach Hire Network";
 
   const { data: AllDefects = [] } = useGetAllDefectsQuery();
 

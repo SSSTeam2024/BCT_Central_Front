@@ -7,7 +7,7 @@ import "./QuoteCalendar.css";
 import { Quote, useGetAllQuoteQuery } from "features/Quotes/quoteSlice";
 
 const QuoteCalendar = () => {
-  document.title = "Calendar | Bouden Coach Travel";
+  document.title = "Calendar | Coach Hire Network";
 
   const { data: AllQuotes = [] } = useGetAllQuoteQuery();
 

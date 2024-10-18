@@ -5,7 +5,7 @@ import Flatpickr from "react-flatpickr";
 import Select from "react-select";
 
 const AddNewSubcontractor = () => {
-  document.title = "Create Affiliate | Bouden Coach Travel";
+  document.title = "Create Affiliate | Coach Hire Network";
 
   const options = [
     { value: "Standard Saloon Car", label: "Standard Saloon Car" },

@@ -7,6 +7,7 @@ import {
   Modal,
   Form,
   Button,
+  Offcanvas,
 } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import Breadcrumb from "Common/BreadCrumb";
@@ -15,8 +16,8 @@ import {
   Quote,
   useAddAffilaiteToQuoteMutation,
   useAddDriverToQuoteMutation,
+  useAddNotesMutation,
   useAssignDriverAndVehicleToQuoteMutation,
-  useDeleteQuoteMutation,
   useGetAllQuoteQuery,
   useUpdateProgressMutation,
   useUpdateStatusQuoteToCancelMutation,
@@ -29,8 +30,12 @@ import {
 } from "features/Driver/driverSlice";
 import { useGetAllVehiclesQuery } from "features/Vehicles/vehicleSlice";
 import { useGetAllAffiliatesQuery } from "features/Affiliate/affiliateSlice";
-
+import Flatpickr from "react-flatpickr";
 import Select from "react-select";
+import { RootState } from "../../app/store";
+import { selectCurrentUser } from "../../features/Account/authSlice";
+import { useSelector } from "react-redux";
+import SimpleBar from "simplebar-react";
 
 interface Column {
   name: JSX.Element;
@@ -40,7 +45,7 @@ interface Column {
 }
 
 const Bookings = () => {
-  document.title = "Bookings | Bouden Coach Travel";
+  document.title = "Bookings | Coach Hire Network";
   const customTableStyles = {
     rows: {
       style: {
@@ -94,14 +99,26 @@ const Bookings = () => {
       },
     }),
   };
+  const user = useSelector((state: RootState) => selectCurrentUser(state));
 
-  const [modal_AssignDriver, setModal_AssignDriver] = useState<boolean>(false);
+  const location = useLocation();
+  const quoteState = location.state;
   const [modal_PushJob, setModal_PushJob] = useState<boolean>(false);
   function tog_PushJob() {
     setModal_PushJob(!modal_PushJob);
   }
   const [modal_AssignVehicle, setModal_AssignVehicle] =
     useState<boolean>(false);
+  const [modal_AddNote, setModal_AddNote] = useState<boolean>(false);
+  function tog_AddNote() {
+    setModal_AddNote(!modal_AddNote);
+  }
+
+  const [modal_AddNoteFromQuickAccess, setModal_AddNoteFromQuickAccess] =
+    useState<boolean>(false);
+  function tog_AddNoteFromQuickAccess() {
+    setModal_AddNoteFromQuickAccess(!modal_AddNoteFromQuickAccess);
+  }
   const { data: AllQuotes = [] } = useGetAllQuoteQuery();
   const result = AllQuotes.filter(
     (bookings) =>
@@ -121,7 +138,7 @@ const Bookings = () => {
   const [modal_DriverVehicleAssign, setmodal_DriverVehicleAssign] =
     useState<boolean>(false);
   function tog_DriverVehicleAssign() {
-    setmodal_DriverVehicleAssign(!modal_DriverVehicleAssign);
+    setSelectHide(!selectHide);
   }
   const [modal_UpdateQuote, setmodal_UpdateQuote] = useState<boolean>(false);
   const tog_ModalUpdateQuote = () => {
@@ -164,6 +181,16 @@ const Bookings = () => {
     });
   };
 
+  const notifySuccessAddNote = () => {
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: "Note Added successfully",
+      showConfirmButton: false,
+      timer: 2500,
+    });
+  };
+
   const notifySuccessPushToAffiliate = () => {
     Swal.fire({
       position: "center",
@@ -185,7 +212,6 @@ const Bookings = () => {
   };
 
   const [selectVehicle, setSelectedVehicle] = useState<string>("");
-  // This function is triggered when the select Vehicle
   const handleSelectVehicle = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     setSelectedVehicle(value);
@@ -208,15 +234,6 @@ const Bookings = () => {
 
   const { quote_id, id_driver } = assignDriverToDriver;
 
-  const onChangeAssignDriverToQuote = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setAssignDriverToQuote((prevState) => ({
-      ...prevState,
-      [e.target.id]: e.target.value,
-    }));
-  };
-
   const onSubmitAssignDriverToQuote = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
@@ -231,20 +248,14 @@ const Bookings = () => {
   };
 
   const openModalAssignDriver = () => {
-    setModal_AssignDriver(!modal_AssignDriver);
+    setSelectAssignDriverHide(!selectAssignDriverHide);
   };
 
   const openModalAssignVehicle = () => {
-    setModal_AssignVehicle(!modal_AssignVehicle);
+    setSelectAssignVehicleHide(!selectAssignVehicleHide);
   };
 
-  const [selectedColumnOption, setSelectedColumnOption] = useState("");
-
-  const handleChangeColumnOption = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setSelectedColumnOption(e.target.value);
-  };
+  const [showNotes, setShowNotes] = useState<boolean>(false);
 
   const columns: Column[] = [
     {
@@ -269,7 +280,11 @@ const Bookings = () => {
       ),
       selector: (row: any) =>
         row?.id_driver?.firstname! === undefined ? (
-          <Link to="#" onClick={() => openModalAssignDriver()} state={row}>
+          <Link
+            to="#"
+            onClick={() => AlertConfirm(handleAssignDriverHideSelect)}
+            state={row}
+          >
             No Driver
           </Link>
         ) : (
@@ -290,7 +305,11 @@ const Bookings = () => {
       name: <span className="mdi mdi-car font-weight-bold fs-24"></span>,
       selector: (row: any) =>
         row.id_vehicle?.registration_number! === undefined ? (
-          <Link to="#" onClick={() => openModalAssignVehicle()} state={row}>
+          <Link
+            to="#"
+            onClick={() => AlertConfirm(handleAssignVehicleHideSelect)}
+            state={row}
+          >
             No Vehicle
           </Link>
         ) : (
@@ -482,13 +501,22 @@ const Bookings = () => {
         ),
     },
     {
-      name: <span className="font-weight-bold fs-13">Notes</span>,
+      name: <span className="font-weight-bold fs-13">Visitor Notes</span>,
       sortable: true,
       selector: (row: any) => {
         return row?.id_visitor?.notes! !== ""
           ? row?.id_visitor?.notes!
           : "No Notes";
       },
+    },
+    {
+      name: <span className="font-weight-bold fs-13">Notes</span>,
+      sortable: true,
+      selector: (row: any) => (
+        <Link to="#" onClick={() => setShowNotes(!showNotes)} state={row}>
+          {row?.information?.length!}
+        </Link>
+      ),
     },
   ];
 
@@ -511,20 +539,16 @@ const Bookings = () => {
     { value: "Account Name", label: "Account Name" },
   ];
 
-  // State to store the selected option values
   const [selectedColumnValues, setSelectedColumnValues] = useState<any[]>([]);
 
-  // Event handler to handle changes in selected options
   const handleSelectValueColumnChange = (selectedOption: any) => {
-    // Extract values from selected options and update state
     const values = selectedOption.map((option: any) => option.value);
     setSelectedColumnValues(values);
   };
 
-  // Filter out columns based on selected options
   const filteredColumns = columns.filter(
     (column: Column) =>
-      !selectedColumnValues.includes(column.name.props.children) // Ensure props.children is string
+      !selectedColumnValues.includes(column.name.props.children)
   );
 
   const [isPrivateHiredChecked, setIsPrivateHiredChecked] = useState(false);
@@ -541,7 +565,6 @@ const Bookings = () => {
     setIsContractChecked(event.target.checked);
   };
 
-  const [deleteQuote] = useDeleteQuoteMutation();
   const swalWithBootstrapButtons = Swal.mixin({
     customClass: {
       confirmButton: "btn btn-success",
@@ -573,19 +596,14 @@ const Bookings = () => {
             "Quote is deleted.",
             "success"
           );
-        } else if (
-          /* Read more about handling dismissals below */
-          result.dismiss === Swal.DismissReason.cancel
-        ) {
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
           swalWithBootstrapButtons.fire("Canceled", "Quote is safe :)", "info");
         }
       });
   };
 
-  // The selected Reglement
   const [selectedCancelCause, setSelectedCancelCause] = useState<string>("");
 
-  // This function will be triggered when a radio button is selected
   const radioHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedCancelCause(event.target.value);
   };
@@ -594,7 +612,6 @@ const Bookings = () => {
     selectVehicleWhenAssignDriverAndVehicle,
     setSelectedVehicleWhenAssignDriverAndVehicle,
   ] = useState<string>("");
-  // This function is triggered when the select Vehicle
   const handleSelectVehicleWhenAssignDriverAndVehicle = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
@@ -606,7 +623,6 @@ const Bookings = () => {
     selectDriverWhenAssignDriverAndVehicle,
     setSelectedDriverWhenAssignDriverAndVehicle,
   ] = useState<string>("");
-  // This function is triggered when the select Driver
   const handleSelectDriverWhenAssignDriverAndVehicle = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
@@ -664,13 +680,6 @@ const Bookings = () => {
 
   const { quoteId, status } = updateStatusToCancel;
 
-  const onChangeStatusToCancel = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUpdateStatusToCancel((prevState) => ({
-      ...prevState,
-      [e.target.id]: e.target.value,
-    }));
-  };
-
   const onSubmitUpdateStatusToCancel = (
     e: React.FormEvent<HTMLFormElement>
   ) => {
@@ -704,15 +713,11 @@ const Bookings = () => {
     label: affiliate.name,
   }));
 
-  // State to store the selected options
   const [selectedOptions, setSelectedOptions] = useState([]);
-  // Event handler to handle changes in selected options
   const handleSelectChange = (selectedOption: any) => {
     setSelectedOptions(selectedOption);
   };
-  // console.log("selectedOptions", selectedOptions);
   const [selectAffiliate, setSelectedAffiliate] = useState<string>("");
-  // This function is triggered when the select Affiliate
   const handleSelectAffiliate = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
@@ -720,13 +725,10 @@ const Bookings = () => {
     setSelectedAffiliate(value);
   };
 
-  // State to store the selected option values
   const [selectedValues, setSelectedValues] = useState<any[]>([]);
 
-  // Event handler to handle changes in selected options
   const handleSelectValueChange = (selectedOption: any) => {
     let whiteList: any[] = [];
-    // Extract values from selected options and update state
     const values = selectedOption.map((option: any) =>
       whiteList.push({
         id: option.value,
@@ -737,7 +739,68 @@ const Bookings = () => {
     );
     setSelectedValues(whiteList);
   };
+  const handleReload = () => {
+    window.location.reload();
+  };
+  const currentDate = new Date();
+  const formattedDate =
+    currentDate.getFullYear() +
+    "-" +
+    String(currentDate.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(currentDate.getDate()).padStart(2, "0");
 
+  const formattedTime =
+    String(currentDate.getHours()).padStart(2, "0") +
+    ":" +
+    String(currentDate.getMinutes()).padStart(2, "0");
+
+  const [addNotes] = useAddNotesMutation();
+  const [note, setNote] = useState("");
+  const handleAddNote = async () => {
+    if (note) {
+      try {
+        await addNotes({
+          id_quote: quoteState?._id!,
+          information: {
+            note,
+            by: user?._id!,
+            date: formattedDate,
+            time: formattedTime,
+          },
+        });
+        setNote("");
+        notifySuccessAddNote();
+        tog_AddNote();
+        setShowNotes(!showNotes);
+      } catch (error) {
+        console.error("Error adding note:", error);
+      }
+    }
+  };
+  const handleAddNoteFromQuickAccess = async () => {
+    if (note) {
+      try {
+        await addNotes({
+          id_quote: selectedRow[0]?._id!,
+          information: {
+            note,
+            by: user?._id!,
+            date: formattedDate,
+            time: formattedTime,
+          },
+        });
+        setNote("");
+        notifySuccessAddNote();
+        tog_AddNoteFromQuickAccess();
+        setTimeout(() => {
+          handleReload();
+        }, 1000);
+      } catch (error) {
+        console.error("Error adding note:", error);
+      }
+    }
+  };
   const date = new Date();
 
   const [assignAffiliateToQuote] = useAddAffilaiteToQuoteMutation();
@@ -777,26 +840,40 @@ const Bookings = () => {
   };
 
   const [selectedPeriod, setSelectedPeriod] = useState<string>("");
-  // This function is triggered when the select Period
   const handleSelectPeriod = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     setSelectedPeriod(value);
   };
 
   const [selectedPayment, setSelectedPayment] = useState<string>("");
-  // This function is triggered when the select Payment
   const handleSelectPayment = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     setSelectedPayment(value);
   };
 
   const [selectedProgress, setSelectedProgress] = useState<string>("");
-  // This function is triggered when the select Progress
   const handleSelectProgress = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const value = event.target.value;
     setSelectedProgress(value);
+  };
+
+  const [filters, setFilters] = useState<{
+    fromDate: Date | null;
+    toDate: Date | null;
+    specificDay: Date | null;
+  }>({
+    fromDate: null,
+    toDate: null,
+    specificDay: null,
+  });
+
+  const handleDateChange = (selectedDate: any, field: any) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [field]: selectedDate[0],
+    }));
   };
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -823,50 +900,28 @@ const Bookings = () => {
       );
     }
 
-    if (selectedPeriod && selectedPeriod !== "all") {
-      const now = new Date();
-      const filterByDate = (jobDate: any) => {
-        const date = new Date(jobDate);
-        switch (selectedPeriod) {
-          case "Today":
-            return date.toDateString() === now.toDateString();
-          case "Yesterday":
-            const yesterday = new Date(now);
-            yesterday.setDate(now.getDate() - 1);
-            return date.toDateString() === yesterday.toDateString();
-          case "Last 7 Days":
-            const lastWeek = new Date(now);
-            lastWeek.setDate(now.getDate() - 7);
-            return date >= lastWeek && now >= date;
-          case "Last 30 Days":
-            const lastMonth = new Date(now);
-            lastMonth.setDate(now.getDate() - 30);
-            return date >= lastMonth && now >= date;
-          case "This Month":
-            return (
-              date.getMonth() === now.getMonth() &&
-              date.getFullYear() === now.getFullYear()
-            );
-          case "Last Month":
-            const lastMonthStart = new Date(
-              now.getFullYear(),
-              now.getMonth() - 1,
-              1
-            );
-            const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-            return date >= lastMonthStart && date <= lastMonthEnd;
-          default:
-            return true;
-        }
-      };
-      filteredJobs = filteredJobs.filter((job) => filterByDate(job.date));
-    }
+    const { fromDate, toDate, specificDay } = filters;
 
-    // if (selectedPayment && selectedPayment !== "all") {
-    //   filteredJobs = filteredJobs.filter(
-    //     (job) => job.payment_status === selectedPayment
-    //   );
-    // }
+    if (specificDay instanceof Date) {
+      filteredJobs = filteredJobs.filter((job) => {
+        const jobDate = new Date(job.date!);
+        if (isNaN(jobDate.getTime())) {
+          return false;
+        }
+        return jobDate.toDateString() === specificDay.toDateString();
+      });
+    } else if (fromDate instanceof Date && toDate instanceof Date) {
+      const adjustedToDate = new Date(toDate);
+      adjustedToDate.setHours(23, 59, 59, 999);
+
+      filteredJobs = filteredJobs.filter((job) => {
+        const jobDate = new Date(job.date!);
+        if (isNaN(jobDate.getTime())) {
+          return false;
+        }
+        return jobDate >= fromDate && jobDate <= adjustedToDate;
+      });
+    }
 
     if (selectedProgress && selectedProgress !== "all") {
       filteredJobs = filteredJobs.filter(
@@ -883,6 +938,56 @@ const Bookings = () => {
     }
 
     return filteredJobs;
+  };
+
+  const AlertConfirm = async (handleHideSelect: () => void) => {
+    Swal.fire({
+      title: "Submit your password",
+      input: "password",
+      html: `
+        <p class="text-muted">This job is <b class="text-danger">not paid</b> yet.
+        To assign a driver please enter a valid password.</p>
+      `,
+      inputAttributes: {
+        autocapitalize: "off",
+      },
+      showCancelButton: true,
+      confirmButtonText: "Submit",
+      showLoaderOnConfirm: true,
+      customClass: {
+        confirmButton: "btn btn-secondary",
+        cancelButton: "btn btn-danger",
+      },
+      preConfirm: async (password) => {
+        try {
+          const validPassword = "123456";
+
+          if (password !== validPassword) {
+            throw new Error("Invalid password");
+          }
+
+          handleHideSelect();
+          return {};
+        } catch (error: any) {
+          Swal.showValidationMessage(`Error: ${error.message}`);
+        }
+      },
+      allowOutsideClick: () => !Swal.isLoading(),
+    });
+  };
+
+  const [selectHide, setSelectHide] = useState(false);
+  const handleHideSelect = () => {
+    setSelectHide(true);
+  };
+  const [selectAssignDriverHide, setSelectAssignDriverHide] = useState(false);
+  const handleAssignDriverHideSelect = () => {
+    setSelectAssignDriverHide(true);
+  };
+
+  const [selectAssignVehicleHide, setSelectAssignVehicleHide] = useState(false);
+  const handleAssignVehicleHideSelect = () => {
+    setSelectAssignVehicleHide(true);
   };
 
   return (
@@ -905,22 +1010,24 @@ const Bookings = () => {
                     />
                   </Col>
                   <Col sm={9} className="col-lg-auto">
-                    <select
-                      className="form-select text-muted"
-                      data-choices
-                      data-choices-search-false
-                      name="Period"
-                      id="idPeriod"
-                      onChange={handleSelectPeriod}
-                    >
-                      <option value="all">All Days</option>
-                      <option value="Today">Today</option>
-                      <option value="Yesterday">Yesterday</option>
-                      <option value="Last 7 Days">Last 7 Days</option>
-                      <option value="Last 30 Days">Last 30 Days</option>
-                      <option defaultValue="This Month">This Month</option>
-                      <option value="Last Month">Last Month</option>
-                    </select>
+                    <Flatpickr
+                      className="form-control flatpickr-input"
+                      placeholder="From"
+                      options={{
+                        dateFormat: "d M, Y",
+                      }}
+                      onChange={(date) => handleDateChange(date, "fromDate")}
+                    />
+                  </Col>
+                  <Col sm={9} className="col-lg-auto">
+                    <Flatpickr
+                      className="form-control flatpickr-input"
+                      placeholder="To"
+                      options={{
+                        dateFormat: "d M, Y",
+                      }}
+                      onChange={(date) => handleDateChange(date, "toDate")}
+                    />
                   </Col>
                   <Col sm={9} className="col-lg-auto">
                     <select
@@ -992,7 +1099,7 @@ const Bookings = () => {
             <Card id="shipmentsList">
               <Card.Header className="border-bottom-dashed">
                 <Row>
-                  <Col lg={9} className="d-flex justify-content-start">
+                  <Col lg={8} className="d-flex justify-content-start">
                     {isChecked ? (
                       <ul className="hstack gap-2 list-unstyled mb-0">
                         <li>
@@ -1000,7 +1107,7 @@ const Bookings = () => {
                             to="#"
                             className="badge badge-soft-info remove-item-btn fs-16"
                             state={selectedRow}
-                            onClick={() => tog_DriverVehicleAssign()}
+                            onClick={() => AlertConfirm(handleHideSelect)}
                           >
                             <i className="bi bi-plus-square-dotted fs-18"></i>{" "}
                             Assign Vehicle/Driver
@@ -1014,6 +1121,16 @@ const Bookings = () => {
                             onClick={() => tog_PushJob()}
                           >
                             <i className="bi bi-send-check fs-18"></i> Push Job
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            to="#"
+                            className="badge badge-soft-primary new-note-btn fs-16"
+                            state={selectedRow}
+                            onClick={tog_AddNoteFromQuickAccess}
+                          >
+                            <i className="bi bi-plus-lg fs-18"></i> New Note
                           </Link>
                         </li>
                         <li>
@@ -1040,35 +1157,30 @@ const Bookings = () => {
                       ""
                     )}
                   </Col>
-                  <Col lg={3} className="d-flex justify-content-end">
-                    <div className="search-box">
-                      <input
-                        type="text"
-                        className="form-control search"
-                        placeholder="Search for something..."
-                        value={searchTerm}
-                        onChange={handleSearchChange}
+                  <Col lg={4}>
+                    <div className="hstack gap-1">
+                      <Flatpickr
+                        className="form-control flatpickr-input w-50"
+                        placeholder="Select Day"
+                        options={{
+                          dateFormat: "d M, Y",
+                        }}
+                        onChange={(date) =>
+                          handleDateChange(date, "specificDay")
+                        }
                       />
-                      <i className="ri-search-line search-icon"></i>
+                      <div className="search-box">
+                        <input
+                          type="text"
+                          className="form-control search"
+                          placeholder="Search for something..."
+                          value={searchTerm}
+                          onChange={handleSearchChange}
+                        />
+                        <i className="ri-search-line search-icon"></i>
+                      </div>
                     </div>
                   </Col>
-                  {/* <Col lg={2} className="d-flex justify-content-end">
-                    <div
-                      className="btn-group btn-group-sm mt-2"
-                      role="group"
-                      aria-label="Basic example"
-                    >
-                      <button type="button" className="btn btn-outline-dark">
-                        Excel
-                      </button>
-                      <button type="button" className="btn btn-outline-dark">
-                        PDF
-                      </button>
-                      <button type="button" className="btn btn-outline-dark">
-                        Print
-                      </button>
-                    </div>
-                  </Col> */}
                 </Row>
               </Card.Header>
               <Card.Body>
@@ -1087,7 +1199,7 @@ const Bookings = () => {
           <Modal
             className="fade zoomIn"
             size="lg"
-            show={modal_AssignDriver}
+            show={selectAssignDriverHide}
             onHide={() => {
               openModalAssignDriver();
             }}
@@ -1228,7 +1340,7 @@ const Bookings = () => {
           <Modal
             className="fade zoomIn"
             size="lg"
-            show={modal_AssignVehicle}
+            show={selectAssignVehicleHide}
             onHide={() => {
               openModalAssignVehicle();
             }}
@@ -1408,12 +1520,17 @@ const Bookings = () => {
           <Modal
             className="fade zoomIn"
             size="lg"
-            show={modal_DriverVehicleAssign}
+            show={selectHide}
             onHide={() => {
               tog_DriverVehicleAssign();
             }}
             centered
           >
+            <Modal.Header className="px-4 pt-4" closeButton>
+              <h5 className="modal-title fs-18" id="exampleModalLabel">
+                Assign Driver/Vehicle
+              </h5>
+            </Modal.Header>
             <Modal.Body className="p-4">
               <Form
                 className="tablelist-form"
@@ -1475,10 +1592,7 @@ const Bookings = () => {
                     <div className="hstack gap-2 justify-content-end">
                       <Button
                         className="btn-soft-danger"
-                        onClick={() => {
-                          tog_DriverVehicleAssign();
-                        }}
-                        data-bs-dismiss="modal"
+                        onClick={handleHideSelect}
                       >
                         <i className="ri-close-fill align-bottom me-1"></i>{" "}
                         Close
@@ -1592,6 +1706,174 @@ const Bookings = () => {
                   </Col>
                 </Row>
               </Form>
+            </Modal.Body>
+          </Modal>
+          <Offcanvas
+            show={showNotes}
+            onHide={() => setShowNotes(!showNotes)}
+            placement="end"
+          >
+            <Offcanvas.Header closeButton>
+              <Offcanvas.Title>Notes Details</Offcanvas.Title>
+            </Offcanvas.Header>
+            <Offcanvas.Body>
+              <Button
+                className="btn-soft-primary"
+                id="add-btn"
+                type="submit"
+                onClick={tog_AddNote}
+              >
+                <i className="ri-add-fill align-bottom me-1"></i> New Note
+              </Button>
+              <div className="mt-3">
+                {quoteState?.information?.map((note: any, index: number) => (
+                  <SimpleBar>
+                    <div
+                      className="p-3 border-bottom border-bottom-dashed"
+                      key={index}
+                    >
+                      <table>
+                        <tr>
+                          <td>
+                            <h6>Note :</h6>{" "}
+                          </td>
+                          <td>
+                            <i>{note?.note!}</i>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <h6>Date : </h6>
+                          </td>
+                          <td>
+                            <i>{note?.date!}</i> at <i>{note?.time!}</i>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <h6>By : </h6>
+                          </td>
+                          <td>
+                            <i>{note?.by?.name!}</i>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </SimpleBar>
+                ))}
+              </div>
+            </Offcanvas.Body>
+          </Offcanvas>
+          <Modal
+            className="fade zoomIn"
+            size="sm"
+            show={modal_AddNote}
+            onHide={() => {
+              tog_AddNote();
+            }}
+            centered
+          >
+            <Modal.Header className="px-4 pt-4" closeButton>
+              <h5 className="modal-title fs-18" id="exampleModalLabel">
+                New Note
+              </h5>
+            </Modal.Header>
+            <Modal.Body className="p-4">
+              <div
+                id="alert-error-msg"
+                className="d-none alert alert-danger py-2"
+              ></div>
+              <Row className="mb-3">
+                <Col lg={12}>
+                  <textarea
+                    className="form-control"
+                    id="note"
+                    name="note"
+                    rows={3}
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                  ></textarea>
+                </Col>
+              </Row>
+              <Row>
+                <Col lg={12}>
+                  <div className="hstack gap-2 justify-content-end">
+                    <Button
+                      className="btn-soft-danger"
+                      onClick={() => {
+                        tog_AddNote();
+                      }}
+                      data-bs-dismiss="modal"
+                    >
+                      <i className="ri-close-line align-bottom me-1"></i> Close
+                    </Button>
+                    <Button
+                      className="btn-soft-info"
+                      id="add-btn"
+                      onClick={handleAddNote}
+                      disabled={!note.trim()}
+                    >
+                      <i className="ri-add-line align-bottom me-1"></i> Add
+                    </Button>
+                  </div>
+                </Col>
+              </Row>
+            </Modal.Body>
+          </Modal>
+          <Modal
+            className="fade zoomIn"
+            size="sm"
+            show={modal_AddNoteFromQuickAccess}
+            onHide={() => {
+              tog_AddNoteFromQuickAccess();
+            }}
+            centered
+          >
+            <Modal.Header className="px-4 pt-4" closeButton>
+              <h5 className="modal-title fs-18" id="exampleModalLabel">
+                New Note
+              </h5>
+            </Modal.Header>
+            <Modal.Body className="p-4">
+              <div
+                id="alert-error-msg"
+                className="d-none alert alert-danger py-2"
+              ></div>
+              <Row className="mb-3">
+                <Col lg={12}>
+                  <textarea
+                    className="form-control"
+                    id="note"
+                    name="note"
+                    rows={3}
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                  ></textarea>
+                </Col>
+              </Row>
+              <Row>
+                <Col lg={12}>
+                  <div className="hstack gap-2 justify-content-end">
+                    <Button
+                      className="btn-soft-danger"
+                      onClick={() => {
+                        tog_AddNoteFromQuickAccess();
+                      }}
+                      data-bs-dismiss="modal"
+                    >
+                      <i className="ri-close-line align-bottom me-1"></i> Close
+                    </Button>
+                    <Button
+                      className="btn-soft-info"
+                      id="add-btn"
+                      onClick={handleAddNoteFromQuickAccess}
+                      disabled={!note.trim()}
+                    >
+                      <i className="ri-add-line align-bottom me-1"></i> Add
+                    </Button>
+                  </div>
+                </Col>
+              </Row>
             </Modal.Body>
           </Modal>
         </Container>

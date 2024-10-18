@@ -12,7 +12,6 @@ import {
   Modal,
 } from "react-bootstrap";
 
-
 const PrincingInfo = () => {
   return (
     <React.Fragment>
@@ -41,7 +40,7 @@ const PrincingInfo = () => {
                           <Form.Control
                             type="text"
                             id="customerName-field"
-                            // defaultValue="Bouden Coach Travel"
+                            // defaultValue="Coach Hire Network"
                             required
                           />
                         </td>

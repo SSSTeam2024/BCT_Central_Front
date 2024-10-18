@@ -10,7 +10,7 @@ import {
 import Swal from "sweetalert2";
 
 const PartialQuotes = () => {
-  document.title = "Partial Quotes | Bouden Coach Travel";
+  document.title = "Partial Quotes | Coach Hire Network";
   const customTableStyles = {
     rows: {
       style: {

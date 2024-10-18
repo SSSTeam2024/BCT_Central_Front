@@ -4,7 +4,7 @@ import Breadcrumb from "Common/BreadCrumb";
 import CurrentTable from "./currentJobTable";
 
 const Current = () => {
-  document.title = "Job Push | Bouden Coach Travel";
+  document.title = "Job Push | Coach Hire Network";
 
   return (
     <React.Fragment>

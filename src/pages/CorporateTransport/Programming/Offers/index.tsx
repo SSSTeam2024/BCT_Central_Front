@@ -29,7 +29,7 @@ import img14 from "assets/images/brands/img-14.png";
 import { Link, useNavigate } from "react-router-dom";
 
 const Offers = () => {
-  document.title = " Offers | Bouden Coach Travel";
+  document.title = " Offers | Coach Hire Network";
 
   const navigate = useNavigate();
 

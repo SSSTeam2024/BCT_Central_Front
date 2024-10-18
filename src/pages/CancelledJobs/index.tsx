@@ -31,7 +31,7 @@ interface Column {
 }
 
 const CancelledJobs = () => {
-  document.title = "Cancelled Jobs| Bouden Coach Travel";
+  document.title = "Cancelled Jobs| Coach Hire Network";
 
   const whiteListLocation = useLocation();
 

@@ -10,7 +10,7 @@ import SingleEmail from "Common/SingleEmail";
 import BulkEmail from "Common/BulkEmail";
 
 const NewEmail = () => {
-  document.title = "New Email | Bouden Coach Travel";
+  document.title = "New Email | Coach Hire Network";
   const { data: AllAttachments = [] } = useGetAllAttachmentsQuery();
 
   const { data: AllEmails = [] } = useGetAllEmailQuery();

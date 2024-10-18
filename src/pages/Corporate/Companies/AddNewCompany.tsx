@@ -24,8 +24,8 @@ function convertToBase64(
 }
 
 const AddNewCompany = () => {
-  document.title = "Create Company | Bouden Coach Travel";
-  const navigate = useNavigate()
+  document.title = "Create Company | Coach Hire Network";
+  const navigate = useNavigate();
   const notifyCompany = () => {
     Swal.fire({
       position: "center",
@@ -55,7 +55,8 @@ const AddNewCompany = () => {
     setSelectedActivity(value);
   };
 
-  const [selectedStatusCompany, setSelectedStatusCompany] = useState<string>("");
+  const [selectedStatusCompany, setSelectedStatusCompany] =
+    useState<string>("");
   // This function is triggered when the select Model
   const handleSelectStatusCompany = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -65,13 +66,14 @@ const AddNewCompany = () => {
   };
 
   // ServiceDate
-  const [selectedDateOfService, setSelectedDateOfService] = useState<Date | null>(null);
+  const [selectedDateOfService, setSelectedDateOfService] =
+    useState<Date | null>(null);
   const handleChangeDateOfService = (selectedDates: Date[]) => {
     // Assuming you only need the first selected date
     setSelectedDateOfService(selectedDates[0]);
   };
 
-  const [createCompany] = useAddNewCompanyMutation()
+  const [createCompany] = useAddNewCompanyMutation();
 
   const initialCompany = {
     name: "",
@@ -171,15 +173,14 @@ const AddNewCompany = () => {
     try {
       company["statusCompany"] = selectedStatusCompany;
       company["activity"] = selectedActivity;
-      company["service_date"]=selectedDateOfService?.toDateString()!
-      createCompany(company).then(() => notifyCompany()).then(() =>
-        navigate("/companies")
-      )
+      company["service_date"] = selectedDateOfService?.toDateString()!;
+      createCompany(company)
+        .then(() => notifyCompany())
+        .then(() => navigate("/companies"));
     } catch (error) {
-      notifyErrorCompany(error)
+      notifyErrorCompany(error);
     }
   };
-
 
   return (
     <React.Fragment>
@@ -250,9 +251,7 @@ const AddNewCompany = () => {
                           {/* Name  == Done */}
                           <Col lg={4}>
                             <div className="mb-3">
-                              <Form.Label htmlFor="name">
-                                Name
-                              </Form.Label>
+                              <Form.Label htmlFor="name">Name</Form.Label>
                               <Form.Control
                                 type="text"
                                 id="name"
@@ -266,9 +265,7 @@ const AddNewCompany = () => {
                           {/* Email  == Done */}
                           <Col lg={4}>
                             <div className="mb-3">
-                              <Form.Label htmlFor="email">
-                                Email
-                              </Form.Label>
+                              <Form.Label htmlFor="email">Email</Form.Label>
                               <Form.Control
                                 type="email"
                                 name="email"
@@ -283,9 +280,7 @@ const AddNewCompany = () => {
                           {/* Phone  == Done */}
                           <Col lg={4}>
                             <div className="mb-3">
-                              <Form.Label htmlFor="phone">
-                                Phone
-                              </Form.Label>
+                              <Form.Label htmlFor="phone">Phone</Form.Label>
                               <Form.Control
                                 type="text"
                                 name="phone"
@@ -296,8 +291,6 @@ const AddNewCompany = () => {
                               />
                             </div>
                           </Col>
-
-
                         </Row>
                         <Row>
                           {/* Category  == Done */}
@@ -322,9 +315,7 @@ const AddNewCompany = () => {
                           {/* Address == Done */}
                           <Col lg={4}>
                             <div className="mb-3">
-                              <Form.Label htmlFor="address">
-                                Address
-                              </Form.Label>
+                              <Form.Label htmlFor="address">Address</Form.Label>
                               <Form.Control
                                 type="text"
                                 name="address"
@@ -351,7 +342,9 @@ const AddNewCompany = () => {
                                 <option value="Industry">Industry</option>
                                 <option value="Health">Health</option>
                                 <option value="School">School</option>
-                                <option value="High Education">High Education</option>
+                                <option value="High Education">
+                                  High Education
+                                </option>
                               </select>
                             </div>
                           </Col>
@@ -374,22 +367,22 @@ const AddNewCompany = () => {
                             </div>
                           </Col>
                           <Col lg={2}>
-                                <div className="mb-3">
-                                  <Form.Label htmlFor="service_date">
-                                    Service Date
-                                  </Form.Label>
-                                  <Flatpickr
-                                    className="form-control flatpickr-input"
-                                    placeholder="Select Date"
-                                    options={{
-                                      dateFormat: "d M, Y",
-                                    }}
-                                    id="service_date"
-                                    name="service_date"
-                                    onChange={handleChangeDateOfService}
-                                  />
-                                </div>
-                              </Col>
+                            <div className="mb-3">
+                              <Form.Label htmlFor="service_date">
+                                Service Date
+                              </Form.Label>
+                              <Flatpickr
+                                className="form-control flatpickr-input"
+                                placeholder="Select Date"
+                                options={{
+                                  dateFormat: "d M, Y",
+                                }}
+                                id="service_date"
+                                name="service_date"
+                                onChange={handleChangeDateOfService}
+                              />
+                            </div>
+                          </Col>
                         </Row>
                         <Row>
                           {/* Legal Card == Done */}
@@ -519,10 +512,7 @@ const AddNewCompany = () => {
                             <Row>
                               <Col lg={3}>
                                 <div className="mb-3">
-                                  <label
-                                    htmlFor="login"
-                                    className="form-label"
-                                  >
+                                  <label htmlFor="login" className="form-label">
                                     Login
                                   </label>
                                   <Form.Control
@@ -558,7 +548,11 @@ const AddNewCompany = () => {
                         </Col>
                         <Col lg={12}>
                           <div className="hstack gap-2 justify-content-end">
-                            <Button variant="primary" id="add-btn" type="submit">
+                            <Button
+                              variant="primary"
+                              id="add-btn"
+                              type="submit"
+                            >
                               Add Company
                             </Button>
                           </div>

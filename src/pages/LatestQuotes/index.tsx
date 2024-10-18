@@ -34,7 +34,7 @@ interface Column {
 }
 
 const LatestQuotes = () => {
-  document.title = "Latest Quotes | Bouden Coach Travel";
+  document.title = "Latest Quotes | Coach Hire Network";
 
   const customTableStyles = {
     rows: {

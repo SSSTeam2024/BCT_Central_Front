@@ -12,14 +12,14 @@ import Breadcrumb from "Common/BreadCrumb";
 import HistoryTable from "./historyTable";
 
 const History = () => {
-  document.title = "Push Job History | Bouden Coach Travel";
+  document.title = "Push Job History | Coach Hire Network";
 
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
           <Breadcrumb title="Push Job History" pageTitle="Push Jobs" />
-         <HistoryTable />
+          <HistoryTable />
         </Container>
       </div>
     </React.Fragment>

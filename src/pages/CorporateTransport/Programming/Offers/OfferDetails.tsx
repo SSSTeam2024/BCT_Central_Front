@@ -17,7 +17,7 @@ import productImg3 from "../../../../assets/images/products/img-3.png";
 import productImg5 from "../../../../assets/images/products/img-5.png";
 
 const OfferDetails = () => {
-  document.title = "Offer Details | Bouden Coach Travel";
+  document.title = "Offer Details | Coach Hire Network";
 
   const [modal_AddOffreModals, setmodal_AddOffreModals] =
     useState<boolean>(false);
@@ -126,9 +126,7 @@ const OfferDetails = () => {
                       </thead>
                       <tbody>
                         <tr>
-                          <td>
-                            #00541
-                          </td>
+                          <td>#00541</td>
                           <td>
                             <div className="d-flex align-items-center">
                               <div className="flex-shrink-0 me-2">
@@ -152,11 +150,7 @@ const OfferDetails = () => {
                           <td className="text-end">$658.00</td>
                         </tr>
                         <tr>
-                          <td>
-
-                            #07484
-
-                          </td>
+                          <td>#07484</td>
                           <td>
                             <div className="d-flex align-items-center">
                               <div className="flex-shrink-0 me-2">
@@ -180,11 +174,7 @@ const OfferDetails = () => {
                         </tr>
 
                         <tr>
-                          <td>
-
-                            #00065
-
-                          </td>
+                          <td>#00065</td>
                           <td>
                             <div className="d-flex align-items-center">
                               <div className="flex-shrink-0 me-2">
@@ -209,11 +199,7 @@ const OfferDetails = () => {
                         </tr>
 
                         <tr>
-                          <td>
-
-                            #00156
-
-                          </td>
+                          <td>#00156</td>
                           <td>
                             <div className="d-flex align-items-center">
                               <div className="flex-shrink-0 me-2">

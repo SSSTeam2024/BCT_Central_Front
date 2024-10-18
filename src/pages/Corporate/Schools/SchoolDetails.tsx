@@ -3,7 +3,7 @@ import { Card, Col, Container, Row, Table } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 
 const SchoolDetails = () => {
-  document.title = "School Details | Bouden Coach Travel";
+  document.title = "School Details | Coach Hire Network";
   const LocationSchool = useLocation();
 
   return (

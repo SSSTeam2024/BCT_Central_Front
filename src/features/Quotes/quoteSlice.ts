@@ -71,6 +71,7 @@ export interface Quote {
   }[];
   type?: string;
   heard_of_us?: string;
+  information?: string[]
 }
 
 export interface BookEmail {
@@ -444,6 +445,16 @@ export const quoteSlice = createApi({
         },
         invalidatesTags: ["Quote", "AssignDriverAndVehicleToQuoteInterface"],
       }),
+      addNotes: builder.mutation<void, { id_quote: string; information: { note: string; by: string, date: string, time: string } }>({
+        query({ id_quote, information }) {
+          return {
+            url: `/updateQuoteInformation/${id_quote}`,
+            method: 'PATCH',
+            body: { information },
+          };
+        },
+        invalidatesTags: ['Quote'],
+      }),
     };
   },
 });
@@ -470,5 +481,6 @@ export const {
   useGetAllQuotesBySchoolEmailQuery,
   useGetAllQuotesByCompanyEmailQuery,
   useUpdateProgressMutation,
-  useCreateNewQuoteMutation
+  useCreateNewQuoteMutation,
+  useAddNotesMutation
 } = quoteSlice;

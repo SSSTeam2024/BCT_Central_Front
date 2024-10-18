@@ -15,7 +15,7 @@ import TableContainer from "Common/TableContainer";
 import { shipments } from "Common/data";
 
 const NewApplications = () => {
-  document.title = "NewApplications | Bouden Coach Travel";
+  document.title = "NewApplications | Coach Hire Network";
 
   const navigate = useNavigate();
 

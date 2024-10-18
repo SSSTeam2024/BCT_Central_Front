@@ -15,7 +15,7 @@ import { Link } from "react-router-dom";
 import AddNewTripModel from "./AddNewTripModel";
 
 const TripModel = () => {
-  document.title = "Trip Model | Bouden Coach Travel";
+  document.title = "Trip Model | Coach Hire Network";
 
   const [modal_AddTripModelModals, setmodal_AddTripModelModals] =
     useState<boolean>(false);

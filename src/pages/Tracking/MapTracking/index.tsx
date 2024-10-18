@@ -20,7 +20,7 @@ import dest_unclicked from "../../../assets/images/dest_unclicked.png";
 
 const LoadingContainer = () => <div>Loading...</div>;
 const Maptracking = (props: any) => {
-  document.title = "Live Tracking | Bouden Coach Travel";
+  document.title = "Live Tracking | Coach Hire Network";
 
   const notify = (msg: string) => {
     Swal.fire({

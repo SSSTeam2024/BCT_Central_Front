@@ -5,7 +5,7 @@ import Feedbacktable from "./Feedbacktable";
 import { useGetAllFeedBacksQuery } from "features/FeedBack/feedBackSlice";
 
 const Feedback = () => {
-  document.title = "FeedBacks | Bouden Coach Travel";
+  document.title = "FeedBacks | Coach Hire Network";
 
   const { data: reviews = [] } = useGetAllFeedBacksQuery();
   return (

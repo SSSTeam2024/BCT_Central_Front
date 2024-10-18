@@ -11,7 +11,7 @@ import {
 import Lottie, { LottieRefCurrentProps } from "lottie-react";
 import emailAnimation from "../../assets/images/Animation - 1717169436713.json";
 const EmailsSent = () => {
-  document.title = "Emails Sent | Bouden Coach Travel";
+  document.title = "Emails Sent | Coach Hire Network";
   const lottieRef3 = useRef<LottieRefCurrentProps>(null);
   const { data: AllSentEmails = [], isLoading } = useGetAllSentEmailsQuery();
   console.log(AllSentEmails);

@@ -30,7 +30,7 @@ import { pdfjs } from "react-pdf";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 
 const VehicleDetails = () => {
-  document.title = "Vehicle Details | Bouden Coach Travel";
+  document.title = "Vehicle Details | Coach Hire Network";
 
   const LocationVehicle = useLocation();
 

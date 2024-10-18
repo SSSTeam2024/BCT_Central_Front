@@ -20,7 +20,7 @@ import Swal from "sweetalert2";
 import Flatpickr from "react-flatpickr";
 
 const NewContract = () => {
-  document.title = "Contracts | Bouden Coach Travel";
+  document.title = "Contracts | Coach Hire Network";
   const { data: AllContracts = [] } = useGetAllContractsQuery();
   const navigate = useNavigate();
 

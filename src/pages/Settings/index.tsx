@@ -26,7 +26,7 @@ import EmailTemplates from "pages/EmailTemplate";
 import ShortCode from "./ShortCode";
 
 const SiteSettings = () => {
-  document.title = "Site Settings | Bouden Coach Travel";
+  document.title = "Site Settings | Coach Hire Network";
 
   const [showSettings, setShowSettings] = useState<boolean>(true);
   const [attachmentSettings, setAttachmentSettings] = useState<boolean>(false);

@@ -41,7 +41,7 @@ function convertToBase64(
 }
 
 const EditTeam = () => {
-  document.title = "Edit Team Member | Bouden Coach Travel";
+  document.title = "Edit Team Member | Coach Hire Network";
   const LocationTeam = useLocation();
   if (pdfjs.GlobalWorkerOptions) {
     pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;

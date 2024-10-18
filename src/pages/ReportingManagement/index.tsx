@@ -28,7 +28,7 @@ import img14 from "assets/images/brands/img-14.png";
 import { Link } from "react-router-dom";
 
 const ReportingManagement = () => {
-  document.title = " Reporting Management | Bouden Coach Travel";
+  document.title = " Reporting Management | Coach Hire Network";
   const [modal_QuoteInfo, setmodal_QuoteInfo] = useState<boolean>(false);
   function tog_QuoteInfo() {
     setmodal_QuoteInfo(!modal_QuoteInfo);

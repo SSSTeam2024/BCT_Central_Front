@@ -5,7 +5,7 @@ import TeamTable from "./TeamTable";
 import { useGetAllTeamQuery } from "features/Team/teamSlice";
 
 const Team = () => {
-  document.title = "Teams | Bouden Coach Travel";
+  document.title = "Teams | Coach Hire Network";
 
   const { data: AllTeams = [] } = useGetAllTeamQuery();
 

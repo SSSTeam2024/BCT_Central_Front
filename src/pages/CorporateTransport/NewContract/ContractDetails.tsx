@@ -44,7 +44,7 @@ const ContractDetails: React.FC = () => {
       if (ctx) {
         ctx.font = "14px Arial";
         ctx.fillText("Service Provider Signature", 10, 20);
-        ctx.fillText("Name: Bouden Coach Travel", 10, 60);
+        ctx.fillText("Name: Coach Hire Network", 10, 60);
         ctx.fillText("Legal status: Legal", 10, 80);
       }
     }
@@ -168,7 +168,7 @@ const ContractDetails: React.FC = () => {
                         </div>
                         <div>
                           <h6 className="mb-0">
-                            <span id="email">Bouden Coach Travel</span>
+                            <span id="email">Coach Hire Network</span>
                           </h6>
                           <h6 className="mb-0">
                             <span className="text-muted fw-normal">
@@ -204,7 +204,7 @@ const ContractDetails: React.FC = () => {
                   <Col lg={12}>
                     <Card.Body className="p-4">
                       <h6 className="d-flex justify-content-center fw-semibold fs-14">
-                        Between Bouden Coach Travel Ltd (Service Provider) and{" "}
+                        Between Coach Hire Network Ltd (Service Provider) and{" "}
                         {user.name}
                       </h6>
                       <div className="mt-3 border-top border-top-dashed"></div>
@@ -296,7 +296,7 @@ const ContractDetails: React.FC = () => {
                             SERVICE PROVIDER INFORMATION
                           </h6>
                           <p className="fw-medium mb-2 fs-16" id="billing-name">
-                            Bouden Coach Travel
+                            Coach Hire Network
                           </p>
                           <p className="text-muted mb-0">
                             <span>Email: </span>
@@ -324,7 +324,7 @@ const ContractDetails: React.FC = () => {
                             id="billing-name"
                           >
                             This Transportation Services Agreement (“Agreement”)
-                            is entered into between Bouden Coach Travel Ltd, a
+                            is entered into between Coach Hire Network Ltd, a
                             company registered at Unit 18 Haywards Industrial
                             Park, Orton Way, Birmingham B35 7BT , here in after
                             referred to as the “Service Provider,” and{" "}

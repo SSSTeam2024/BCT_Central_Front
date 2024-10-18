@@ -28,7 +28,7 @@ import img14 from "assets/images/brands/img-14.png";
 import { Link } from "react-router-dom";
 
 const Callbacks = () => {
-  document.title = "Callbacks | Bouden Coach Travel";
+  document.title = "Callbacks | Coach Hire Network";
   const columns = [
     {
       name: <span className="font-weight-bold fs-13">Quote ID</span>,

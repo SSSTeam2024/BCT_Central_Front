@@ -27,7 +27,7 @@ const bookmarkProduct = (e: any) => {
 const LoadingContainer = () => <div>Loading...</div>;
 
 const SubcontractorDetails = (props: any) => {
-  document.title = "Affiliate Details | Bouden Coach Travel";
+  document.title = "Affiliate Details | Coach Hire Network";
   const LocationSubContractor = useLocation();
 
   return (

@@ -10,7 +10,7 @@ import ApplicationNotifications from "./ApplicationNotifications";
 import PrivacySecurity from "./PrivacySecurity";
 
 const Settings = () => {
-  document.title = "Driver | Bouden Coach Travel";
+  document.title = "Driver | Coach Hire Network";
 
   return (
     <React.Fragment>

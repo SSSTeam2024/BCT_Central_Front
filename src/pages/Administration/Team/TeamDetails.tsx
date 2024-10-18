@@ -16,7 +16,7 @@ import { pdfjs } from "react-pdf";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 
 const TeamDetails = () => {
-  document.title = "Team Details | Bouden Coach Travel";
+  document.title = "Team Details | Coach Hire Network";
   const LocationTeam = useLocation();
   if (pdfjs.GlobalWorkerOptions) {
     pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;

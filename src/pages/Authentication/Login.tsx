@@ -16,7 +16,7 @@ import { setCredentials } from "features/Account/authSlice";
 import Cookies from "js-cookie";
 
 const Login = () => {
-  document.title = "Login | Bouden Coach Travel";
+  document.title = "Login | Coach Hire Network";
 
   const [login, { isLoading }] = useLoginMutation();
 
@@ -94,16 +94,26 @@ const Login = () => {
               <Col lg={6}>
                 <div className="auth-card mx-lg-3">
                   <Card className="border-0 mb-0">
-                    <Card.Header className="bg-primary border-0">
+                    <Card.Header className="bg-light-subtle border-0">
                       <Row>
-                        <Col lg={4} className="col-3">
-                          <img src={logo} alt="" className="img-fluid" />
+                        <Col
+                          lg={12}
+                          className="d-flex justify-content-start col-12"
+                        >
+                          <img
+                            src={logo}
+                            alt=""
+                            className="img-fluid"
+                            width="240"
+                          />
                         </Col>
                       </Row>
                     </Card.Header>
                     <Card.Body>
                       <p className="text-muted fs-15">
-                        Sign in to continue to Bouden Coach Travel Dashboard.
+                        Sign in to continue to{" "}
+                        <span className="text-danger">Coach Hire Network</span>{" "}
+                        Dashboard.
                       </p>
                       <div className="p-2">
                         <div className="mb-3">
@@ -158,8 +168,7 @@ const Login = () => {
                         </div>
                         <div>
                           <Button
-                            variant="primary"
-                            className="w-100"
+                            className="w-100 btn btn-darken-danger"
                             type="submit"
                             onClick={async () => {
                               try {
@@ -204,7 +213,7 @@ const Login = () => {
                 <Col lg={12}>
                   <div className="text-center">
                     <p className="mb-0 text-muted">
-                      ©{new Date().getFullYear()} Bouden Coach Travel. Crafted
+                      ©{new Date().getFullYear()} Coach Hire Network. Crafted
                       with <i className="mdi mdi-heart text-danger"></i> by Team
                       3S
                     </p>

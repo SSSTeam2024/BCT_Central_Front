@@ -19,7 +19,7 @@ interface Column {
 }
 
 const DeletedJobs = () => {
-  document.title = " Deleted Jobs | Bouden Coach Travel";
+  document.title = " Deleted Jobs | Coach Hire Network";
 
   const customTableStyles = {
     rows: {

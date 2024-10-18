@@ -9,7 +9,7 @@ import productImg3 from "../../../../assets/images/products/img-3.png";
 import productImg5 from "../../../../assets/images/products/img-5.png";
 
 const TripModelDetails = () => {
-  document.title = "Trip Model Details | Bouden Coach Travel";
+  document.title = "Trip Model Details | Coach Hire Network";
 
   const LocationTripModel = useLocation();
 

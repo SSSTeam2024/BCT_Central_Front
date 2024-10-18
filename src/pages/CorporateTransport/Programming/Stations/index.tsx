@@ -17,7 +17,7 @@ import { shipments } from "Common/data";
 import offerbanner from "../../../../assets/images/ecommerce/offer-banner.jpg";
 
 const Stations = () => {
-  document.title = "Stations | Bouden Coach Travel";
+  document.title = "Stations | Coach Hire Network";
 
   const navigate = useNavigate();
 

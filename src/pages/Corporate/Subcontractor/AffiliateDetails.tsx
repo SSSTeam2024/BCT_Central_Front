@@ -7,7 +7,7 @@ import { pdfjs } from "react-pdf";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 
 const AffilaiteDetails = () => {
-  document.title = "Affiliate Profile | Bouden Coach Travel";
+  document.title = "Affiliate Profile | Coach Hire Network";
 
   const affiliateLocation = useLocation();
   const [modal_PVCModals, setmodal_PVCModals] = useState<boolean>(false);

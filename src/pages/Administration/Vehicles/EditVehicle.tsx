@@ -47,7 +47,7 @@ function convertToBase64(
 }
 
 const EditVehicle = () => {
-  document.title = "Edit Vehicle | Bouden Coach Travel";
+  document.title = "Edit Vehicle | Coach Hire Network";
   const { data: AllVehicleTypes = [] } = useGetAllVehicleTypesQuery();
   const { data: AllExtras = [] } = useGetAllExtrasQuery();
   const vehicleLocation = useLocation();

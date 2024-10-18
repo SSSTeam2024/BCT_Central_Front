@@ -3,7 +3,7 @@ import { Col, Container, Row } from "react-bootstrap";
 import Widgets from "./Widgets";
 
 const Dashboard = () => {
-  document.title = "Dashboard | Bouden Coach Travel";
+  document.title = "Dashboard | Coach Hire Network";
 
   return (
     <React.Fragment>
