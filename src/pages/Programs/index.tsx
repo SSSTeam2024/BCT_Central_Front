@@ -292,7 +292,79 @@ const ProgramList = () => {
       name: <span className="font-weight-bold fs-13">Action</span>,
       sortable: true,
       selector: (row: any) => {
-        return (
+        return row.tab_number !== "4" ? (
+          <ul className="hstack gap-2 list-unstyled mb-0">
+            <li>
+              <Link
+                to={`/program-details/${row.programName}`}
+                className="badge badge-soft-primary edit-item-btn"
+                state={row}
+              >
+                <i
+                  className="ph ph-eye"
+                  style={{
+                    transition: "transform 0.3s ease-in-out",
+                    cursor: "pointer",
+                    fontSize: "1.5em",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.transform = "scale(1.2)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.transform = "scale(1)")
+                  }
+                ></i>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/new-suggested-route"
+                state={{
+                  program: row,
+                  nextTab: String(Number(row.tab_number) + 1),
+                }}
+                className="badge badge-soft-dark edit-item-btn"
+              >
+                <i
+                  className="ph ph-caret-double-right"
+                  style={{
+                    transition: "transform 0.3s ease-in-out",
+                    cursor: "pointer",
+                    fontSize: "1.5em",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.transform = "scale(1.2)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.transform = "scale(1)")
+                  }
+                ></i>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="#"
+                className="badge badge-soft-danger remove-item-btn"
+                onClick={() => AlertDelete(row._id)}
+              >
+                <i
+                  className="ph ph-trash"
+                  style={{
+                    transition: "transform 0.3s ease-in-out",
+                    cursor: "pointer",
+                    fontSize: "1.5em",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.transform = "scale(1.2)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.transform = "scale(1)")
+                  }
+                ></i>
+              </Link>
+            </li>
+          </ul>
+        ) : (
           <ul className="hstack gap-2 list-unstyled mb-0">
             <li>
               <Link

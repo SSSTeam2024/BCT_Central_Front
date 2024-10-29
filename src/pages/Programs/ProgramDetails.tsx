@@ -13,7 +13,7 @@ import { useFetchJourneyByIdQuery } from "features/Journeys/journeySlice";
 const ProgramDetail = () => {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const location = useLocation();
-  const program = location.state; // Access state
+  const program = location.state;
 
   const OneVehicleType = useFetchVehicleTypeByIdQuery(program.vehiculeType);
   const OneLuggage = useFetchLuggageByIdQuery(program.luggage);
@@ -30,10 +30,9 @@ const ProgramDetail = () => {
   });
   useEffect(() => {
     if (isLoaded && program) {
-      // Check if program is not null or undefined
       const directionsService = new google.maps.DirectionsService();
       const waypoints = program.stops.map((stop: any) => ({
-        location: { query: stop.address.placeName }, // Use the address from autocomplete
+        location: { query: stop.address.placeName },
         stopover: true,
       }));
 

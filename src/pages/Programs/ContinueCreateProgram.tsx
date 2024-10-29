@@ -25,11 +25,8 @@ import {
 import Swal from "sweetalert2";
 import "./AddProgram.css";
 import {
-  FetchedGroup,
   Programm,
   useAddProgrammMutation,
-  useFetchEmployeeGroupsByProgramIdMutation,
-  useFetchStudentGroupsByProgramIdMutation,
   useUpdateProgramMutation,
 } from "features/Programs/programSlice";
 import Calendar from "react-calendar";
@@ -48,10 +45,7 @@ import {
   useFetchJourneyByIdQuery,
   useGetAllJourneyQuery,
 } from "features/Journeys/journeySlice";
-import {
-  PassengerAndLuggage,
-  useGetAllPassengerAndLuggagesQuery,
-} from "features/PassengerAndLuggageLimits/passengerAndLuggageSlice";
+import { useGetAllPassengerAndLuggagesQuery } from "features/PassengerAndLuggageLimits/passengerAndLuggageSlice";
 
 interface Option {
   value: string;
@@ -131,16 +125,12 @@ interface stopTime {
   minutes: number;
 }
 
-const AddProgramm = () => {
+const ContinueCreateProgram = () => {
   document.title = "New Suggested Route | Coach Hire Network";
   const { data: AllPassengersLimit = [] } =
     useGetAllPassengerAndLuggagesQuery();
   const [createProgram] = useAddProgrammMutation<Programm>();
   const [updateProgram] = useUpdateProgramMutation();
-  const [fetchEmployeeGroupsByProgramId] =
-    useFetchEmployeeGroupsByProgramIdMutation();
-  const [fetchStudentGroupsByProgramId] =
-    useFetchStudentGroupsByProgramIdMutation();
   const location = useLocation();
   const { nextTab } = location.state || { nextTab: "1" };
   const { data: AllJourneys = [] } = useGetAllJourneyQuery();
@@ -163,21 +153,13 @@ const AddProgramm = () => {
   const [recommandedCapacityState, setRecommandedCapacityState] =
     useState<string>("");
   const [selectedVehicleType, setSelectedVehicletype] = useState<string>("");
-  const [showVehicleType, setShowVehicleType] = useState<boolean>(false);
-  const [showLuggageDetails, setShowLuggageDetails] = useState<boolean>(false);
+
   // The selected Client Type
   const [selectedClientType, setSelectedClientType] = useState<string>("");
 
   // The selected Group Creation Mode
   const [selectedGroupCreationMode, setSelectedGroupCreationMode] =
-    useState<string>(() => {
-      if (location.state && location.state.program.groups_creation_mode) {
-        return location.state.program.groups_creation_mode.includes("Custom")
-          ? "Custom"
-          : "AutoGroup";
-      }
-      return "";
-    });
+    useState<string>("");
 
   const [activeVerticalTab, setactiveVerticalTab] = useState<number>(1);
   const [programName, setProgramName] = useState("");
@@ -202,10 +184,7 @@ const AddProgramm = () => {
   const originRef = useRef<any>(null);
   const destinationRef = useRef<any>(null);
   const stopRef = useRef<any>(null);
-  const [fetchedGroups, setFetchedGroups] = useState<FetchedGroup[] | null>(
-    null
-  );
-  const [selectedGroups, setSelectedGroups] = useState<FetchedGroup[]>([]);
+
   const [destSwitchRef, setDestSwitchRef] = useState<google.maps.LatLng[]>([]);
   const [originSwitchRef, setOriginSwitchRef] = useState<google.maps.LatLng[]>(
     []
@@ -227,19 +206,6 @@ const AddProgramm = () => {
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [selectedLuggage, setSelectedLuggage] = useState<string>("");
   const [disabledNext, setDisabledNext] = useState<boolean>(true);
-  const [directions, setDirections] =
-    useState<google.maps.DirectionsResult | null>(null);
-  const [stopCoordinates, setStopCoordinates] = useState<
-    google.maps.LatLngLiteral[]
-  >([]);
-  const [filteredPassengersByGroup, setFilteredPassengersByGroup] = useState<
-    Record<string, PassengerAndLuggage[]>
-  >({});
-
-  const [filteredLuggageByGroup, setFilteredLuggageByGroup] = useState<
-    Record<string, PassengerAndLuggage[]>
-  >({});
-
   const [recap, setRecap] = useState<Recap>({
     programName: "",
     capacityRecommanded: "",
@@ -254,62 +220,6 @@ const AddProgramm = () => {
     pickUp_date: "",
     pickUp_time: "",
   });
-
-  const handleMapLoad = (map: any) => {
-    setMap(map);
-  };
-
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.REACT_APP_MAPS_API!,
-    libraries: ["places"],
-  });
-
-  useEffect(() => {
-    if (isLoaded && location.state) {
-      const directionsService = new google.maps.DirectionsService();
-      const waypoints = location?.state?.program?.stops?.map((stop: any) => ({
-        location: { query: stop.address.placeName },
-        stopover: true,
-      }));
-      directionsService.route(
-        {
-          origin: location?.state?.program?.origin_point?.coordinates!,
-          destination:
-            location?.state?.program?.destination_point?.coordinates!,
-          travelMode: google.maps.TravelMode.DRIVING,
-          waypoints,
-        },
-        (result, status) => {
-          if (result !== null && status === google.maps.DirectionsStatus.OK) {
-            setDirections(result);
-            if (result.routes && result.routes.length > 0) {
-              const newStopCoordinates = result.routes[0].legs.map((leg) => ({
-                lat: leg.start_location.lat(),
-                lng: leg.start_location.lng(),
-              }));
-              setStopCoordinates(newStopCoordinates);
-            } else {
-              console.error("No routes found in the directions result");
-            }
-          } else {
-            console.error("Directions request failed due to " + status);
-          }
-        }
-      );
-    }
-  }, [isLoaded, location.state]);
-
-  useEffect(() => {
-    if (location.state && location.state.program) {
-      setRecommandedCapacityState(location.state.program.recommanded_capacity);
-    }
-  }, [location.state]);
-
-  useEffect(() => {
-    if (location.state && location.state.program) {
-      setAffectedCounter(location.state.program.recommanded_capacity);
-    }
-  }, [location.state]);
 
   const onChangeRecommandedCapacityState = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -379,54 +289,6 @@ const AddProgramm = () => {
       setSchoolGroups(tempArray);
     }
   };
-
-  useEffect(() => {
-    const program = location.state?.program;
-
-    if (program) {
-      const programId = program._id;
-
-      const fetchGroups =
-        program.company_id === null
-          ? fetchStudentGroupsByProgramId
-          : fetchEmployeeGroupsByProgramId;
-
-      fetchGroups(programId)
-        .unwrap()
-        .then((response: FetchedGroup[]) => {
-          setFetchedGroups(response);
-          setSelectedGroups(new Array(response.length).fill(null));
-
-          const newFilteredPassengersByGroup: Record<
-            string,
-            PassengerAndLuggage[]
-          > = {};
-
-          response.forEach((group: FetchedGroup) => {
-            const studentCount = parseInt(group.student_number, 10);
-
-            const filteredPassengers = AllPassengersLimit.filter(
-              (passenger: PassengerAndLuggage) => {
-                const maxPassengers = parseInt(passenger.max_passengers, 10);
-                return maxPassengers >= studentCount;
-              }
-            );
-
-            newFilteredPassengersByGroup[group._id] = filteredPassengers;
-          });
-
-          setFilteredPassengersByGroup(newFilteredPassengersByGroup);
-        })
-        .catch((error) => {
-          console.error(
-            `Error fetching ${
-              program.company_id === null ? "student" : "employee"
-            } groups:`,
-            error
-          );
-        });
-    }
-  }, [location.state, AllPassengersLimit]);
 
   const onChangeCompanyGroupName = (
     event: React.ChangeEvent<any>,
@@ -508,18 +370,6 @@ const AddProgramm = () => {
     }
   };
 
-  useEffect(() => {
-    if (location.state && location.state.program.exceptDays) {
-      setSelected1(location.state.program.exceptDays);
-    }
-  }, [location.state]);
-
-  useEffect(() => {
-    if (location.state && location.state.program.extra) {
-      setSelected(location.state.program.extra);
-    }
-  }, [location.state]);
-
   const filteredVehicleType = AllPassengersLimit.filter(
     (vehcileType) =>
       Number(recommandedCapacityState) <= Number(vehcileType.max_passengers)
@@ -545,6 +395,11 @@ const AddProgramm = () => {
     setCompanyGroups([]);
     setRows([]);
   };
+
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: process.env.REACT_APP_MAPS_API!,
+    libraries: ["places"],
+  });
 
   useEffect(() => {
     calculateContractTotalPrice();
@@ -721,7 +576,6 @@ const AddProgramm = () => {
       (element) => element.vehicle_type._id === value
     );
     prevSchoolGroups[index].luggages = luggages;
-    console.log(prevSchoolGroups);
     setSchoolGroups(prevSchoolGroups);
   };
 
@@ -766,12 +620,6 @@ const AddProgramm = () => {
     setSelectedLuggage(value);
     setDisabledNext(true);
   };
-
-  useEffect(() => {
-    if (location.state && location.state.program) {
-      setSelectedJourney(location.state.program.journeyType);
-    }
-  }, [location.state]);
 
   // This function is triggered when the select Journey
   const handleSelectJourney = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -861,27 +709,6 @@ const AddProgramm = () => {
     });
   };
 
-  useEffect(() => {
-    if (location.state) {
-      const freeDate = new Date(location.state.program.freeDays_date);
-      setFree_date([freeDate]);
-    }
-  }, [location.state]);
-
-  useEffect(() => {
-    if (location.state) {
-      const dropoff = new Date(location.state.program.droppOff_date);
-      setDropOff_date(dropoff);
-    }
-  }, [location.state]);
-
-  useEffect(() => {
-    if (location.state) {
-      const pickup = new Date(location.state.program.pickUp_date);
-      setPickUp_date(pickup);
-    }
-  }, [location.state]);
-
   // This function is triggered when the select SchoolID
   const handleSelectSchoolID = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -902,23 +729,11 @@ const AddProgramm = () => {
     setProgrammName(event.target.value);
   };
 
-  useEffect(() => {
-    if (location.state && location.state.program) {
-      setProgrammNotes(location.state.program.notes);
-    }
-  }, [location.state]);
-
   const onChangeProgramNotes = (
     event: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     setProgrammNotes(event.target.value);
   };
-
-  useEffect(() => {
-    if (location.state && location.state.program) {
-      setProgrammPaymentDays(location.state.program.within_payment_days);
-    }
-  }, [location.state]);
 
   const onChangeProgramPaymentDays = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -945,19 +760,8 @@ const AddProgramm = () => {
     ]);
   };
 
-  useEffect(() => {
-    if (location.state && location.state.program) {
-      setSchoolGroups(location.state.program.students_groups || []);
-    }
-  }, [location.state]);
-
-  useEffect(() => {
-    if (location.state && location.state.program) {
-      setCompanyGroups(location.state.program.employees_groups || []);
-    }
-  }, [location.state]);
-
   const handleAddGroupClick = () => {
+    console.log("before location.state check");
     if (location.state === null) {
       if (selectedClientType === "School") {
         let prevG = [...schoolGroups];
@@ -1267,13 +1071,6 @@ const AddProgramm = () => {
   const OneVehicleType = useFetchVehicleTypeByIdQuery(selectedVehicleType);
   const OneLuggage = useFetchLuggageByIdQuery(selectedLuggage);
   const OneJourney = useFetchJourneyByIdQuery(selectedJourney);
-
-  useEffect(() => {
-    if (location.state && location.state.program) {
-      // Set selectedJourney to the journeyType ID from location.state if it exists
-      setSelectedInvoiceFrequency(location.state.program.invoiceFrequency);
-    }
-  }, [location.state]);
 
   const handleSelectInvoiceFrequency = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -1755,6 +1552,7 @@ const AddProgramm = () => {
             String(stopTimes[i].minutes).padStart(2, "0"),
         });
       }
+
       programmData["programDetails"]["stops"] = stops;
     }
     if (!isNextButtonDisabled()) {
@@ -1799,24 +1597,6 @@ const AddProgramm = () => {
       status: "Pending",
       date_status: new Date().toDateString()!,
     };
-    let stops = [];
-
-    for (let i = 0; i < waypts.length; i++) {
-      stops.push({
-        id: "",
-        address: {
-          placeName: waypts[i].location,
-          coordinates: waypts[i].coordinates,
-        },
-
-        time:
-          String(stopTimes[i].hours).padStart(2, "0") +
-          ":" +
-          String(stopTimes[i].minutes).padStart(2, "0"),
-      });
-    }
-    data["programDetails"]["stops"] = stops;
-    data["programDetails"]["groups_creation_mode"] = selectedGroupCreationMode;
     if (location.state === null && programId === null) {
       const response = await createProgram(data).unwrap();
       setProgramId(response?._id!);
@@ -1907,23 +1687,6 @@ const AddProgramm = () => {
         data["groups"]["type"] = selectedClientType;
         data["groups"]["groupCollection"] = validCompanyGroups;
       }
-      // let stops = [];
-
-      // for (let i = 0; i < waypts.length; i++) {
-      //   stops.push({
-      //     id: "",
-      //     address: {
-      //       placeName: waypts[i].location,
-      //       coordinates: waypts[i].coordinates,
-      //     },
-
-      //     time:
-      //       String(stopTimes[i].hours).padStart(2, "0") +
-      //       ":" +
-      //       String(stopTimes[i].minutes).padStart(2, "0"),
-      //   });
-      // }
-      // data["programDetails"]["stops"] = stops;
 
       await updateProgram({
         id: programId!,
@@ -1983,7 +1746,7 @@ const AddProgramm = () => {
           location?.state?.program?.pickUp_Time!;
         data["programDetails"]["dropOff_time"] =
           location?.state?.program?.dropOff_time!;
-        data["programDetails"]["stops"] = location?.state?.program?.stops!;
+
         data["programDetails"]["_id"] = location?.state?.program?._id!;
         data["programDetails"]["destination_point"] =
           location?.state?.program?.destination_point!;
@@ -2036,6 +1799,7 @@ const AddProgramm = () => {
         if (location?.state?.program?.company_id! === null) {
           let validSchoolGroups = [];
           for (let index = 0; index < schoolGroups.length; index++) {
+            console.log("schoolGroups", schoolGroups);
             const group = {
               groupName: schoolGroups[index].groupName,
               student_number: schoolGroups[index].student_number,
@@ -2050,11 +1814,10 @@ const AddProgramm = () => {
 
           data["groups"]["type"] = "School";
           data["groups"]["groupCollection"] = validSchoolGroups;
-          data["programDetails"]["groups_creation_mode"] =
-            selectedGroupCreationMode;
         }
 
         if (location?.state?.program?.school_id! === null) {
+          console.log("location?.state?.program?.school_id! === null");
           let validCompanyGroups = [];
           for (let index = 0; index < companyGroups.length; index++) {
             const group = {
@@ -2122,8 +1885,6 @@ const AddProgramm = () => {
           data["programDetails"]["employees_groups"] =
             location?.state?.program?.employees_groups!;
         }
-        data["programDetails"]["groups_creation_mode"] =
-          location?.state?.program?.groups_creation_mode!;
         data["programDetails"]["within_payment_days"] = programm_paymentDays;
         data["programDetails"]["invoiceFrequency"] = selectedInvoiceFrequency;
         data["programDetails"]["journeyType"] = selectedJourney;
@@ -2437,20 +2198,6 @@ const AddProgramm = () => {
     return ref;
   };
 
-  const handleLuggageChange = (e: any, rowIndex: number) => {
-    const selectedLuggage = e.target.value;
-
-    setSelectedGroups((prevSelectedGroups) => {
-      const updatedGroups = [...prevSelectedGroups];
-      updatedGroups[rowIndex] = {
-        ...updatedGroups[rowIndex],
-        luggage_details: selectedLuggage,
-      };
-      console.log("Updated selectedGroups after change:", updatedGroups);
-      return updatedGroups;
-    });
-  };
-
   return (
     <React.Fragment>
       <div className="page-content">
@@ -2477,9 +2224,9 @@ const AddProgramm = () => {
                                 id="flexRadioDefault1"
                                 onChange={radioHandler}
                                 value="School"
-                                // checked={
-                                //   location?.state?.program?.school_id! !== null
-                                // }
+                                checked={
+                                  location?.state?.program?.school_id! !== null
+                                }
                               />
                               <Form.Label
                                 className="form-check-label fs-17"
@@ -2498,9 +2245,9 @@ const AddProgramm = () => {
                                 id="flexRadioDefault1"
                                 onChange={radioHandler}
                                 value="Company"
-                                // checked={
-                                //   location?.state?.program?.company_id! !== null
-                                // }
+                                checked={
+                                  location?.state?.program?.company_id! !== null
+                                }
                               />
                               <Form.Label
                                 className="form-check-label fs-17"
@@ -2538,7 +2285,7 @@ const AddProgramm = () => {
                             </Col>
                           </Row>
                         )}
-                        {/* {location?.state?.program?.school_id! !== null && (
+                        {location?.state?.program?.school_id! !== null && (
                           <Row>
                             <Col lg={10}>
                               <Form.Label htmlFor="school_id">
@@ -2588,7 +2335,7 @@ const AddProgramm = () => {
                               </div>
                             </Col>
                           </Row>
-                        )} */}
+                        )}
                         {selectedClientType === "Company" ? (
                           <Row>
                             <Col lg={10}>
@@ -2630,11 +2377,7 @@ const AddProgramm = () => {
                               className="mb-2"
                               placeholder="Add Program Name"
                               name="programDetails.programName"
-                              value={
-                                location?.state! !== null
-                                  ? location?.state?.program?.programName!
-                                  : programm_name
-                              }
+                              value={programm_name}
                               onChange={onChangeProgramName}
                             />
                           </Col>
@@ -2673,12 +2416,6 @@ const AddProgramm = () => {
                                   }
                                 }}
                                 onChange={onChangeProgramms}
-                                defaultValue={
-                                  location?.state! === null
-                                    ? ""
-                                    : location?.state?.program?.origin_point
-                                        ?.placeName!
-                                }
                                 required
                               />
                             </Autocomplete>
@@ -2694,9 +2431,6 @@ const AddProgramm = () => {
                                 time_24hr: true,
                                 onChange: handlePickupTime,
                               }}
-                              value={
-                                location?.state?.program?.pickUp_Time || ""
-                              }
                             />
                           </Col>
                         </Row>
@@ -2727,12 +2461,6 @@ const AddProgramm = () => {
                                   }
                                 }}
                                 onChange={onChangeProgramms}
-                                defaultValue={
-                                  location?.state! === null
-                                    ? ""
-                                    : location?.state?.program
-                                        ?.destination_point?.placeName!
-                                }
                               />
                             </Autocomplete>
                           </Col>
@@ -2741,29 +2469,25 @@ const AddProgramm = () => {
                               placeholder="HH:MM"
                               className="form-control text-center"
                               id="pickUp_time"
-                              value={
-                                location.state !== null
-                                  ? location?.state?.program?.dropOff_time!
-                                  : createDateFromStrings(
-                                      String(new Date().getFullYear()).padStart(
-                                        2,
-                                        "0"
-                                      ) +
-                                        "-" +
-                                        String(
-                                          new Date().getMonth() + 1
-                                        ).padStart(2, "0") +
-                                        "-" +
-                                        String(
-                                          new Date().getDate().toLocaleString()
-                                        ).padStart(2, "0"),
-                                      stopTimes[stopTimes.length - 1]?.hours +
-                                        ":" +
-                                        stopTimes[stopTimes.length - 1]
-                                          ?.minutes +
-                                        ":00"
-                                    ).getTime()
-                              }
+                              value={createDateFromStrings(
+                                String(new Date().getFullYear()).padStart(
+                                  2,
+                                  "0"
+                                ) +
+                                  "-" +
+                                  String(new Date().getMonth() + 1).padStart(
+                                    2,
+                                    "0"
+                                  ) +
+                                  "-" +
+                                  String(
+                                    new Date().getDate().toLocaleString()
+                                  ).padStart(2, "0"),
+                                stopTimes[stopTimes.length - 1]?.hours +
+                                  ":" +
+                                  stopTimes[stopTimes.length - 1]?.minutes +
+                                  ":00"
+                              ).getTime()}
                               disabled={true}
                               options={{
                                 enableTime: true,
@@ -2895,62 +2619,33 @@ const AddProgramm = () => {
                             width: "100%",
                           }}
                         >
-                          {location.state !== null ? (
-                            <GoogleMap
-                              mapContainerStyle={{
-                                height: "100%",
-                                width: "80%",
-                              }}
-                              zoom={8}
-                              // center={{ lat: -34.397, lng: 150.644 }}
-                              onLoad={handleMapLoad}
-                            >
-                              {directions && (
-                                <DirectionsRenderer
-                                  directions={directions}
-                                  options={{
-                                    polylineOptions: {
-                                      strokeColor: "red",
-                                      strokeOpacity: 0.8,
-                                      strokeWeight: 4,
-                                    },
-                                  }}
-                                />
-                              )}
-                            </GoogleMap>
-                          ) : (
-                            <GoogleMap
-                              center={center}
-                              zoom={15}
-                              mapContainerStyle={{
-                                width: "100%",
-                                height: "80%",
-                              }}
-                              options={{
-                                zoomControl: false,
-                                streetViewControl: false,
-                                mapTypeControl: false,
-                                fullscreenControl: true,
+                          <GoogleMap
+                            center={center}
+                            zoom={15}
+                            mapContainerStyle={{
+                              width: "100%",
+                              height: "80%",
+                            }}
+                            options={{
+                              zoomControl: false,
+                              streetViewControl: false,
+                              mapTypeControl: false,
+                              fullscreenControl: true,
 
-                                fullscreenControlOptions: {
-                                  position:
-                                    google.maps.ControlPosition.TOP_RIGHT,
-                                },
-                              }}
-                              onLoad={(map) => setMap(map)}
-                            >
-                              {selectedLocation && <Marker position={nom} />}
-                              {selectedDestination && (
-                                <Marker position={fatma} />
-                              )}
-                              {directionsResponse && (
-                                <DirectionsRenderer
-                                  directions={directionsResponse}
-                                />
-                              )}
-                            </GoogleMap>
-                          )}
-
+                              fullscreenControlOptions: {
+                                position: google.maps.ControlPosition.TOP_RIGHT,
+                              },
+                            }}
+                            onLoad={(map) => setMap(map)}
+                          >
+                            {selectedLocation && <Marker position={nom} />}
+                            {selectedDestination && <Marker position={fatma} />}
+                            {directionsResponse && (
+                              <DirectionsRenderer
+                                directions={directionsResponse}
+                              />
+                            )}
+                          </GoogleMap>
                           <Button
                             aria-label="center back"
                             onClick={clearRoute}
@@ -3005,7 +2700,6 @@ const AddProgramm = () => {
                               ))}
                             </Dropdown.Menu>
                           </Dropdown>
-
                           <Button
                             type="button"
                             className="btn btn-success btn-label right ms-auto nexttab"
@@ -3190,7 +2884,6 @@ const AddProgramm = () => {
                             id="flexRadioDefault1"
                             onChange={radioHandlerGroupCreationMode}
                             value="AutoGroup"
-                            checked={selectedGroupCreationMode === "AutoGroup"}
                           />
                           <Form.Label
                             className="form-check-label fs-17"
@@ -3209,7 +2902,6 @@ const AddProgramm = () => {
                             id="flexRadioDefault1"
                             onChange={radioHandlerGroupCreationMode}
                             value="Custom"
-                            checked={selectedGroupCreationMode === "Custom"}
                           />
                           <Form.Label
                             className="form-check-label fs-17"
@@ -3362,281 +3054,9 @@ const AddProgramm = () => {
                             overflowX: "auto",
                           }}
                         >
-                          {schoolGroups.length > 0 && location.state === null
-                            ? selectedClientType === "School" ||
-                              location?.state?.program?.company_id! === null
-                              ? schoolGroups.map((group, index) => (
-                                  <Row key={index}>
-                                    <Col lg={2}>
-                                      <Form.Label htmlFor="customerName-field">
-                                        Group Name
-                                      </Form.Label>
-                                      <Form.Control
-                                        type="text"
-                                        id="customerName-field"
-                                        className="mb-2"
-                                        name="customerName-field"
-                                        value={group.groupName}
-                                        onChange={(e) =>
-                                          onChangeSchoolGroupName(e, index)
-                                        }
-                                      />
-                                    </Col>
-                                    <Col lg={2}>
-                                      <Form.Label htmlFor="pax">
-                                        Passengers
-                                      </Form.Label>
-                                      <Form.Control
-                                        type="text"
-                                        id="pax"
-                                        className="mb-2"
-                                        name="pax"
-                                        placeholder={`1 - ${recommandedCapacityState}`}
-                                        value={group.student_number}
-                                        onChange={(e) =>
-                                          onChangeSchoolGroupPax(e, index)
-                                        }
-                                      />
-                                    </Col>
-                                    <Col lg={3}>
-                                      <div>
-                                        <Form.Label htmlFor="customerName-field">
-                                          Vehicle
-                                        </Form.Label>
-                                        <select
-                                          className="form-select text-muted"
-                                          name="vehicleType"
-                                          id="vehicleType"
-                                          onChange={(e) =>
-                                            handleCustomSelectSchoolVehicleType(
-                                              e,
-                                              index
-                                            )
-                                          }
-                                        >
-                                          <option value="">
-                                            Select Vehicle Type
-                                          </option>
-                                          {group?.passenger_limit?.map(
-                                            (vehicleType) => (
-                                              <option
-                                                value={
-                                                  vehicleType.vehicle_type._id
-                                                }
-                                                key={
-                                                  vehicleType.vehicle_type._id
-                                                }
-                                              >
-                                                {vehicleType.vehicle_type.type}
-                                              </option>
-                                            )
-                                          )}
-                                        </select>
-                                      </div>
-                                    </Col>
-                                    <Col lg={3}>
-                                      <div className="mb-3">
-                                        <Form.Label htmlFor="luggageDetails">
-                                          Luggage Details
-                                        </Form.Label>
-                                        <select
-                                          className="form-select text-muted"
-                                          name="luggageDetails"
-                                          id="luggageDetails"
-                                          onChange={(e) =>
-                                            handleCustomSelectSchoolLuggageDetails(
-                                              e,
-                                              index
-                                            )
-                                          }
-                                        >
-                                          <option value="">
-                                            Select Luggage
-                                          </option>
-                                          {group?.luggages?.map((Luggage) => (
-                                            <option
-                                              value={
-                                                Luggage.max_luggage.description
-                                              }
-                                              key={Luggage.max_luggage._id}
-                                            >
-                                              {Luggage.max_luggage.description}
-                                            </option>
-                                          ))}
-                                        </select>
-                                      </div>
-                                    </Col>
-                                    <Col lg={1}>
-                                      <div>
-                                        <Form.Label htmlFor="price">
-                                          Price
-                                        </Form.Label>
-                                        <Form.Control
-                                          type="text"
-                                          id="price"
-                                          className="mb-2"
-                                          name="price"
-                                          value={group.price || ""}
-                                          onChange={(e) =>
-                                            onChangeGroupPrice(e, index)
-                                          }
-                                        />
-                                      </div>
-                                    </Col>
-                                    <Col lg={1}>
-                                      <button
-                                        type="button"
-                                        className="btn btn-danger btn-icon"
-                                        onClick={() =>
-                                          handleRemoveStudentGroupClick(index)
-                                        }
-                                        style={{
-                                          marginTop: "29px",
-                                          marginBottom: "15px",
-                                        }}
-                                      >
-                                        <i className="ri-delete-bin-5-line"></i>
-                                      </button>
-                                    </Col>
-                                  </Row>
-                                ))
-                              : companyGroups.map((group, index) => (
-                                  <Row key={index}>
-                                    <Col lg={2}>
-                                      <Form.Label htmlFor="customerName-field">
-                                        Group Name
-                                      </Form.Label>
-                                      <Form.Control
-                                        type="text"
-                                        id="customerName-field"
-                                        className="mb-2"
-                                        name="customerName-field"
-                                        value={group.groupName}
-                                        onChange={(e) =>
-                                          onChangeCompanyGroupName(e, index)
-                                        }
-                                      />
-                                    </Col>
-                                    <Col lg={2}>
-                                      <Form.Label htmlFor="pax">
-                                        Passengers
-                                      </Form.Label>
-                                      <Form.Control
-                                        type="text"
-                                        id="pax"
-                                        className="mb-2"
-                                        name="pax"
-                                        placeholder={`1 - ${recommandedCapacityState}`}
-                                        value={group.passenger_number}
-                                        onChange={(e) =>
-                                          onChangeCompanyGroupPax(e, index)
-                                        }
-                                      />
-                                    </Col>
-                                    <Col lg={3}>
-                                      <div>
-                                        <Form.Label htmlFor="customerName-field">
-                                          Vehicle
-                                        </Form.Label>
-                                        <select
-                                          className="form-select text-muted"
-                                          name="vehicleType"
-                                          id="vehicleType"
-                                          onChange={(e) =>
-                                            handleCustomSelectCompanyVehicleType(
-                                              e,
-                                              index
-                                            )
-                                          }
-                                        >
-                                          <option value="">
-                                            Select Vehicle Type
-                                          </option>
-                                          {group.passenger_limit.map(
-                                            (vehicleType) => (
-                                              <option
-                                                value={
-                                                  vehicleType.vehicle_type._id
-                                                }
-                                                key={
-                                                  vehicleType.vehicle_type._id
-                                                }
-                                              >
-                                                {vehicleType.vehicle_type.type}
-                                              </option>
-                                            )
-                                          )}
-                                        </select>
-                                      </div>
-                                    </Col>
-                                    <Col lg={3}>
-                                      <div className="mb-3">
-                                        <Form.Label htmlFor="luggageDetails">
-                                          Luggage Details
-                                        </Form.Label>
-                                        <select
-                                          className="form-select text-muted"
-                                          name="luggageDetails"
-                                          id="luggageDetails"
-                                          onChange={(e) =>
-                                            handleCustomSelectCompanyLuggageDetails(
-                                              e,
-                                              index
-                                            )
-                                          }
-                                        >
-                                          <option value="">
-                                            Select Luggage
-                                          </option>
-                                          {group?.luggages!.map((Luggage) => (
-                                            <option
-                                              value={
-                                                Luggage.max_luggage.description
-                                              }
-                                              key={Luggage.max_luggage._id}
-                                            >
-                                              {Luggage.max_luggage.description}
-                                            </option>
-                                          ))}
-                                        </select>
-                                      </div>
-                                    </Col>
-                                    <Col lg={1}>
-                                      <div>
-                                        <Form.Label htmlFor="price">
-                                          Price
-                                        </Form.Label>
-                                        <Form.Control
-                                          type="text"
-                                          id="price"
-                                          className="mb-2"
-                                          name="price"
-                                          value={group.price || ""}
-                                          onChange={(e) =>
-                                            onChangeGroupPrice(e, index)
-                                          }
-                                        />
-                                      </div>
-                                    </Col>
-                                    <Col lg={1}>
-                                      <button
-                                        type="button"
-                                        className="btn btn-danger btn-icon"
-                                        onClick={() =>
-                                          handleRemoveCompanyGroupClick(index)
-                                        }
-                                        style={{
-                                          marginTop: "29px",
-                                          marginBottom: "15px",
-                                        }}
-                                      >
-                                        <i className="ri-delete-bin-5-line"></i>
-                                      </button>
-                                    </Col>
-                                  </Row>
-                                ))
-                            : location.state !== null &&
-                              fetchedGroups?.map((group, index) => (
+                          {selectedClientType === "School" ||
+                          location?.state?.program?.company_id! === null
+                            ? schoolGroups.map((group, index) => (
                                 <Row key={index}>
                                   <Col lg={2}>
                                     <Form.Label htmlFor="customerName-field">
@@ -3674,131 +3094,63 @@ const AddProgramm = () => {
                                       <Form.Label htmlFor="customerName-field">
                                         Vehicle
                                       </Form.Label>
-                                      {showVehicleType ? (
-                                        <select
-                                          className="form-select text-muted"
-                                          name="vehicleType"
-                                          id="vehicleType"
-                                          onChange={(e) =>
-                                            handleCustomSelectCompanyVehicleType(
-                                              e,
-                                              index
-                                            )
-                                          }
-                                        >
-                                          <option value="">
-                                            Select Vehicle Type
-                                          </option>
-                                          {filteredPassengersByGroup[
-                                            group._id
-                                          ]?.map((passenger) => (
+                                      <select
+                                        className="form-select text-muted"
+                                        name="vehicleType"
+                                        id="vehicleType"
+                                        onChange={(e) =>
+                                          handleCustomSelectSchoolVehicleType(
+                                            e,
+                                            index
+                                          )
+                                        }
+                                      >
+                                        <option value="">
+                                          Select Vehicle Type
+                                        </option>
+                                        {group.passenger_limit.map(
+                                          (vehicleType) => (
                                             <option
-                                              key={passenger.vehicle_type._id}
-                                              value={passenger.vehicle_type._id}
-                                            >
-                                              {passenger.vehicle_type.type}
-                                            </option>
-                                          ))}
-                                        </select>
-                                      ) : (
-                                        <h6>{group.vehicle_type.type}</h6>
-                                      )}
-
-                                      {!showVehicleType && (
-                                        <div
-                                          className="d-flex justify-content-start mt-n2"
-                                          style={{ marginLeft: "240px" }}
-                                        >
-                                          <label
-                                            htmlFor="vehicle_type"
-                                            className="mb-0"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-placement="right"
-                                            title="Select Vehicle Type"
-                                          >
-                                            <span
-                                              className="d-inline-block"
-                                              onClick={() =>
-                                                setShowVehicleType(true)
+                                              value={
+                                                vehicleType.vehicle_type._id
                                               }
+                                              key={vehicleType.vehicle_type._id}
                                             >
-                                              <span className="text-success cursor-pointer">
-                                                <i className="bi bi-pen fs-14"></i>
-                                              </span>
-                                            </span>
-                                          </label>
-                                        </div>
-                                      )}
+                                              {vehicleType.vehicle_type.type}
+                                            </option>
+                                          )
+                                        )}
+                                      </select>
                                     </div>
                                   </Col>
                                   <Col lg={3}>
                                     <div className="mb-3">
-                                      <Form.Label
-                                        htmlFor={`luggageDetails-${index}`}
-                                      >
+                                      <Form.Label htmlFor="luggageDetails">
                                         Luggage Details
                                       </Form.Label>
-                                      {showLuggageDetails ? (
-                                        <select
-                                          className="form-select text-muted"
-                                          name={`luggageDetails-${index}`}
-                                          id={`luggageDetails-${index}`}
-                                          onChange={(e) =>
-                                            handleCustomSelectSchoolVehicleType(
-                                              e,
-                                              index
-                                            )
-                                          }
-                                        >
-                                          <option value="">
-                                            Select Luggage Details
-                                          </option>
-                                          {filteredPassengersByGroup[
-                                            group._id
-                                          ]?.map((passenger) => (
-                                            <option
-                                              key={passenger.max_luggage._id}
-                                              value={
-                                                passenger.max_luggage
-                                                  .description
-                                              }
-                                            >
-                                              {
-                                                passenger.max_luggage
-                                                  .description
-                                              }
-                                            </option>
-                                          ))}
-                                        </select>
-                                      ) : (
-                                        <h6>{group.luggage_details}</h6>
-                                      )}
-
-                                      {!showLuggageDetails && (
-                                        <div
-                                          className="d-flex justify-content-start mt-n2"
-                                          style={{ marginLeft: "240px" }}
-                                        >
-                                          <label
-                                            htmlFor={`luggageDetails-${index}`}
-                                            className="mb-0"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-placement="right"
-                                            title="Select Luggage Details"
+                                      <select
+                                        className="form-select text-muted"
+                                        name="luggageDetails"
+                                        id="luggageDetails"
+                                        onChange={(e) =>
+                                          handleCustomSelectSchoolLuggageDetails(
+                                            e,
+                                            index
+                                          )
+                                        }
+                                      >
+                                        <option value="">Select Luggage</option>
+                                        {group?.luggages!.map((Luggage) => (
+                                          <option
+                                            value={
+                                              Luggage.max_luggage.description
+                                            }
+                                            key={Luggage.max_luggage._id}
                                           >
-                                            <span
-                                              className="d-inline-block"
-                                              onClick={() =>
-                                                setShowLuggageDetails(true)
-                                              }
-                                            >
-                                              <span className="text-success cursor-pointer">
-                                                <i className="bi bi-pen fs-14"></i>
-                                              </span>
-                                            </span>
-                                          </label>
-                                        </div>
-                                      )}
+                                            {Luggage.max_luggage.description}
+                                          </option>
+                                        ))}
+                                      </select>
                                     </div>
                                   </Col>
                                   <Col lg={1}>
@@ -3811,7 +3163,7 @@ const AddProgramm = () => {
                                         id="price"
                                         className="mb-2"
                                         name="price"
-                                        value={group.unit_price || ""}
+                                        value={group.price || ""}
                                         onChange={(e) =>
                                           onChangeGroupPrice(e, index)
                                         }
@@ -3824,6 +3176,137 @@ const AddProgramm = () => {
                                       className="btn btn-danger btn-icon"
                                       onClick={() =>
                                         handleRemoveStudentGroupClick(index)
+                                      }
+                                      style={{
+                                        marginTop: "29px",
+                                        marginBottom: "15px",
+                                      }}
+                                    >
+                                      <i className="ri-delete-bin-5-line"></i>
+                                    </button>
+                                  </Col>
+                                </Row>
+                              ))
+                            : companyGroups.map((group, index) => (
+                                <Row key={index}>
+                                  <Col lg={2}>
+                                    <Form.Label htmlFor="customerName-field">
+                                      Group Name
+                                    </Form.Label>
+                                    <Form.Control
+                                      type="text"
+                                      id="customerName-field"
+                                      className="mb-2"
+                                      name="customerName-field"
+                                      value={group.groupName}
+                                      onChange={(e) =>
+                                        onChangeCompanyGroupName(e, index)
+                                      }
+                                    />
+                                  </Col>
+                                  <Col lg={2}>
+                                    <Form.Label htmlFor="pax">
+                                      Passengers
+                                    </Form.Label>
+                                    <Form.Control
+                                      type="text"
+                                      id="pax"
+                                      className="mb-2"
+                                      name="pax"
+                                      placeholder={`1 - ${recommandedCapacityState}`}
+                                      value={group.passenger_number}
+                                      onChange={(e) =>
+                                        onChangeCompanyGroupPax(e, index)
+                                      }
+                                    />
+                                  </Col>
+                                  <Col lg={3}>
+                                    <div>
+                                      <Form.Label htmlFor="customerName-field">
+                                        Vehicle
+                                      </Form.Label>
+                                      <select
+                                        className="form-select text-muted"
+                                        name="vehicleType"
+                                        id="vehicleType"
+                                        onChange={(e) =>
+                                          handleCustomSelectCompanyVehicleType(
+                                            e,
+                                            index
+                                          )
+                                        }
+                                      >
+                                        <option value="">
+                                          Select Vehicle Type
+                                        </option>
+                                        {group.passenger_limit.map(
+                                          (vehicleType) => (
+                                            <option
+                                              value={
+                                                vehicleType.vehicle_type._id
+                                              }
+                                              key={vehicleType.vehicle_type._id}
+                                            >
+                                              {vehicleType.vehicle_type.type}
+                                            </option>
+                                          )
+                                        )}
+                                      </select>
+                                    </div>
+                                  </Col>
+                                  <Col lg={3}>
+                                    <div className="mb-3">
+                                      <Form.Label htmlFor="luggageDetails">
+                                        Luggage Details
+                                      </Form.Label>
+                                      <select
+                                        className="form-select text-muted"
+                                        name="luggageDetails"
+                                        id="luggageDetails"
+                                        onChange={(e) =>
+                                          handleCustomSelectCompanyLuggageDetails(
+                                            e,
+                                            index
+                                          )
+                                        }
+                                      >
+                                        <option value="">Select Luggage</option>
+                                        {group?.luggages!.map((Luggage) => (
+                                          <option
+                                            value={
+                                              Luggage.max_luggage.description
+                                            }
+                                            key={Luggage.max_luggage._id}
+                                          >
+                                            {Luggage.max_luggage.description}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  </Col>
+                                  <Col lg={1}>
+                                    <div>
+                                      <Form.Label htmlFor="price">
+                                        Price
+                                      </Form.Label>
+                                      <Form.Control
+                                        type="text"
+                                        id="price"
+                                        className="mb-2"
+                                        name="price"
+                                        value={group.price || ""}
+                                        onChange={(e) =>
+                                          onChangeGroupPrice(e, index)
+                                        }
+                                      />
+                                    </div>
+                                  </Col>
+                                  <Col lg={1}>
+                                    <button
+                                      type="button"
+                                      className="btn btn-danger btn-icon"
+                                      onClick={() =>
+                                        handleRemoveCompanyGroupClick(index)
                                       }
                                       style={{
                                         marginTop: "29px",
@@ -3857,15 +3340,9 @@ const AddProgramm = () => {
                               >
                                 Total Price:
                               </Form.Label>
-                              {location.state !== null ? (
-                                <span id="total-price" className="ms-2">
-                                  £ {location.state.program.total_price}{" "}
-                                </span>
-                              ) : (
-                                <span id="total-price" className="ms-2">
-                                  £ {calculateTotalPrice()}{" "}
-                                </span>
-                              )}
+                              <span id="total-price" className="ms-2">
+                                £ {calculateTotalPrice()}{" "}
+                              </span>
                             </Col>
                           </Row>
                         </Row>
@@ -3907,7 +3384,6 @@ const AddProgramm = () => {
                             className="form-select text-muted"
                             name="journeyType"
                             id="journeyType"
-                            value={selectedJourney}
                             onChange={handleSelectJourney}
                           >
                             <option value="">Select Journey Type</option>
@@ -4029,18 +3505,9 @@ const AddProgramm = () => {
                                 Groups Number
                               </Form.Label>
                               <br />
-                              {location.state !== null ? (
-                                <span className="badge bg-dark-subtle text-dark fs-14 mt-2">
-                                  {
-                                    location?.state?.program?.students_groups
-                                      ?.length
-                                  }
-                                </span>
-                              ) : (
-                                <span className="badge bg-dark-subtle text-dark fs-14 mt-2">
-                                  {schoolGroups.length}
-                                </span>
-                              )}
+                              <span className="badge bg-dark-subtle text-dark fs-14 mt-2">
+                                {schoolGroups.length}
+                              </span>
                             </div>
                           </Col>
                         ) : (
@@ -4050,18 +3517,9 @@ const AddProgramm = () => {
                                 Groups Number
                               </Form.Label>
                               <br />
-                              {location.state !== null ? (
-                                <span className="badge bg-dark-subtle text-dark fs-14 mt-2">
-                                  {
-                                    location?.state?.program?.employees_groups
-                                      ?.length
-                                  }
-                                </span>
-                              ) : (
-                                <span className="badge bg-dark-subtle text-dark fs-14 mt-2">
-                                  {companyGroups.length}
-                                </span>
-                              )}
+                              <span className="badge bg-dark-subtle text-dark fs-14 mt-2">
+                                {companyGroups.length}
+                              </span>
                             </div>
                           </Col>
                         )}
@@ -4071,15 +3529,9 @@ const AddProgramm = () => {
                               Total Price
                             </Form.Label>
                             <br />
-                            {location.state !== null ? (
-                              <span className="badge bg-dark-subtle text-dark fs-14 mt-2">
-                                £ {location.state.program.total_price}
-                              </span>
-                            ) : (
-                              <span className="badge bg-dark-subtle text-dark fs-14 mt-2">
-                                £ {contractTotalPrice}
-                              </span>
-                            )}
+                            <span className="badge bg-dark-subtle text-dark fs-14 mt-2">
+                              £ {contractTotalPrice}
+                            </span>
                           </div>
                         </Col>
                       </Row>
@@ -4095,7 +3547,6 @@ const AddProgramm = () => {
                               className="form-select text-muted"
                               name="invoiceFrequency"
                               id="invoiceFrequency"
-                              value={selectedInvoiceFrequency}
                               onChange={handleSelectInvoiceFrequency}
                             >
                               <option value="">Select</option>
@@ -4188,4 +3639,4 @@ const AddProgramm = () => {
     </React.Fragment>
   );
 };
-export default AddProgramm;
+export default ContinueCreateProgram;

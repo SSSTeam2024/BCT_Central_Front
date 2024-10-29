@@ -581,6 +581,7 @@ const AddContractProgramm = (props: any) => {
           date_status: "",
         },
       ],
+      groups_creation_mode: "",
     },
     groups: {
       type: "",

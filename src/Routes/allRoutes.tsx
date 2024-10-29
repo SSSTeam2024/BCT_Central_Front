@@ -93,6 +93,7 @@ import EditDriver from "pages/Administration/Driver/EditDriver";
 import EditDefect from "pages/Administration/Vehicles/EditDefect";
 import QuoteCalendar from "pages/QuoteCalendar";
 import Calendar from "pages/QuoteCalendar";
+import ContinueCreateProgram from "pages/Programs/ContinueCreateProgram";
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: <Dashboard /> },
@@ -114,6 +115,10 @@ const authProtectedRoutes = [
   { path: "/program/:name", component: <ProgramClone /> },
   { path: "/program-details/:name", component: <ProgramDetails /> },
   { path: "/edit-program/:name", component: <EditProgram /> },
+  {
+    path: "/continue-suggested-route/:name",
+    component: <ContinueCreateProgram />,
+  },
 
   { path: "/edit-vehicle/:name", component: <EditVehicle /> },
 

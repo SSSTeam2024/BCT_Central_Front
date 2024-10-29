@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export interface Programm {
+  _id?: string;
   programDetails: {
     _id?: string;
     programName: string;
@@ -56,6 +57,7 @@ export interface Programm {
       date: string;
       sender: string;
     }[];
+    groups_creation_mode: string
   };
   groups: {
     type: string;
@@ -121,6 +123,20 @@ export interface ProgrammGroups {
     date: string;
     sender: string;
   }[];
+  tab_number?: string;
+}
+
+export interface FetchedGroup {
+  groupName: string;
+  id_school: string;
+  luggage_details: string;
+  program: string;
+  student_number: string;
+  students: Array<any>;
+  unit_price: string;
+  vehicle_type: any;
+  _id: string;
+  luggages?: Array<{ max_luggage: { description: string; _id: string } }>;
 }
 
 export interface SendResponse {
@@ -172,7 +188,25 @@ export const programmSlice = createApi({
         query() {
           return `/getAllProgramms`;
         },
-        providesTags: ["ProgrammGroups"],
+        providesTags: ["Programm"],
+      }),
+      fetchStudentGroupsByProgramId: builder.mutation<FetchedGroup[], number | void>({
+        query(id) {
+          return {
+            url: `/get-program-groups-students/${id}`,
+            method: "GET",
+          };
+        },
+        invalidatesTags: ["Programm"],
+      }),
+      fetchEmployeeGroupsByProgramId: builder.mutation<FetchedGroup[], number | void>({
+        query(id) {
+          return {
+            url: `/get-program-groups-employees/${id}`,
+            method: "GET",
+          };
+        },
+        invalidatesTags: ["Programm"],
       }),
       fetchProgrammById: builder.query<Programm, string | void>({
         query: (_id) => ({
@@ -181,7 +215,7 @@ export const programmSlice = createApi({
         }),
         providesTags: ["Programm"],
       }),
-      addProgramm: builder.mutation<void, Programm>({
+      addProgramm: builder.mutation<Programm, Programm>({
         query(payload) {
           return {
             url: "/newProgramm",
@@ -190,6 +224,13 @@ export const programmSlice = createApi({
           };
         },
         invalidatesTags: ["Programm"],
+      }),
+      updateProgram: builder.mutation({
+        query: ({ id, updatedProgram }) => ({
+          url: `/updateProgram/${id}`,
+          method: 'PUT',
+          body: updatedProgram,
+        }),
       }),
       sendResponse: builder.mutation<void, SendResponse>({
         query({
@@ -274,4 +315,7 @@ export const {
   useConvertToQuoteMutation,
   useDeleteProgramMutation,
   useUpdateStatusMutation,
+  useUpdateProgramMutation,
+  useFetchEmployeeGroupsByProgramIdMutation,
+  useFetchStudentGroupsByProgramIdMutation
 } = programmSlice;
