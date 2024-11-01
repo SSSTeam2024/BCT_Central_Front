@@ -13,7 +13,9 @@ import {
   useSendNewEmailMutation,
 } from "features/Emails/emailSlice";
 import { useAddNewEmailSentMutation } from "features/emailSent/emailSentSlice";
-import { useGetQuoteByIdQuery } from "features/Quotes/quoteSlice";
+import { RootState } from "../../app/store";
+import { selectCurrentUser } from "../../features/Account/authSlice";
+import { useSelector } from "react-redux";
 import axios from "axios";
 
 interface ChildProps {
@@ -27,6 +29,8 @@ const ModalEmail: React.FC<ChildProps> = ({ setmodal_Email, modal_Email }) => {
   const { data: AllEmailQueue = [] } = useGetAllEmailQueuesQuery();
 
   const [deleteEmailQueue] = useDeleteEmailQueueMutation();
+
+  const user = useSelector((state: RootState) => selectCurrentUser(state));
 
   const swalWithBootstrapButtons = Swal.mixin({
     customClass: {
@@ -131,7 +135,6 @@ const ModalEmail: React.FC<ChildProps> = ({ setmodal_Email, modal_Email }) => {
               name: queue.name,
               quote_Id: queue.quote_Id,
             };
-            console.log(emailData);
             await sendNewEmailMutation(emailData);
 
             await saveEmailSentMutation({
@@ -140,6 +143,8 @@ const ModalEmail: React.FC<ChildProps> = ({ setmodal_Email, modal_Email }) => {
               from: queue.sender,
               to: queue.newEmail!,
               quoteID: id,
+              emailBody: queue.body,
+              by: user?.name,
             });
             await deleteEmailQueue(queue?._id!);
             notifySuccess();
@@ -166,6 +171,8 @@ const ModalEmail: React.FC<ChildProps> = ({ setmodal_Email, modal_Email }) => {
           from: queue.sender,
           to: queue.newEmail!,
           quoteID: id,
+          emailBody: queue.body,
+          by: user?.name,
         });
         await deleteEmailQueue(queue?._id!);
         notifySuccess();

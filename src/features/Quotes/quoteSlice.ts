@@ -4,8 +4,8 @@ export interface Quote {
   _id?: string;
   passengers_number: number;
   journey_type: string;
-  estimated_start_time: string;
-  estimated_return_start_time: string;
+  estimated_start_time?: string;
+  estimated_return_start_time?: string;
   destination_point: {
     placeName: string;
     coordinates: {
@@ -41,7 +41,7 @@ export interface Quote {
   status: string;
   progress: string;
   balance: string;
-  deposit: string;
+  deposit?: string;
   id_driver: string;
   id_vehicle: string;
   total_price: string;
@@ -237,7 +237,7 @@ export const quoteSlice = createApi({
         }),
         providesTags: ["Quote"],
       }),
-      getQuotesByReference: builder.query<Quote[], number | void>({
+      getQuotesByReference: builder.query<any[], number | void>({
         query: (_id) => ({
           url: `/allQuotesByReference/${_id}`,
           method: "GET",
@@ -455,6 +455,14 @@ export const quoteSlice = createApi({
         },
         invalidatesTags: ['Quote'],
       }),
+      updateQuote: builder.mutation<void, Quote>({
+        query: ({ _id, ...rest }) => ({
+          url: `/updateQuote/${_id}`,
+          method: "PATCH",
+          body: rest,
+        }),
+        invalidatesTags: ["Quote"],
+      }),
     };
   },
 });
@@ -482,5 +490,6 @@ export const {
   useGetAllQuotesByCompanyEmailQuery,
   useUpdateProgressMutation,
   useCreateNewQuoteMutation,
-  useAddNotesMutation
+  useAddNotesMutation,
+  useUpdateQuoteMutation
 } = quoteSlice;

@@ -43,6 +43,8 @@ const ProgramList = () => {
   const [modal_Pickup, setmodal_Pickup] = useState<boolean>(false);
   const [modal_Destination, setmodal_Destination] = useState<boolean>(false);
   const [modal_Action, setmodal_Action] = useState<boolean>(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedToDate, setSelectedToDate] = useState<Date | null>(null);
   const { data = [] } = useFetchProgrammsQuery();
   function tog_Pickup() {
     setmodal_Pickup(!modal_Pickup);
@@ -135,6 +137,24 @@ const ProgramList = () => {
         "error"
       );
     }
+  };
+
+  const handleDateChange = (date: Date[]) => {
+    setSelectedDate(date[0]);
+  };
+
+  const handleToDateChange = (date: Date[]) => {
+    setSelectedToDate(date[0]);
+  };
+
+  const formatDate = (date: Date) => {
+    const formattedDate = date.toLocaleDateString("en-CA", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    console.log(formattedDate);
+    return formattedDate;
   };
 
   const [openChatModal, setOpenChatModal] = useState<boolean>(false);
@@ -704,6 +724,75 @@ const ProgramList = () => {
     //   setSelectedInvoiceFrequency(programLocation.state.invoiceFrequency);
     // }
   }
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+  const handleStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedStatus(event.target.value);
+  };
+
+  const getFilteredPrograms = () => {
+    let filteredPrograms = [...data];
+
+    if (searchTerm || selectedStatus || selectedDate || selectedToDate) {
+      filteredPrograms = filteredPrograms.filter((program: any) => {
+        const matchesSearchTerm = searchTerm
+          ? program?.programName
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            program?.origin_point?.placeName
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            program?.destination_point?.placeName
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            program?.pickUp_date
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            program?.droppOff_date
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            program?.invoiceFrequency
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            program?.total_price
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            program?.status?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (program.program_status &&
+              program.program_status.length > 0 &&
+              program.program_status[program.program_status.length - 1].status
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase()))
+          : true;
+
+        const matchesSelectedStatus = selectedStatus
+          ? program.program_status &&
+            program.program_status.length > 0 &&
+            program.program_status[program.program_status.length - 1].status ===
+              selectedStatus
+          : true;
+
+        const matchesSelectedDate = selectedDate
+          ? new Date(program.pickUp_date) >= selectedDate
+          : true;
+
+        const matchesSelectedToDate = selectedToDate
+          ? new Date(program.pickUp_date) <= selectedToDate
+          : true;
+        return (
+          matchesSearchTerm &&
+          matchesSelectedStatus &&
+          matchesSelectedDate &&
+          matchesSelectedToDate
+        );
+      });
+    }
+
+    return filteredPrograms.reverse();
+  };
 
   return (
     <React.Fragment>
@@ -718,30 +807,23 @@ const ProgramList = () => {
               <Card.Body>
                 <Row className="g-3">
                   <Col lg={2}>
-                    <select
-                      className="form-select text-muted"
-                      data-choices
-                      data-choices-search-false
-                      name="choices-single-default"
-                      id="idStatus"
-                    >
-                      <option value="all">All</option>
-                      <option value="Today">Today</option>
-                      <option value="Yesterday">Yesterday</option>
-                      <option value="Last 7 Days">Last 7 Days</option>
-                      <option value="Last 30 Days">Last 30 Days</option>
-                      <option defaultValue="This Month">This Month</option>
-                      <option value="Last Month">Last Month</option>
-                    </select>
+                    <Flatpickr
+                      className="form-control flatpickr-input"
+                      placeholder="Select From Date"
+                      options={{
+                        dateFormat: "d M, Y",
+                      }}
+                      onChange={handleDateChange}
+                    />
                   </Col>
                   <Col lg={2}>
                     <Flatpickr
                       className="form-control flatpickr-input"
-                      placeholder="Select Date"
+                      placeholder="Select To Date"
                       options={{
-                        mode: "range",
                         dateFormat: "d M, Y",
                       }}
+                      onChange={handleToDateChange}
                     />
                   </Col>
                   <Col lg={2}>
@@ -751,13 +833,24 @@ const ProgramList = () => {
                       data-choices-search-false
                       name="choices-single-default"
                       id="idStatus"
+                      value={selectedStatus}
+                      onChange={handleStatusChange}
                     >
                       <option value="">Status</option>
-                      <option value="Pickups">Pickups</option>
                       <option value="Pending">Pending</option>
-                      <option value="Shipping">Shipping</option>
-                      <option value="Delivered">Delivered</option>
-                      <option value="Out Of Delivery">Out Of Delivery</option>
+                      <option value="Answered By Admin">
+                        Answered By Admin
+                      </option>
+                      <option value="Answered By Client">
+                        Answered By Client
+                      </option>
+                      <option value="Approved By Admin">
+                        Approved By Admin
+                      </option>
+                      <option value="Approved By Client">
+                        Approved By Client
+                      </option>
+                      {/* <option value="Converted">Converted</option> */}
                     </select>
                   </Col>
                   <Col lg={6} className="d-flex justify-content-end">
@@ -782,6 +875,8 @@ const ProgramList = () => {
                         type="text"
                         className="form-control search"
                         placeholder="Search for something..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
                       />
                       <i className="ri-search-line search-icon"></i>
                     </div>
@@ -789,7 +884,11 @@ const ProgramList = () => {
                 </Row>
               </Card.Header>
               <Card.Body>
-                <DataTable columns={columns} data={data} pagination />
+                <DataTable
+                  columns={columns}
+                  data={getFilteredPrograms()}
+                  pagination
+                />
               </Card.Body>
             </Card>
           </Col>

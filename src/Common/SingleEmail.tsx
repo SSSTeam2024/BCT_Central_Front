@@ -190,6 +190,7 @@ const SingleEmail: React.FC<ChildProps> = ({
         name: category,
         quote_Id: selectedQuote,
         date_email: currentDate.toDateString(),
+        by: user?.name,
       };
       newEmailQueueMutation(updatedEmailData)
         .then(() => notifySuccess())

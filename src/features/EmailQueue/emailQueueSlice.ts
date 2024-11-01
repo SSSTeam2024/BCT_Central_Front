@@ -9,6 +9,7 @@ export interface EmailQueue {
   sender: string;
   name: string;
   date_email?: string,
+  by?:string
 }
 
 export interface DeleteEmailQueues {

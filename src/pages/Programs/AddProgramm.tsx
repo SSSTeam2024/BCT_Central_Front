@@ -52,6 +52,7 @@ import {
   PassengerAndLuggage,
   useGetAllPassengerAndLuggagesQuery,
 } from "features/PassengerAndLuggageLimits/passengerAndLuggageSlice";
+import SimpleBar from "simplebar-react";
 
 interface Option {
   value: string;
@@ -558,15 +559,52 @@ const AddProgramm = () => {
     setSelectedVehicletype(value);
     setDisabledNext(true);
   };
-
   const handlePriceChange = (index: number, value: string) => {
     const numericValue = value.replace(/[^0-9]/g, "");
+    const updatedPrice = numericValue === "" ? 0 : Number(numericValue);
+
     const updatedPrices = [...prices];
-    updatedPrices[index] = numericValue === "" ? 0 : Number(numericValue);
+    updatedPrices[index] = updatedPrice;
     setPrices(updatedPrices);
+
+    if (
+      (selectedClientType === "School" && schoolGroups[index]) ||
+      location.state.program.school_id !== null
+    ) {
+      console.log("Updating School Group");
+      const updatedSchoolGroups = [...schoolGroups];
+      updatedSchoolGroups[index] = {
+        ...updatedSchoolGroups[index],
+        price: updatedPrice,
+      };
+      console.log("Updated School Groups:", updatedSchoolGroups);
+      setSchoolGroups(updatedSchoolGroups);
+    } else if (
+      (selectedClientType === "Company" && companyGroups[index]) ||
+      location.state.program.company_id !== null
+    ) {
+      console.log("Updating Company Group");
+      const updatedCompanyGroups = [...companyGroups];
+      updatedCompanyGroups[index] = {
+        ...updatedCompanyGroups[index],
+        price: updatedPrice,
+      };
+      console.log("Updated Company Groups:", updatedCompanyGroups);
+      setCompanyGroups(updatedCompanyGroups);
+    }
+
     const sum = updatedPrices.reduce((acc, curr) => acc + curr, 0);
     setTotalPrice(sum);
   };
+
+  // Log groups after updates
+  useEffect(() => {
+    console.log("Current School Groups:", schoolGroups);
+  }, [schoolGroups]);
+
+  useEffect(() => {
+    console.log("Current Company Groups:", companyGroups);
+  }, [companyGroups]);
 
   const generateGroups = () => {
     const filteredVehicleTypeID = AllPassengersLimit.filter(
@@ -721,7 +759,6 @@ const AddProgramm = () => {
       (element) => element.vehicle_type._id === value
     );
     prevSchoolGroups[index].luggages = luggages;
-    console.log(prevSchoolGroups);
     setSchoolGroups(prevSchoolGroups);
   };
 
@@ -1270,7 +1307,6 @@ const AddProgramm = () => {
 
   useEffect(() => {
     if (location.state && location.state.program) {
-      // Set selectedJourney to the journeyType ID from location.state if it exists
       setSelectedInvoiceFrequency(location.state.program.invoiceFrequency);
     }
   }, [location.state]);
@@ -2142,14 +2178,23 @@ const AddProgramm = () => {
   }
 
   function onLoad(autocomplete: any) {
-    setSearchResult(autocomplete);
+    autocomplete.setComponentRestrictions({
+      country: ["uk"],
+    });
+    setSearchResult(autocomplete); // Now we’re correctly setting the autocomplete instance
   }
 
   function onLoadStop(autocomplete: any) {
+    autocomplete.setComponentRestrictions({
+      country: ["uk"],
+    });
     setSearchStop(autocomplete);
   }
 
   function onLoadDest(autocomplete: any) {
+    autocomplete.setComponentRestrictions({
+      country: ["uk"],
+    });
     setSearchDestination(autocomplete);
   }
 
@@ -2466,7 +2511,7 @@ const AddProgramm = () => {
                 <Tab.Content>
                   <Tab.Pane eventKey="1">
                     <Row>
-                      <Col lg={4}>
+                      <Col lg={5}>
                         <Row className="gap-4">
                           <Col lg={2} className="p-2">
                             <div className="form-check mb-2">
@@ -2789,59 +2834,126 @@ const AddProgramm = () => {
                             </Col>
                           </Row>
                         )}
-                        <div
-                          style={{
-                            marginTop: "20px",
-                            maxHeight: "300px",
-                            overflowX: "auto",
-                          }}
-                        >
-                          {stops2.map((stop, index) => (
-                            <Row>
-                              <Col lg={7} key={index}>
-                                <Form.Label htmlFor="customerName-field">
-                                  Stop {index + 1}
-                                </Form.Label>
-                                <div className="mb-3 d-flex">
-                                  <Autocomplete
-                                    onPlaceChanged={onPlaceChangedStop}
-                                    onLoad={onLoadStop}
+                        {location.state === null ? (
+                          <SimpleBar
+                            autoHide={false}
+                            data-simplebar-track="dark"
+                            className="overflow-auto mb-4"
+                            style={{ height: "240px" }}
+                          >
+                            {stops2.map((stop, index) => (
+                              <Row className="mt-3">
+                                <Col lg={2}>
+                                  <Form.Label htmlFor="customerName-field">
+                                    Stop {index + 1}
+                                  </Form.Label>
+                                </Col>
+                                <Col lg={5} key={index}>
+                                  <div className="mb-3">
+                                    <Autocomplete
+                                      onPlaceChanged={onPlaceChangedStop}
+                                      onLoad={onLoadStop}
+                                    >
+                                      <Form.Control
+                                        type="text"
+                                        placeholder="Stop"
+                                        ref={stopRef}
+                                        id="stop"
+                                        onClick={() => {
+                                          handleLocationButtonClickStop();
+                                        }}
+                                      />
+                                    </Autocomplete>
+                                  </div>
+                                </Col>
+                                <Col lg={3}>
+                                  <Flatpickr
+                                    className="form-control"
+                                    id="pickUp_time"
+                                    value={createDateFromStrings(
+                                      String(new Date().getFullYear()).padStart(
+                                        2,
+                                        "0"
+                                      ) +
+                                        "-" +
+                                        String(
+                                          new Date().getMonth() + 1
+                                        ).padStart(2, "0") +
+                                        "-" +
+                                        String(
+                                          new Date().getDate().toLocaleString()
+                                        ).padStart(2, "0"),
+                                      stopTimes[index]?.hours +
+                                        ":" +
+                                        stopTimes[index]?.minutes +
+                                        ":00"
+                                    ).getTime()}
+                                    options={{
+                                      enableTime: true,
+                                      noCalendar: true,
+                                      dateFormat: "H:i",
+                                      time_24hr: true,
+                                    }}
+                                    onChange={(selectedDates) =>
+                                      handleStopTime(selectedDates, index)
+                                    }
+                                  />
+                                </Col>
+                                <Col lg={1}>
+                                  <button
+                                    type="button"
+                                    className="btn btn-danger btn-icon"
+                                    onClick={() =>
+                                      handleRemoveStopClick(stop.id)
+                                    }
                                   >
-                                    <Form.Control
-                                      type="text"
-                                      style={{ width: "280px" }}
-                                      placeholder="Stop"
-                                      ref={stopRef}
-                                      id="stop"
-                                      onClick={() => {
-                                        handleLocationButtonClickStop();
-                                      }}
-                                    />
-                                  </Autocomplete>
-                                  {
+                                    <i className="ri-delete-bin-5-line"></i>
+                                  </button>
+                                </Col>
+                              </Row>
+                            ))}
+                          </SimpleBar>
+                        ) : (
+                          <SimpleBar
+                            autoHide={false}
+                            data-simplebar-track="dark"
+                            className="overflow-auto mb-4"
+                            style={{ height: "240px" }}
+                          >
+                            {location?.state?.program?.stops?.map(
+                              (stop: any, index: any) => (
+                                <Row className="mt-3">
+                                  <Col lg={2}>
+                                    <Form.Label htmlFor="customerName-field">
+                                      Stop {index + 1}
+                                    </Form.Label>
+                                  </Col>
+                                  <Col lg={5} key={index}>
+                                    <div className="mb-3">
+                                      <Autocomplete
+                                        onPlaceChanged={onPlaceChangedStop}
+                                        onLoad={onLoadStop}
+                                      >
+                                        <Form.Control
+                                          type="text"
+                                          placeholder="Stop"
+                                          ref={stopRef}
+                                          id="stop"
+                                          defaultValue={
+                                            stop?.address?.placeName!
+                                          }
+                                          onClick={() => {
+                                            handleLocationButtonClickStop();
+                                          }}
+                                        />
+                                      </Autocomplete>
+                                    </div>
+                                  </Col>
+                                  <Col lg={3}>
                                     <Flatpickr
                                       className="form-control"
-                                      style={{ width: "100px" }}
                                       id="pickUp_time"
-                                      value={createDateFromStrings(
-                                        String(
-                                          new Date().getFullYear()
-                                        ).padStart(2, "0") +
-                                          "-" +
-                                          String(
-                                            new Date().getMonth() + 1
-                                          ).padStart(2, "0") +
-                                          "-" +
-                                          String(
-                                            new Date()
-                                              .getDate()
-                                              .toLocaleString()
-                                          ).padStart(2, "0"),
-                                        stopTimes[index]?.hours +
-                                          ":" +
-                                          stopTimes[index]?.minutes +
-                                          ":00"
-                                      ).getTime()}
+                                      value={stop?.time!}
                                       options={{
                                         enableTime: true,
                                         noCalendar: true,
@@ -2852,31 +2964,33 @@ const AddProgramm = () => {
                                         handleStopTime(selectedDates, index)
                                       }
                                     />
-                                  }
-                                </div>
-                              </Col>
-                              <button
-                                type="button"
-                                className="btn btn-danger btn-icon"
-                                onClick={() => handleRemoveStopClick(stop.id)}
-                                style={{
-                                  marginTop: "29px",
-                                  marginLeft: "152px",
-                                }}
-                              >
-                                <i className="ri-delete-bin-5-line"></i>
-                              </button>
-                            </Row>
-                          ))}
-                          <div className="d-flex flex-btn-via">
+                                  </Col>
+                                  <Col lg={1}>
+                                    <button
+                                      type="button"
+                                      className="btn btn-danger btn-icon"
+                                      onClick={() =>
+                                        handleRemoveStopClick(stop.id)
+                                      }
+                                    >
+                                      <i className="ri-delete-bin-5-line"></i>
+                                    </button>
+                                  </Col>
+                                </Row>
+                              )
+                            )}
+                          </SimpleBar>
+                        )}
+
+                        <Row>
+                          <div>
                             <Link
                               to="#"
                               id="add-item"
-                              className="btn btn-soft-info fw-medium"
+                              className="btn btn-soft-info fw-medium w-lg"
                               onClick={handleAddStopClickWrapper(
                                 "New Stop Address"
                               )}
-                              style={{ width: "150px" }}
                             >
                               <i className="ri-add-line label-icon align-middle rounded-pill fs-16 me-2">
                                 {" "}
@@ -2884,9 +2998,9 @@ const AddProgramm = () => {
                               </i>
                             </Link>
                           </div>
-                        </div>
+                        </Row>
                       </Col>
-                      <Col lg={8}>
+                      <Col lg={7}>
                         <div
                           style={{
                             position: "absolute",
@@ -2901,8 +3015,8 @@ const AddProgramm = () => {
                                 height: "100%",
                                 width: "80%",
                               }}
-                              zoom={8}
-                              // center={{ lat: -34.397, lng: 150.644 }}
+                              zoom={12}
+                              center={{ lat: 40.7128, lng: -74.006 }}
                               onLoad={handleMapLoad}
                             >
                               {directions && (

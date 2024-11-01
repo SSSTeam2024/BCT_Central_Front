@@ -390,7 +390,7 @@ const PendingQuotes = () => {
   };
 
   const getFilteredJobs = () => {
-    let filteredJobs = result;
+    let filteredJobs = [...result];
 
     if (searchTerm) {
       filteredJobs = filteredJobs.filter(
@@ -446,7 +446,7 @@ const PendingQuotes = () => {
       filteredJobs = filteredJobs.filter((job) => filterByDate(job.date));
     }
 
-    return filteredJobs;
+    return filteredJobs.reverse();
   };
 
   return (

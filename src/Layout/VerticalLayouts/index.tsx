@@ -8,7 +8,7 @@ import { withTranslation } from "react-i18next";
 import navdata from "../LayoutMenuData";
 import { Link, useNavigate } from "react-router-dom";
 import ModalAffiliate from "./ModalAffiliate";
-import ModalEmail from "./Modal Email";
+import ModalEmail from "./ModalEmail";
 import ModalNote from "./ModalNote";
 import ModalSendNewEmail from "./ModalSendNewEmail";
 import { useGetAllEmailQueuesQuery } from "features/EmailQueue/emailQueueSlice";

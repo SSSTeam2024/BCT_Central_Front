@@ -7,6 +7,8 @@ export interface EmailSent {
   subjectEmail: string;
   from: string;
   to: string;
+  emailBody: string
+  by: String
 }
 
 export const emailSentSlice = createApi({

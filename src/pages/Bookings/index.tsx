@@ -263,7 +263,7 @@ const Bookings = () => {
       selector: (cell: Quote) => {
         return (
           <span>
-            <Link to={`/assign-quote/${cell?._id!}`} state={cell}>
+            <Link to={`/assign-quote/${cell?.quote_ref!}`} state={cell}>
               <span className="text-info">
                 <u>{cell?.quote_ref!}</u>
               </span>
