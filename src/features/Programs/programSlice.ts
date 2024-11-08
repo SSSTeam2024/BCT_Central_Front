@@ -35,7 +35,7 @@ export interface Programm {
     freeDays_date: string[];
     exceptDays: string[];
     recommanded_capacity: string;
-    extra: string[];
+    extra: any[];
     notes: string;
     dropOff_time: string;
     pickUp_Time: string;

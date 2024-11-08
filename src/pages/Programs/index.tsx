@@ -714,15 +714,8 @@ const ProgramList = () => {
   };
 
   function tog_Action() {
-    // if (programLocation.state.unit_price !== "") {
-    //   // setQuoteUnitPrice(Number(programLocation.state.unit_price));
-    //   // setContractTotalPrice(Number(programLocation.state.total_price));
-    // }
     setmodal_Action(!modal_Action);
     handleResponseMsgSubmit();
-    // if (programLocation.state.invoiceFrequency !== "") {
-    //   setSelectedInvoiceFrequency(programLocation.state.invoiceFrequency);
-    // }
   }
   const [selectedStatus, setSelectedStatus] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -1157,114 +1150,6 @@ const ProgramList = () => {
             </h5>
           </Modal.Header>
           <Modal.Body className="p-4">
-            {/* <Form onSubmit={onSubmitSendResponse}>
-              <Col lg={12} className="mb-2">
-                <Form.Label htmlFor="notes_for_client">Notes</Form.Label>
-                <textarea
-                  className="form-control"
-                  id="notes_for_client"
-                  name="notes_for_client"
-                  // placeholder="Customer see these!"
-                  rows={3}
-                  // value={sendResponse.notes_for_client}
-                  value={currentMsg}
-                  onChange={handleResponseMsgChange}
-                ></textarea>
-              </Col>
-              <Col lg={12} className="mb-2">
-                <Form.Label htmlFor="unit_price">Unit Price</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="unit_price"
-                  id="unit_price"
-                  placeholder="£ 00.00"
-                  onChange={onChangeUnitPrice}
-                  value={quoteUnitPrice}
-                />
-              </Col>
-              <Col lg={12} className="mb-2">
-                <Form.Label htmlFor="total_price">Total Price</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="total_price"
-                  id="total_price"
-                  placeholder="£ 00.00"
-                  // onChange={onChangeUnitPrice}
-                  defaultValue={contractTotalPrice}
-                  readOnly
-                />
-              </Col>
-              <Col lg={12} className="mb-2">
-                <Form.Label htmlFor="within_payment_days">With Payment Days</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="within_payment_days"
-                  id="within_payment_days"
-                  placeholder="2"
-                  onChange={onChangeSendResponse}
-                  value={sendResponse.within_payment_days}
-                />
-              </Col>
-              <Col lg={12}>
-                <div className="mb-2">
-                  <Form.Label htmlFor="invoiceFrequency">
-                    Invoice Frequency
-                  </Form.Label>
-                  <select
-                    className="form-select text-muted"
-                    name="invoiceFrequency"
-                    id="invoiceFrequency"
-                    onChange={handleSelectInvoiceFrequency}
-                  >
-                    <option value="">Select</option>
-                    <option value="Daily">Daily</option>
-                    <option value="Weekly">Weekly</option>
-                    <option value="Bi Weekly">Bi Weekly</option>
-                    <option value="Third Weekly">Third Weekly</option>
-                    <option value="Monthly">Monthly</option>
-                  </select>
-                </div>
-                <p>{selectedInvoiceFrequency}</p>
-              </Col>
-              <Col lg={4} className="d-flex align-items-center">
-                <div className="form-check m-2">
-                  <Form.Control
-                    className="form-check-input"
-                    type="checkbox"
-                    id="formCheck1"
-                    checked={isChecked}
-                    onChange={handleCheckboxChange}
-                  />
-                </div>
-                <Form.Label className="m-2" htmlFor="customerName-field">
-                  Approved
-                </Form.Label>
-              </Col>
-              <Col lg={12}>
-                <div className="hstack gap-2 justify-content-end">
-                  <Button
-                    className="btn-ghost-danger"
-                    onClick={() => {
-                      tog_Action();
-                      setSendResponse(initialSendResponse);
-                    }}
-                    data-bs-dismiss="modal"
-                  >
-                    <i className="ri-close-line align-bottom me-1"></i> Close
-                  </Button>
-                  <Button
-                    variant="primary"
-                    id="add-btn"
-                    type="submit"
-                    onClick={() => {
-                      tog_Action();
-                    }}
-                  >
-                    Send
-                  </Button>
-                </div>
-              </Col>
-            </Form> */}
             {programLocation?.state?.notes_for_client!.map((notes: any) => (
               <Row>
                 <Col
