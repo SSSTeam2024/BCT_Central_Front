@@ -135,6 +135,9 @@ const ReturnToJourneyRoute: React.FC<JourneyRouteProps> = ({
     google.maps.LatLngLiteral[]
   >([]);
 
+  const [directionsRenderer, setDirectionsRenderer] =
+    useState<google.maps.DirectionsRenderer | null>(null);
+
   const [recap, setRecap] = useState<Recap>({
     programName: "",
     capacityRecommanded: "",
@@ -248,15 +251,12 @@ const ReturnToJourneyRoute: React.FC<JourneyRouteProps> = ({
       typeof location?.state?.program?.school_id === "object" &&
       location.state.program.school_id?._id
     ) {
-      // If `school_id` is an object, use its `_id` property
       setSelectedSchoolID(location.state.program.school_id._id);
       setSelectedCompanyID("");
     } else if (typeof location?.state?.program?.school_id === "string") {
-      // If `school_id` is a string, use it directly
       setSelectedSchoolID(location.state.program.school_id);
       setSelectedCompanyID("");
     } else if (location?.state?.program?.company_id) {
-      // If `company_id` exists, use it
       setSelectedCompanyID(
         location.state.program.company_id._id ||
           location.state.program.company_id
@@ -275,7 +275,6 @@ const ReturnToJourneyRoute: React.FC<JourneyRouteProps> = ({
       ).getPlace();
       const name = place.name;
       const location = place.geometry?.location;
-
       if (location) {
         const coordinates = { lat: location.lat(), lng: location.lng() };
 
@@ -544,6 +543,21 @@ const ReturnToJourneyRoute: React.FC<JourneyRouteProps> = ({
     setLoading(true);
 
     const directionsService = new google.maps.DirectionsService();
+
+    // Initialize DirectionsRenderer if not already initialized
+    if (!directionsRenderer) {
+      const renderer = new google.maps.DirectionsRenderer();
+      renderer.setMap(map);
+      setDirectionsRenderer(renderer);
+    } else {
+      // Clear the existing route
+      directionsRenderer.setMap(null);
+      directionsRenderer.setMap(map);
+    }
+
+    // Clear the existing directions
+    setDirections(null);
+
     const waypoints = waypts.map((point) => ({
       location: point.location,
       stopover: true,
@@ -562,6 +576,9 @@ const ReturnToJourneyRoute: React.FC<JourneyRouteProps> = ({
         if (status === google.maps.DirectionsStatus.OK) {
           setDirectionsResponse(result);
           setRouteDirections(result);
+
+          // Use the existing DirectionsRenderer to display the new route
+          directionsRenderer!.setDirections(result);
 
           const selectedRoute = result?.routes?.[0];
           if (!selectedRoute) return;
@@ -707,7 +724,29 @@ const ReturnToJourneyRoute: React.FC<JourneyRouteProps> = ({
   }, [location.state]);
 
   useEffect(() => {
+    console.log("Updated directions:", directions);
+  }, [directions]);
+
+  useEffect(() => {
     if (isLoaded && location.state) {
+      // Clear the existing route
+      if (directionsRenderer) {
+        directionsRenderer.setMap(null);
+        setDirectionsRenderer(null);
+      }
+
+      console.log("Before setting directions:", directions);
+      setDirections(null);
+      console.log("After setting directions:", directions);
+
+      const newDirectionsRenderer = new google.maps.DirectionsRenderer();
+      // Force update the map to remove old route
+      newDirectionsRenderer.setMap(null);
+      setTimeout(() => {
+        newDirectionsRenderer.setMap(map);
+      }, 100);
+      setDirectionsRenderer(newDirectionsRenderer);
+
       const directionsService = new google.maps.DirectionsService();
       const waypoints = location.state.program.stops.map((stop: any) => ({
         location: { query: stop.address.placeName },
@@ -722,16 +761,17 @@ const ReturnToJourneyRoute: React.FC<JourneyRouteProps> = ({
           waypoints,
         },
         (result, status) => {
-          if (result !== null && status === google.maps.DirectionsStatus.OK) {
+          if (status === google.maps.DirectionsStatus.OK && result) {
+            // Set the new directions
             setDirections(result);
+            newDirectionsRenderer.setDirections(result);
+
             if (result.routes && result.routes.length > 0) {
               const newStopCoordinates = result.routes[0].legs.map((leg) => ({
                 lat: leg.start_location.lat(),
                 lng: leg.start_location.lng(),
               }));
               setStopCoordinates(newStopCoordinates);
-            } else {
-              console.error("No routes found in the directions result");
             }
           } else {
             console.error("Directions request failed due to " + status);
@@ -739,7 +779,7 @@ const ReturnToJourneyRoute: React.FC<JourneyRouteProps> = ({
         }
       );
     }
-  }, [isLoaded, location.state]);
+  }, [isLoaded, location.state, map]);
 
   const handleMapLoad = (map: any) => {
     setMap(map);
@@ -992,7 +1032,7 @@ const ReturnToJourneyRoute: React.FC<JourneyRouteProps> = ({
                   handleLocationButtonClick();
                   if (origin_name) {
                     map?.panTo(origin_name);
-                    map?.setZoom(15);
+                    map?.setZoom(13);
                   }
                 }}
                 onChange={onChangeProgramms}
