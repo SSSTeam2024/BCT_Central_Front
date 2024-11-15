@@ -37,7 +37,6 @@ const ReturnToRunDates: React.FC<RunDatesProps> = ({ setActiveTab }) => {
   const [updateProgram] = useUpdateProgramMutation();
   const location = useLocation();
   const runDatesLocation = location.state;
-  console.log("return to run dates", runDatesLocation);
   const [pickUp_date, setPickUp_date] = useState<Date | null>(null);
   const [dropOff_date, setDropOff_date] = useState<Date | null>(null);
   const [free_date, setFree_date] = useState<Date[]>([]);

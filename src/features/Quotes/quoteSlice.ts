@@ -20,6 +20,7 @@ export interface Quote {
       lng: number;
     };
   };
+  dropoff_time?: string;
   quote_ref?: string;
   vehicle_type: string;
   id_visitor: string;
@@ -313,7 +314,7 @@ export const quoteSlice = createApi({
             body: { quote_id, manual_cost, id_visitor, id_vehicle, id_driver },
           };
         },
-        invalidatesTags: ["Quote", "AssignDriver"],
+        invalidatesTags: ["Quote"],
       }),
       createNewQuote: builder.mutation<void, NewQuote>({
         query(payload) {
@@ -363,7 +364,7 @@ export const quoteSlice = createApi({
             body: { quote_id, id_vehicle },
           };
         },
-        invalidatesTags: ["Quote", "AssignVehicleToQuote"],
+        invalidatesTags: ["Quote"],
       }),
       addAffilaiteToQuote: builder.mutation<void, AssignAffiliateToQuote>({
         query({ idQuote, white_list, pushedDate, pushed_price }) {

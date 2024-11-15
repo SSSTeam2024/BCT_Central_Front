@@ -33,7 +33,6 @@ const RunDates: React.FC<RunDatesProps> = ({ setActiveTab }) => {
   const [excepted_dates, setExceptedDates] = useState<string[]>([]);
   const location = useLocation();
   const runDatesLocation = location.state;
-  console.log("runDatesLocation", runDatesLocation);
   const [programmData, setProgrammData] = useState({
     programDetails: {
       _id: "",

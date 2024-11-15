@@ -1,192 +1,109 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Col, Container, Row } from "react-bootstrap";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
-import "./QuoteCalendar.css";
-
 import { Quote, useGetAllQuoteQuery } from "features/Quotes/quoteSlice";
+import { format } from "date-fns";
+import DailyTable from "./DailyTable";
+import HourlyTable from "./HourlyTable";
+import WeeklyTable from "./WeeklyTable";
+import MonthlyTable from "./MonthlyTable";
+import QuoteDetailsCard from "./QuoteDetailsCard";
+import DateFilterCard from "./DateFilterCard";
+import PopupDetails from "./PopupDetails";
+import AssignCard from "./AssignCard";
 
 const QuoteCalendar = () => {
-  document.title = "Calendar | Coach Hire Network";
-
   const { data: AllQuotes = [] } = useGetAllQuoteQuery();
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [todayQuotes, setTodayQuotes] = useState<Quote[]>([]);
+  const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
 
-  const [pickUp_date, setPickUp_date] = useState<Date | null>(null);
-  const [dropOff_date, setDropOff_date] = useState<Date | null>(null);
-  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
+  const [selectedQuoteDate, setSelectedQuoteDate] = useState<Date | null>(
+    new Date()
+  );
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("Daily");
 
-  const handleCircleClick = (quote: Quote) => {
-    setSelectedQuote(quote);
+  const [selectedQuote, setSelectedQuote] = useState<any | null>(null);
+  const formatDateForComparison = (date: Date) => {
+    return format(date, "yyyy-MM-dd");
   };
 
-  const tileClassName = ({ date }: { date: Date }) => {
-    const formattedDate = `${date.getFullYear()}-${String(
-      date.getMonth() + 1
-    ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-
-    const classes = AllQuotes.reduce((acc: string[], quote: Quote) => {
-      if (quote.date === formattedDate) {
-        switch (quote.progress) {
-          case "New":
-            acc.push("quote-day-new");
-            break;
-          case "Booked":
-            acc.push("quote-day-booked");
-            break;
-          case "Completed":
-            acc.push("quote-day-confirmed");
-            break;
-          case "Cancel":
-            acc.push("quote-day-cancel");
-            break;
-          case "Deleted":
-            acc.push("quote-day-deleted");
-            break;
-          case "Accepted":
-            acc.push("quote-day-accepted");
-            break;
-          case "On Route":
-            acc.push("quote-day-onroute");
-            break;
-          case "On site":
-            acc.push("quote-day-onsite");
-            break;
-          case "Picked Up":
-            acc.push("quote-day-pickedup");
-            break;
-        }
-      }
-      return acc;
-    }, []);
-
-    if (classes.length > 0) {
-      return classes.join(" ");
-    }
-
-    if (date < pickUp_date! || date > dropOff_date!) {
-      return null;
-    }
-
-    return null;
-  };
-
-  const tileContent = ({ date }: { date: Date }) => {
-    const formattedDate = `${date.getFullYear()}-${String(
-      date.getMonth() + 1
-    ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-
-    const quote = AllQuotes.find(
-      (quote: Quote) => quote.date === formattedDate
+  useEffect(() => {
+    const formattedDate = formatDateForComparison(
+      selectedQuoteDate || currentDate
     );
-    console.log(quote);
-    if (quote) {
-      return (
-        <div
-          // className={`quote-circle ${quote.progress}`}
-          onClick={() => handleCircleClick(quote)}
-        />
-      );
-    }
+    const filteredQuotes = AllQuotes.filter(
+      (quote) => quote.date === formattedDate
+    );
+    setTodayQuotes(filteredQuotes);
+  }, [selectedQuoteDate, currentDate, AllQuotes]);
 
-    return null;
-  };
-  console.log(selectedQuote);
-  const tileDisabled = ({ date }: { date: Date }) => {
-    return date < pickUp_date! || date > dropOff_date!;
+  const togglePopup = () => {
+    setIsPopupOpen(!isPopupOpen);
   };
 
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          <Card>
-            <Row>
-              <Col lg={11}>
-                <div className="d-flex justify-content-center w-100 h-100 p-3">
-                  <Calendar
-                    tileClassName={tileClassName}
-                    tileContent={tileContent}
-                    tileDisabled={tileDisabled}
-                  />
-                </div>
-              </Col>
-              <Col lg={1}>
-                <div className="table-responsive">
-                  <table className="table table-sm table-borderless align-middle description-table">
-                    <tbody>
-                      <tr>
-                        <td>
-                          <p className="legend-container">
-                            <span className="legend bg-day-new"></span>
-                            New
-                          </p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p className="legend-container">
-                            <span className="legend bg-day-booked"></span>
-                            Booking
-                          </p>
-                        </td>
-                      </tr>
-
-                      <tr>
-                        <td>
-                          <p className="legend-container">
-                            <span className="legend bg-day-onsite"></span>On
-                            Site
-                          </p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p className="legend-container">
-                            <span className="legend bg-day-onroute"></span>On
-                            Route
-                          </p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p className="legend-container">
-                            <span className="legend bg-day-pickedup"></span>
-                            Picked Up
-                          </p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p className="legend-container">
-                            <span className="legend bg-day-completed"></span>
-                            Completed
-                          </p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p className="legend-container">
-                            <span className="legend bg-day-cancel"></span>
-                            Cancelled
-                          </p>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </Col>
-            </Row>
-            <Row>
-              {selectedQuote && (
-                <div className="quote-details">
-                  <h3>Quote Details</h3>
-                  <p>Date: {selectedQuote.date}</p>
-                  <p>Progress: {selectedQuote.progress}</p>
-                  <p>Other details: {selectedQuote.date}</p>
-                </div>
+          <Row>
+            <Col lg={5}>
+              <QuoteDetailsCard selectedQuote={selectedQuote} />
+            </Col>
+            <Col lg={4}>
+              <DateFilterCard
+                selectedPeriod={selectedPeriod}
+                setSelectedPeriod={setSelectedPeriod}
+                selectedQuoteDate={selectedQuoteDate}
+                setSelectedQuoteDate={setSelectedQuoteDate}
+              />
+            </Col>
+            <Col>
+              <AssignCard selectedQuote={selectedQuote} />
+            </Col>
+          </Row>
+          <Row>
+            <Card className="p-3">
+              {selectedPeriod === "Daily" && (
+                <DailyTable
+                  selectedPeriod="Daily"
+                  quotes={todayQuotes}
+                  setSelectedQuote={(quote) => setSelectedQuote(quote)}
+                  togglePopup={togglePopup}
+                />
               )}
-            </Row>
-          </Card>
+              {selectedPeriod === "Hourly" && (
+                <HourlyTable
+                  selectedPeriod="Hourly"
+                  quotes={todayQuotes}
+                  setSelectedQuote={(quote) => {
+                    setSelectedQuote(quote);
+                    togglePopup();
+                  }}
+                />
+              )}
+              {selectedPeriod === "Weekly" && (
+                <WeeklyTable
+                  selectedPeriod="Weekly"
+                  quotes={todayQuotes}
+                  setSelectedQuote={(quote) => setSelectedQuote(quote)}
+                  togglePopup={togglePopup}
+                />
+              )}
+              {selectedPeriod === "Monthly" && (
+                <MonthlyTable
+                  selectedPeriod="Monthly"
+                  quotes={todayQuotes}
+                  setSelectedQuote={(quote) => {
+                    setSelectedQuote(quote);
+                    togglePopup();
+                  }}
+                />
+              )}
+            </Card>
+          </Row>
+          {isPopupOpen && (
+            <PopupDetails selectedQuote={selectedQuote} onClose={togglePopup} />
+          )}
         </Container>
       </div>
     </React.Fragment>

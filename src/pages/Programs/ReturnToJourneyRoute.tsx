@@ -735,9 +735,7 @@ const ReturnToJourneyRoute: React.FC<JourneyRouteProps> = ({
         setDirectionsRenderer(null);
       }
 
-      console.log("Before setting directions:", directions);
       setDirections(null);
-      console.log("After setting directions:", directions);
 
       const newDirectionsRenderer = new google.maps.DirectionsRenderer();
       // Force update the map to remove old route
@@ -884,7 +882,6 @@ const ReturnToJourneyRoute: React.FC<JourneyRouteProps> = ({
     }));
 
     data["programDetails"]["stops"] = updatedStops;
-    console.log("data", data);
     await updateProgram({
       id: location?.state?.program?._id!,
       updatedProgram: data,
