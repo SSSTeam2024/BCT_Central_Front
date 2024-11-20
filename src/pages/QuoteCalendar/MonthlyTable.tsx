@@ -1,24 +1,18 @@
-import React, { useState, CSSProperties } from "react";
-import { Quote, useGetAllQuoteQuery } from "features/Quotes/quoteSlice";
+import React, { useState } from "react";
+import { useGetAllQuoteQuery } from "features/Quotes/quoteSlice";
 import { useGetAllDriverQuery } from "features/Driver/driverSlice";
 import { useGetAllVehicleTypesQuery } from "features/VehicleType/vehicleTypeSlice";
 import { useGetAllVehiclesQuery } from "features/Vehicles/vehicleSlice";
 
 interface MonthlyProps {
   selectedPeriod: string;
-  quotes: any[];
   selectedMonth: string;
-  setSelectedQuote: (quote: Quote) => void;
 }
 const MonthlyTable: React.FC<MonthlyProps> = ({
   selectedPeriod,
-  quotes,
   selectedMonth,
-  setSelectedQuote,
 }) => {
   document.title = "Calendar | Coach Hire Network";
-
-  const getHourIndex = (time: any) => parseInt(time.split(":")[0], 10);
 
   const { data: AllQuotes = [] } = useGetAllQuoteQuery();
   const { data: AllVehicleType = [] } = useGetAllVehicleTypesQuery();
@@ -161,7 +155,6 @@ const MonthlyTable: React.FC<MonthlyProps> = ({
                 }
               ></span>
             </th>
-
             <th
               onClick={() => handleViewChange("quote")}
               className={
@@ -176,7 +169,6 @@ const MonthlyTable: React.FC<MonthlyProps> = ({
                 }
               ></span>
             </th>
-
             <th
               onClick={() => handleViewChange("vehicle")}
               className={
@@ -191,7 +183,6 @@ const MonthlyTable: React.FC<MonthlyProps> = ({
                 }
               ></span>
             </th>
-
             {getTableHeaders()?.map((header, index) => (
               <th key={index} className="bg-info text-white">
                 {header}
@@ -199,7 +190,6 @@ const MonthlyTable: React.FC<MonthlyProps> = ({
             ))}
           </tr>
         </thead>
-
         <tbody>
           {currentView === "driver" && (
             <>

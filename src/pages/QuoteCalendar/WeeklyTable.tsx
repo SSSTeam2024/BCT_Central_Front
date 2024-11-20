@@ -1,22 +1,8 @@
-import React, { useState, CSSProperties, useEffect, useMemo } from "react";
-import { Quote, useGetAllQuoteQuery } from "features/Quotes/quoteSlice";
+import React, { useState, useMemo } from "react";
+import { useGetAllQuoteQuery } from "features/Quotes/quoteSlice";
 import { useGetAllDriverQuery } from "features/Driver/driverSlice";
 import { useGetAllVehicleTypesQuery } from "features/VehicleType/vehicleTypeSlice";
 import { useGetAllVehiclesQuery } from "features/Vehicles/vehicleSlice";
-
-const buttonStyle: CSSProperties = {
-  position: "absolute",
-  top: "5px",
-  right: "5px",
-  background: "#F0E68C",
-  color: "#000000",
-  border: "none",
-  borderRadius: "50%",
-  width: "20px",
-  height: "20px",
-  fontSize: "12px",
-  cursor: "pointer",
-};
 
 interface WeekProps {
   selectedPeriod: string;
@@ -170,7 +156,6 @@ const WeeklyTable: React.FC<WeekProps> = ({ selectedPeriod, selectedWeek }) => {
                 }
               ></span>
             </th>
-
             <th
               onClick={() => handleViewChange("quote")}
               className={
@@ -185,7 +170,6 @@ const WeeklyTable: React.FC<WeekProps> = ({ selectedPeriod, selectedWeek }) => {
                 }
               ></span>
             </th>
-
             <th
               onClick={() => handleViewChange("vehicle")}
               className={
@@ -200,7 +184,6 @@ const WeeklyTable: React.FC<WeekProps> = ({ selectedPeriod, selectedWeek }) => {
                 }
               ></span>
             </th>
-
             {getTableHeaders.map((header, index) => (
               <th key={index} className="bg-info text-white">
                 {header}
@@ -208,7 +191,6 @@ const WeeklyTable: React.FC<WeekProps> = ({ selectedPeriod, selectedWeek }) => {
             ))}
           </tr>
         </thead>
-
         <tbody>
           {currentView === "driver" && (
             <>
@@ -300,7 +282,6 @@ const WeeklyTable: React.FC<WeekProps> = ({ selectedPeriod, selectedWeek }) => {
                     quoteCountByDayForVehicleType[dayOfWeek + 1] += 1;
                   }
                 });
-
                 return (
                   <React.Fragment key={`vehicle-${vehicleIndex}`}>
                     <tr>

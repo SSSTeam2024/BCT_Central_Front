@@ -93,9 +93,7 @@ const QuoteCalendar = () => {
               {selectedPeriod === "Monthly" && (
                 <MonthlyTable
                   selectedPeriod="Monthly"
-                  quotes={todayQuotes}
                   selectedMonth={selectedMonth}
-                  setSelectedQuote={(quote) => setSelectedQuote(quote)}
                 />
               )}
             </Card>

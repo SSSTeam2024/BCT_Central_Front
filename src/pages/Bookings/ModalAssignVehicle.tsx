@@ -10,13 +10,9 @@ import Swal from "sweetalert2";
 import { useAddVehicleToQuoteMutation } from "features/Quotes/quoteSlice";
 import { boolean } from "yup";
 interface VehicleProps {
-  modal_AssignVehicle: boolean;
-  setModal_AssignVehicle: React.Dispatch<React.SetStateAction<boolean>>;
+  setModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
-const ModalAssignVehicle: React.FC<VehicleProps> = ({
-  modal_AssignVehicle,
-  setModal_AssignVehicle,
-}) => {
+const ModalAssignVehicle: React.FC<VehicleProps> = ({ setModalVisibility }) => {
   const locationQuote = useLocation();
   const navigate = useNavigate();
   const { data: AllVehicles = [] } = useGetAllVehiclesQuery();
@@ -46,6 +42,14 @@ const ModalAssignVehicle: React.FC<VehicleProps> = ({
       }
     );
   }
+
+  const handleAssignVehicle = () => {
+    // Perform the vehicle assignment logic here
+    console.log("Vehicle assigned!");
+
+    // Close the modal after assigning the vehicle
+    setModalVisibility(false);
+  };
 
   const [selectVehicle, setSelectedVehicle] = useState<string>("");
   // This function is triggered when the select Vehicle
@@ -155,8 +159,8 @@ const ModalAssignVehicle: React.FC<VehicleProps> = ({
 
       assignVehicleToQuoteMutation(assignvehicleToDriver)
         .then(() => notifySuccess())
-        .then(() => navigate("/bookings"))
-        .then(() => setModal_AssignVehicle(modal_AssignVehicle));
+        .then(() => navigate("/bookings"));
+      // .then(() => setModal_AssignVehicle(modal_AssignVehicle));
     } catch (error) {
       notifyError(error);
     }
@@ -300,7 +304,7 @@ const ModalAssignVehicle: React.FC<VehicleProps> = ({
                     variant="primary"
                     id="add-btn"
                     type="submit"
-                    onClick={() => setModal_AssignVehicle(!modal_AssignVehicle)}
+                    onClick={handleAssignVehicle}
                   >
                     Assign Vehicle
                   </Button>

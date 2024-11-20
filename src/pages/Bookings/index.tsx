@@ -1342,14 +1342,13 @@ const Bookings = () => {
             size="lg"
             show={selectAssignVehicleHide}
             onHide={() => {
-              openModalAssignVehicle();
+              setSelectAssignVehicleHide(false);
             }}
             centered
           >
             <Modal.Body className="p-4">
               <ModalAssignVehicle
-                modal_AssignVehicle={modal_AssignVehicle}
-                setModal_AssignVehicle={setModal_AssignVehicle}
+                setModalVisibility={setSelectAssignVehicleHide}
               />
             </Modal.Body>
           </Modal>
