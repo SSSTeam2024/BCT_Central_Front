@@ -2,6 +2,7 @@ import React, { useState, CSSProperties, useEffect, useMemo } from "react";
 import { Quote, useGetAllQuoteQuery } from "features/Quotes/quoteSlice";
 import { useGetAllDriverQuery } from "features/Driver/driverSlice";
 import { useGetAllVehicleTypesQuery } from "features/VehicleType/vehicleTypeSlice";
+import { useGetAllVehiclesQuery } from "features/Vehicles/vehicleSlice";
 
 const buttonStyle: CSSProperties = {
   position: "absolute",
@@ -26,8 +27,12 @@ const WeeklyTable: React.FC<WeekProps> = ({ selectedPeriod, selectedWeek }) => {
   const { data: AllQuotes = [] } = useGetAllQuoteQuery();
   const { data: AllDrivers = [] } = useGetAllDriverQuery();
   const { data: AllVehicleType = [] } = useGetAllVehicleTypesQuery();
+  const { data: AllVehicles = [] } = useGetAllVehiclesQuery();
   const activeDrivers = AllDrivers.filter(
     (driver) => driver.driverStatus === "Active"
+  );
+  const activeVehicles = AllVehicles.filter(
+    (vehicle) => vehicle.statusVehicle === "Active"
   );
 
   const getTableHeaders = useMemo(() => {
@@ -107,6 +112,42 @@ const WeeklyTable: React.FC<WeekProps> = ({ selectedPeriod, selectedWeek }) => {
       (quote: any) => quote?.id_driver?._id! === driver?._id!
     );
     return quotesDriver;
+  });
+
+  const quotesWithoutVehicle = filteredQuotes.filter(
+    (quote) => quote.id_vehicle === null
+  );
+
+  const headersVehicle: string[] = [];
+  const dailyQuoteVehicleCounts: Record<string, number> = {};
+  const [dayVehicle, monthVehicle, yearVehicle] = startDateStr
+    .split("-")
+    .map(Number);
+
+  const startOfWeekVehicle = new Date(
+    Date.UTC(yearVehicle, monthVehicle - 1, dayVehicle)
+  );
+  for (let i = 0; i < 7; i++) {
+    const currentDate = new Date(startOfWeekVehicle);
+    currentDate.setUTCDate(startOfWeekVehicle.getUTCDate() + i);
+
+    const formattedDate = currentDate.toLocaleDateString("en-GB");
+    headersVehicle.push(formattedDate);
+    dailyQuoteVehicleCounts[formattedDate] = 0;
+  }
+
+  quotesWithoutVehicle.forEach((quote) => {
+    const quoteDate = parseQuoteDate(quote?.date!).toLocaleDateString("en-GB");
+    if (dailyQuoteVehicleCounts[quoteDate] !== undefined) {
+      dailyQuoteVehicleCounts[quoteDate] += 1;
+    }
+  });
+
+  const quotesWithVehicle = activeVehicles.map((vehicle: any) => {
+    let quotesVehicle = filteredQuotes.filter(
+      (quote: any) => quote?.id_vehicle?._id! === vehicle?._id!
+    );
+    return quotesVehicle;
   });
 
   return (
@@ -247,12 +288,16 @@ const WeeklyTable: React.FC<WeekProps> = ({ selectedPeriod, selectedWeek }) => {
 
                 filteredVehicleTypeQuotes.forEach((quote) => {
                   const date = new Date(quote?.date!);
-
-                  const dayNumber = date.getDate();
-                  const weekNumber = Math.ceil(dayNumber / 7);
-
+                  const dayOfWeek = date.getDay();
+                  const firstDayOfWeek = new Date(
+                    date.getFullYear(),
+                    date.getMonth(),
+                    1
+                  ).getDay();
+                  const adjustedDay = date.getDate() + firstDayOfWeek;
+                  const weekNumber = Math.ceil(adjustedDay / 7);
                   if (weekNumber >= 1 && weekNumber <= 4) {
-                    quoteCountByDayForVehicleType[weekNumber] += 1;
+                    quoteCountByDayForVehicleType[dayOfWeek + 1] += 1;
                   }
                 });
 
@@ -291,19 +336,20 @@ const WeeklyTable: React.FC<WeekProps> = ({ selectedPeriod, selectedWeek }) => {
               })}
             </>
           )}
-
-          {/*
           {currentView === "vehicle" && (
             <>
               <tr>
                 <td colSpan={3}>No Vehicle</td>
-                {Array.from({ length: numberOfDays }, (_, colIndex) => {
-                  const day = colIndex + 1;
-                  const quoteCount = quoteWithoutCountByDay[day] || 0;
+                {headersVehicle.map((header, index) => {
+                  const quoteCount = dailyQuoteVehicleCounts[header] || 0;
                   return (
-                    <td key={colIndex}>
+                    <td key={index}>
                       <div className="text-center">
-                        <span className="fw-bold badge bg-danger text-white">
+                        <span
+                          className={`fw-bold badge ${
+                            quoteCount > 0 ? "bg-danger text-white" : ""
+                          }`}
+                        >
                           {quoteCount > 0 ? quoteCount : ""}
                         </span>
                       </div>
@@ -311,37 +357,32 @@ const WeeklyTable: React.FC<WeekProps> = ({ selectedPeriod, selectedWeek }) => {
                   );
                 })}
               </tr>
-              {activeVehicles.map((vehicle, vehicleIndex) => {
-                const vehicleQuotes = filteredQuotes.filter((quote) => {
-                  const vehicleId =
-                    typeof quote?.id_vehicle === "string"
-                      ? quote?.id_vehicle
-                      : (quote?.id_vehicle as { _id: string })?._id! || "";
-
-                  return vehicleId === vehicle._id;
-                });
-
+              {quotesWithVehicle.map((vehicleQuotes, vehicleIndex) => {
                 const quoteCountByDayForVehicle: Record<number, number> = {};
 
-                for (let day = 1; day <= numberOfDays; day++) {
+                for (let day = 1; day <= 7; day++) {
                   quoteCountByDayForVehicle[day] = 0;
                 }
 
                 vehicleQuotes.forEach((quote) => {
-                  const [quoteYear, quoteMonth, quoteDay] =
-                    quote?.date?.split("-")!;
-                  const dayNumber = parseInt(quoteDay, 10);
-                  if (dayNumber) {
-                    quoteCountByDayForVehicle[dayNumber] += 1;
+                  const date = new Date(quote?.date!);
+
+                  const dayNumber = date.getDate();
+                  const weekNumber = Math.ceil(dayNumber / 7);
+
+                  if (weekNumber >= 1 && weekNumber <= 4) {
+                    quoteCountByDayForVehicle[weekNumber] += 1;
                   }
                 });
 
+                const vehicle = activeVehicles[vehicleIndex];
                 return (
                   <tr key={`vehicle-${vehicleIndex}`}>
                     <td colSpan={3}>{vehicle?.registration_number!}</td>
-                    {Array.from({ length: numberOfDays }, (_, colIndex) => {
+                    {Array.from({ length: 7 }, (_, colIndex) => {
                       const day = colIndex + 1;
                       const quoteCount = quoteCountByDayForVehicle[day] || 0;
+
                       return (
                         <td key={colIndex}>
                           <div className="text-center">
@@ -356,7 +397,7 @@ const WeeklyTable: React.FC<WeekProps> = ({ selectedPeriod, selectedWeek }) => {
                 );
               })}
             </>
-          )} */}
+          )}
         </tbody>
       </table>
     </div>
