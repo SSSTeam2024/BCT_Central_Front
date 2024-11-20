@@ -1,9 +1,15 @@
 function addDurationToTime(
     time: string,
-    hoursToAdd: any,
-    minutesToAdd: any,
+    hoursToAdd: number,
+    minutesToAdd: number,
     givenDate: string
   ) {
+    if (!time || typeof time !== "string" || !time.includes(":")) {
+      throw new Error("Invalid 'time' argument. Expected format: 'HH:MM'");
+    }
+    if (!givenDate || typeof givenDate !== "string" || !givenDate.includes("-")) {
+      throw new Error("Invalid 'givenDate' argument. Expected format: 'YYYY-MM-DD'");
+    }
     const [hours, minutes] = time.split(":").map(Number);
     let totalMinutes = hours * 60 + minutes;
     totalMinutes += hoursToAdd * 60 + minutesToAdd;

@@ -10,6 +10,8 @@ interface DateFilterCardProps {
   setSelectedPeriod: (period: string) => void;
   selectedQuoteDate: Date | null;
   setSelectedQuoteDate: (date: Date | null) => void;
+  setSelectedMonth: (string: string) => void;
+  setSelectedWeek: (string: string) => void;
 }
 
 const DateFilterCard: React.FC<DateFilterCardProps> = ({
@@ -17,23 +19,15 @@ const DateFilterCard: React.FC<DateFilterCardProps> = ({
   setSelectedPeriod,
   selectedQuoteDate,
   setSelectedQuoteDate,
+  setSelectedMonth,
+  setSelectedWeek,
 }) => {
   const { data: AllQuotes = [] } = useGetAllQuoteQuery();
-  const { data: AllDrivers = [] } = useGetAllDriverQuery();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [todayQuotes, setTodayQuotes] = useState<Quote[]>([]);
-  const activeDrivers = AllDrivers.filter(
-    (driver) => driver.driverStatus === "Active"
-  );
 
   const formatDateForComparison = (date: Date) => {
     return format(date, "yyyy-MM-dd");
-  };
-
-  const [currentView, setCurrentView] = useState("driver");
-
-  const handleViewChange = (view: string) => {
-    setCurrentView(view);
   };
 
   useEffect(() => {
@@ -97,11 +91,18 @@ const DateFilterCard: React.FC<DateFilterCardProps> = ({
       startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6);
+      setSelectedWeek(
+        `${format(startOfWeek, "dd-MM-yyyy")} to ${format(
+          endOfWeek,
+          "dd-MM-yyyy"
+        )}`
+      );
       return `${format(startOfWeek, "dd-MM-yyyy")} to ${format(
         endOfWeek,
         "dd-MM-yyyy"
       )}`;
     } else if (selectedPeriod === "Monthly") {
+      setSelectedMonth(format(currentDate, "MMMM yyyy"));
       return format(currentDate, "MMMM yyyy");
     }
     return "";

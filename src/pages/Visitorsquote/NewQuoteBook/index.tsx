@@ -67,7 +67,6 @@ const NewQuoteBook = () => {
     { refetchOnMountOrArgChange: true }
   );
 
-  console.log("quotesByReference", quotesByReference);
   const [updateQuote] = useUpdateQuoteMutation();
 
   const result = AllVehicles.filter(
@@ -677,19 +676,37 @@ const NewQuoteBook = () => {
   useEffect(() => {
     if (quotesByReference.length === 0) return;
     const convertedDuration = convertToHHMM(returnDuration);
-    if (selectedReturnDate === null && selectedReturnTime === null) {
-      let drop_off_date_time = addDurationToTime(
-        quotesByReference[1]?.pickup_time!,
-        convertedDuration.hours,
-        convertedDuration.minutes,
-        quotesByReference[1]?.date!
-      );
-      let clean_dropoff_time =
-        String(drop_off_date_time.hours).padStart(2, "0") +
-        ":" +
-        String(drop_off_date_time.minutes).padStart(2, "0");
-      setDropoffReturnDate(drop_off_date_time.date);
-      setDropoffReturnTime(clean_dropoff_time);
+    if (quotesByReference.length === 1) {
+      if (selectedReturnDate === null && selectedReturnTime === null) {
+        let drop_off_date_time = addDurationToTime(
+          quotesByReference[0]?.pickup_time!,
+          convertedDuration.hours,
+          convertedDuration.minutes,
+          quotesByReference[0]?.date!
+        );
+        let clean_dropoff_time =
+          String(drop_off_date_time.hours).padStart(2, "0") +
+          ":" +
+          String(drop_off_date_time.minutes).padStart(2, "0");
+        setDropoffReturnDate(drop_off_date_time.date);
+        setDropoffReturnTime(clean_dropoff_time);
+      }
+    }
+    if (quotesByReference.length === 2) {
+      if (selectedReturnDate === null && selectedReturnTime === null) {
+        let drop_off_date_time = addDurationToTime(
+          quotesByReference[1]?.pickup_time!,
+          convertedDuration.hours,
+          convertedDuration.minutes,
+          quotesByReference[1]?.date!
+        );
+        let clean_dropoff_time =
+          String(drop_off_date_time.hours).padStart(2, "0") +
+          ":" +
+          String(drop_off_date_time.minutes).padStart(2, "0");
+        setDropoffReturnDate(drop_off_date_time.date);
+        setDropoffReturnTime(clean_dropoff_time);
+      }
     }
     if (selectedReturnDate !== null && selectedReturnTime !== null) {
       let drop_off_date_time = addDurationToTime(

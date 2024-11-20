@@ -1,15 +1,7 @@
-import React, { useState, CSSProperties, useEffect } from "react";
-import { Button, Card, Col, Container, Row } from "react-bootstrap";
+import React, { useState, CSSProperties, useEffect, useMemo } from "react";
 import { Quote, useGetAllQuoteQuery } from "features/Quotes/quoteSlice";
-import { format } from "date-fns";
 import { useGetAllDriverQuery } from "features/Driver/driverSlice";
-import Flatpickr from "react-flatpickr";
-
-interface PopupInfo {
-  colIndex: number;
-  details?: Quote;
-  [key: string]: any;
-}
+import { useGetAllVehicleTypesQuery } from "features/VehicleType/vehicleTypeSlice";
 
 const buttonStyle: CSSProperties = {
   position: "absolute",
@@ -27,96 +19,25 @@ const buttonStyle: CSSProperties = {
 
 interface WeekProps {
   selectedPeriod: string;
-  quotes: any[];
-  setSelectedQuote: (quote: Quote) => void;
-  togglePopup: () => void;
+  selectedWeek: string;
 }
 
-const WeeklyTable: React.FC<WeekProps> = ({
-  selectedPeriod,
-  quotes,
-  setSelectedQuote,
-  togglePopup,
-}) => {
-  document.title = "Calendar | Coach Hire Network";
-
-  const getHourIndex = (time: any) => parseInt(time.split(":")[0], 10);
-
+const WeeklyTable: React.FC<WeekProps> = ({ selectedPeriod, selectedWeek }) => {
   const { data: AllQuotes = [] } = useGetAllQuoteQuery();
   const { data: AllDrivers = [] } = useGetAllDriverQuery();
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [todayQuotes, setTodayQuotes] = useState<Quote[]>([]);
+  const { data: AllVehicleType = [] } = useGetAllVehicleTypesQuery();
   const activeDrivers = AllDrivers.filter(
     (driver) => driver.driverStatus === "Active"
   );
 
-  const [selectedQuoteDate, setSelectedQuoteDate] = useState<Date | null>(
-    new Date()
-  );
-
-  const formatDateForComparison = (date: Date) => {
-    return format(date, "yyyy-MM-dd");
-  };
-
-  const [currentView, setCurrentView] = useState("driver");
-
-  const handleViewChange = (view: string) => {
-    setCurrentView(view);
-  };
-  // Function to get the start and end dates of the current week (assuming week starts on Sunday)
-  function getCurrentWeekRange() {
-    const currentDate = new Date();
-    const firstDayOfWeek = new Date(
-      currentDate.setDate(currentDate.getDate() - currentDate.getDay())
-    );
-    const lastDayOfWeek = new Date(
-      currentDate.setDate(firstDayOfWeek.getDate() + 6)
-    );
-
-    // Formatting dates to 'yyyy-mm-dd' string format
-    const formatDate = (date: any) => date.toISOString().split("T")[0];
-
-    return {
-      startOfWeek: formatDate(firstDayOfWeek),
-      endOfWeek: formatDate(lastDayOfWeek),
-    };
-  }
-
-  // Extract the current week range
-  const { startOfWeek, endOfWeek } = getCurrentWeekRange();
-
-  // Filter quotes based on their date falling within the current week
-  const currentWeekQuotes = AllQuotes.filter((quote) => {
-    const quoteDate = quote.date; // Assuming quote.date is in 'yyyy-mm-dd' format as a string
-    return quoteDate! >= startOfWeek && quoteDate! <= endOfWeek;
-  });
-
-  console.log(currentWeekQuotes);
-
-  const [popupInfo, setPopupInfo] = useState<PopupInfo | null>(null);
-
-  const closePopup = () => setPopupInfo(null);
-  const getWeekRange = (date: Date) => {
-    const startOfWeek = new Date(date);
-    startOfWeek.setDate(date.getDate() - date.getDay());
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-    return { startOfWeek, endOfWeek };
-  };
-  useEffect(() => {
-    const { startOfWeek, endOfWeek } = getWeekRange(currentDate);
-    const filteredQuotes = AllQuotes.filter((quote) => {
-      const quoteDate = new Date(quote?.date!);
-      return quoteDate >= startOfWeek && quoteDate <= endOfWeek;
-    });
-    setTodayQuotes(filteredQuotes);
-  }, [selectedQuoteDate, currentDate, AllQuotes]);
-  console.log("sqd", selectedQuoteDate);
-  const getTableHeaders = () => {
+  const getTableHeaders = useMemo(() => {
     if (selectedPeriod === "Weekly") {
-      const headers = [];
-      const startOfWeek = new Date(currentDate);
-      startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+      const headers: string[] = [];
+
+      const [startDateStr] = selectedWeek.split(" to ");
+      const [day, month, year] = startDateStr.split("-").map(Number);
+
+      const startOfWeek = new Date(year, month - 1, day);
 
       for (let i = 0; i < 7; i++) {
         const date = new Date(startOfWeek);
@@ -125,22 +46,68 @@ const WeeklyTable: React.FC<WeekProps> = ({
       }
       return headers;
     }
+    return [];
+  }, [selectedPeriod, selectedWeek]);
+
+  const [startDateStr, endDateStr] = selectedWeek.split(" to ");
+
+  const parseSelectedWeekDate = (dateStr: string) => {
+    const [day, month, year] = dateStr.split("-").map(Number);
+    return new Date(year, month - 1, day);
   };
 
-  const quotesWithoutDriver = quotes.filter(
+  const parseQuoteDate = (dateStr: string) => {
+    const [year, month, day] = dateStr.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  };
+
+  const startDate = parseSelectedWeekDate(startDateStr);
+  const endDate = parseSelectedWeekDate(endDateStr);
+
+  const filteredQuotes = AllQuotes.filter((quote) => {
+    const quoteDate = parseQuoteDate(quote?.date!);
+    return quoteDate >= startDate && quoteDate <= endDate;
+  });
+
+  const [currentView, setCurrentView] = useState("driver");
+
+  const handleViewChange = (view: string) => {
+    setCurrentView(view);
+  };
+
+  const quotesWithoutDriver = filteredQuotes.filter(
     (quote) => quote.id_driver === null
   );
 
-  const handleQuoteClick = (quote: any) => {
-    setSelectedQuote(quote);
-  };
+  const headers: string[] = [];
+  const dailyQuoteCounts: Record<string, number> = {};
 
-  const handleButtonClick = (colIndex: number, quote: any) => {
-    setSelectedQuote(quote);
-    togglePopup();
-  };
+  const [day, month, year] = startDateStr.split("-").map(Number);
 
-  const headers = getTableHeaders() || [];
+  const startOfWeek = new Date(Date.UTC(year, month - 1, day));
+
+  for (let i = 0; i < 7; i++) {
+    const currentDate = new Date(startOfWeek);
+    currentDate.setUTCDate(startOfWeek.getUTCDate() + i);
+
+    const formattedDate = currentDate.toLocaleDateString("en-GB");
+    headers.push(formattedDate);
+    dailyQuoteCounts[formattedDate] = 0;
+  }
+
+  quotesWithoutDriver.forEach((quote) => {
+    const quoteDate = parseQuoteDate(quote?.date!).toLocaleDateString("en-GB");
+    if (dailyQuoteCounts[quoteDate] !== undefined) {
+      dailyQuoteCounts[quoteDate] += 1;
+    }
+  });
+
+  const quotesWithDriver = activeDrivers.map((driver: any) => {
+    let quotesDriver = filteredQuotes.filter(
+      (quote: any) => quote?.id_driver?._id! === driver?._id!
+    );
+    return quotesDriver;
+  });
 
   return (
     <div className="table-responsive">
@@ -193,7 +160,7 @@ const WeeklyTable: React.FC<WeekProps> = ({
               ></span>
             </th>
 
-            {getTableHeaders()?.map((header, index) => (
+            {getTableHeaders.map((header, index) => (
               <th key={index} className="bg-info text-white">
                 {header}
               </th>
@@ -202,43 +169,194 @@ const WeeklyTable: React.FC<WeekProps> = ({
         </thead>
 
         <tbody>
-          {activeDrivers.map((driver) => (
-            <tr key={driver._id}>
-              <th>
-                {driver.firstname} {driver.surname}
-              </th>
-              {headers.map((headerDate, colIndex) => {
-                const quoteForDate = todayQuotes.find(
-                  (quote) =>
-                    new Date(quote?.date!).toLocaleDateString("en-GB") ===
-                    headerDate
-                );
-                return (
-                  <td
-                    key={colIndex}
-                    className="position-relative"
-                    onClick={() => handleQuoteClick(quoteForDate)}
-                  >
-                    {quoteForDate ? (
-                      <>
-                        <span>{quoteForDate.quote_ref}</span>
-                        <button
-                          style={buttonStyle}
-                          onClick={() =>
-                            handleButtonClick(colIndex, quoteForDate)
-                          }
+          {currentView === "driver" && (
+            <>
+              <tr>
+                <td colSpan={3}>No Driver</td>
+                {headers.map((header, index) => {
+                  const quoteCount = dailyQuoteCounts[header] || 0;
+                  return (
+                    <td key={index}>
+                      <div className="text-center">
+                        <span
+                          className={`fw-bold badge ${
+                            quoteCount > 0 ? "bg-danger text-white" : ""
+                          }`}
                         >
-                          i
-                        </button>
-                      </>
-                    ) : (
-                      "-"
-                    )}
-                  </td>
+                          {quoteCount > 0 ? quoteCount : ""}
+                        </span>
+                      </div>
+                    </td>
+                  );
+                })}
+              </tr>
+              {quotesWithDriver.map((driverQuotes, driverIndex) => {
+                const quoteCountByDayForDriver: Record<number, number> = {};
+
+                for (let day = 1; day <= 7; day++) {
+                  quoteCountByDayForDriver[day] = 0;
+                }
+
+                driverQuotes.forEach((quote) => {
+                  const date = new Date(quote?.date!);
+
+                  const dayNumber = date.getDate();
+                  const weekNumber = Math.ceil(dayNumber / 7);
+
+                  if (weekNumber >= 1 && weekNumber <= 4) {
+                    quoteCountByDayForDriver[weekNumber] += 1;
+                  }
+                });
+
+                const driver = activeDrivers[driverIndex];
+                return (
+                  <tr key={`driver-${driverIndex}`}>
+                    <td colSpan={3}>
+                      {driver?.firstname} {driver?.surname}
+                    </td>
+                    {Array.from({ length: 7 }, (_, colIndex) => {
+                      const day = colIndex + 1;
+                      const quoteCount = quoteCountByDayForDriver[day] || 0;
+
+                      return (
+                        <td key={colIndex}>
+                          <div className="text-center">
+                            <span className="fw-bold badge bg-warning text-white">
+                              {quoteCount > 0 ? quoteCount : ""}
+                            </span>
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
                 );
               })}
-            </tr>
-          ))}
+            </>
+          )}
+          {currentView === "quote" && (
+            <>
+              {AllVehicleType.map((vehicleType, vehicleIndex) => {
+                const filteredVehicleTypeQuotes = filteredQuotes.filter(
+                  (quote) => quote.vehicle_type === vehicleType.type
+                );
+                const quoteCountByDayForVehicleType: Record<number, number> =
+                  {};
+                for (let day = 1; day <= 7; day++) {
+                  quoteCountByDayForVehicleType[day] = 0;
+                }
+
+                filteredVehicleTypeQuotes.forEach((quote) => {
+                  const date = new Date(quote?.date!);
+
+                  const dayNumber = date.getDate();
+                  const weekNumber = Math.ceil(dayNumber / 7);
+
+                  if (weekNumber >= 1 && weekNumber <= 4) {
+                    quoteCountByDayForVehicleType[weekNumber] += 1;
+                  }
+                });
+
+                return (
+                  <React.Fragment key={`vehicle-${vehicleIndex}`}>
+                    <tr>
+                      <td colSpan={3} className="fw-bold">
+                        {vehicleType?.type!}
+                      </td>
+                    </tr>
+                    {filteredVehicleTypeQuotes.map((quote, quoteIndex) => (
+                      <tr key={`quote-${vehicleIndex}-${quoteIndex}`}>
+                        <td colSpan={3} className="text-center">
+                          <span className="fw-medium text-info">
+                            {quote.quote_ref}
+                          </span>
+                        </td>
+                        {Array.from({ length: 7 }, (_, colIndex) => {
+                          const day = colIndex + 1;
+                          const quoteCount =
+                            quoteCountByDayForVehicleType[day] || 0;
+                          return (
+                            <td>
+                              <div className="text-center">
+                                <span className={`badge bg-primary text-white`}>
+                                  {quoteCount > 0 ? quoteCount : ""}
+                                </span>
+                              </div>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </React.Fragment>
+                );
+              })}
+            </>
+          )}
+
+          {/*
+          {currentView === "vehicle" && (
+            <>
+              <tr>
+                <td colSpan={3}>No Vehicle</td>
+                {Array.from({ length: numberOfDays }, (_, colIndex) => {
+                  const day = colIndex + 1;
+                  const quoteCount = quoteWithoutCountByDay[day] || 0;
+                  return (
+                    <td key={colIndex}>
+                      <div className="text-center">
+                        <span className="fw-bold badge bg-danger text-white">
+                          {quoteCount > 0 ? quoteCount : ""}
+                        </span>
+                      </div>
+                    </td>
+                  );
+                })}
+              </tr>
+              {activeVehicles.map((vehicle, vehicleIndex) => {
+                const vehicleQuotes = filteredQuotes.filter((quote) => {
+                  const vehicleId =
+                    typeof quote?.id_vehicle === "string"
+                      ? quote?.id_vehicle
+                      : (quote?.id_vehicle as { _id: string })?._id! || "";
+
+                  return vehicleId === vehicle._id;
+                });
+
+                const quoteCountByDayForVehicle: Record<number, number> = {};
+
+                for (let day = 1; day <= numberOfDays; day++) {
+                  quoteCountByDayForVehicle[day] = 0;
+                }
+
+                vehicleQuotes.forEach((quote) => {
+                  const [quoteYear, quoteMonth, quoteDay] =
+                    quote?.date?.split("-")!;
+                  const dayNumber = parseInt(quoteDay, 10);
+                  if (dayNumber) {
+                    quoteCountByDayForVehicle[dayNumber] += 1;
+                  }
+                });
+
+                return (
+                  <tr key={`vehicle-${vehicleIndex}`}>
+                    <td colSpan={3}>{vehicle?.registration_number!}</td>
+                    {Array.from({ length: numberOfDays }, (_, colIndex) => {
+                      const day = colIndex + 1;
+                      const quoteCount = quoteCountByDayForVehicle[day] || 0;
+                      return (
+                        <td key={colIndex}>
+                          <div className="text-center">
+                            <span className="fw-bold badge bg-warning text-white">
+                              {quoteCount > 0 ? quoteCount : ""}
+                            </span>
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </>
+          )} */}
         </tbody>
       </table>
     </div>

@@ -21,7 +21,8 @@ const QuoteCalendar = () => {
     new Date()
   );
   const [selectedPeriod, setSelectedPeriod] = useState<string>("Daily");
-
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
+  const [selectedWeek, setSelectedWeek] = useState<string>("");
   const [selectedQuote, setSelectedQuote] = useState<any | null>(null);
   const formatDateForComparison = (date: Date) => {
     return format(date, "yyyy-MM-dd");
@@ -55,6 +56,8 @@ const QuoteCalendar = () => {
                 setSelectedPeriod={setSelectedPeriod}
                 selectedQuoteDate={selectedQuoteDate}
                 setSelectedQuoteDate={setSelectedQuoteDate}
+                setSelectedMonth={setSelectedMonth}
+                setSelectedWeek={setSelectedWeek}
               />
             </Col>
             <Col>
@@ -84,19 +87,15 @@ const QuoteCalendar = () => {
               {selectedPeriod === "Weekly" && (
                 <WeeklyTable
                   selectedPeriod="Weekly"
-                  quotes={todayQuotes}
-                  setSelectedQuote={(quote) => setSelectedQuote(quote)}
-                  togglePopup={togglePopup}
+                  selectedWeek={selectedWeek}
                 />
               )}
               {selectedPeriod === "Monthly" && (
                 <MonthlyTable
                   selectedPeriod="Monthly"
                   quotes={todayQuotes}
-                  setSelectedQuote={(quote) => {
-                    setSelectedQuote(quote);
-                    togglePopup();
-                  }}
+                  selectedMonth={selectedMonth}
+                  setSelectedQuote={(quote) => setSelectedQuote(quote)}
                 />
               )}
             </Card>
