@@ -388,7 +388,7 @@ const EditSchool = () => {
                             Phone
                           </Form.Label>
                           <Form.Control
-                            type="terxt"
+                            type="text"
                             id="phone"
                             name="phone"
                             value={phoneNum}

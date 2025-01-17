@@ -50,6 +50,7 @@
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.0",
     "react-autocomplete": "^1.8.1",
+    "react-beautiful-dnd": "^13.1.1",
     "react-bootstrap": "^2.7.0",
     "react-calendar": "^4.8.0",
     "react-color": "^2.19.3",

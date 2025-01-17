@@ -94,6 +94,16 @@ import EditDefect from "pages/Administration/Vehicles/EditDefect";
 import QuoteCalendar from "pages/QuoteCalendar";
 import Calendar from "pages/QuoteCalendar";
 import ContinueCreateProgram from "pages/Programs/ContinueCreateProgram";
+import WebSites from "pages/WebSites";
+import Header from "pages/Header";
+import MenuSite from "pages/Menu";
+import FooterList from "pages/FooterList";
+import FooterSocial from "pages/FooterSocial";
+import AboutUs from "pages/AboutUs";
+import OurValues from "pages/OurValues";
+import OfferServices from "pages/OfferServices";
+import HtmlPage from "pages/HtmlPage";
+import OurMissions from "pages/OurMissions";
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: <Dashboard /> },
@@ -184,7 +194,16 @@ const authProtectedRoutes = [
   { path: "/job-share", component: <JobShare /> },
   { path: "/partial-quotes", component: <PartialQuotes /> },
   { path: "/job-template", component: <JobsTemplates /> },
-
+  { path: "/website-settings", component: <WebSites /> },
+  { path: "/website-header", component: <Header /> },
+  { path: "/website-menu", component: <MenuSite /> },
+  { path: "/website-footer-list", component: <FooterList /> },
+  { path: "/website-social-media", component: <FooterSocial /> },
+  { path: "/website-about-us", component: <AboutUs /> },
+  { path: "/website-our-values", component: <OurValues /> },
+  { path: "/website-services-offer", component: <OfferServices /> },
+  { path: "/website-page", component: <HtmlPage /> },
+  { path: "/website-our-missions", component: <OurMissions /> },
   //? Feedback & Claims
   { path: "/feedback", component: <Feedback /> },
   { path: "/claims", component: <Claims /> },

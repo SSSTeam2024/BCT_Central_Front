@@ -45,6 +45,17 @@ import { defectSlice } from "features/Defects/defectSlice";
 import { requestFeatureSlice } from "features/RequestFeature/requestFeature";
 import { errorReportSlice } from "features/ErrorReport/errorReportSlice";
 import { complainSlice } from "features/Complains/complainsSlice";
+import { headerSlice } from "features/header/headerSlice";
+import { menuSlice } from "features/menu/menuSlice";
+import { footerListSlice } from "features/FooterList/footerListSlice";
+import { pageSlice } from "features/pageCollection/pageSlice";
+import { footerSocialSlice } from "features/FooterSocial/footerSocialSlice";
+import { aboutUsSlice } from "features/AboutUsComponent/aboutUsSlice";
+import { ourValuesSlice } from "features/OurValuesComponent/ourValuesSlice";
+import { offreServiceSlice } from "features/OffreServicesComponent/offreServicesSlice";
+import { iconSlice } from "features/Icons/iconSlice";
+import { htmlPageSlice } from "features/htmlPage/htmlPageSlice";
+import { ourMissionSlice } from "features/OurMissionsComponent/ourMissionsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -85,6 +96,17 @@ export const store = configureStore({
     [requestFeatureSlice.reducerPath]: requestFeatureSlice.reducer,
     [errorReportSlice.reducerPath]: errorReportSlice.reducer,
     [complainSlice.reducerPath]: complainSlice.reducer,
+    [headerSlice.reducerPath]: headerSlice.reducer,
+    [menuSlice.reducerPath]: menuSlice.reducer,
+    [footerListSlice.reducerPath]: footerListSlice.reducer,
+    [pageSlice.reducerPath]: pageSlice.reducer,
+    [footerSocialSlice.reducerPath]: footerSocialSlice.reducer,
+    [aboutUsSlice.reducerPath]: aboutUsSlice.reducer,
+    [ourValuesSlice.reducerPath]: ourValuesSlice.reducer,
+    [offreServiceSlice.reducerPath]: offreServiceSlice.reducer,
+    [iconSlice.reducerPath]: iconSlice.reducer,
+    [htmlPageSlice.reducerPath]: htmlPageSlice.reducer,
+    [ourMissionSlice.reducerPath]: ourMissionSlice.reducer,
     auth: authSlice,
     Layout: LayoutReducer,
     ForgetPassword: ForgetPasswordReducer,
@@ -129,11 +151,22 @@ export const store = configureStore({
       defectSlice.middleware,
       requestFeatureSlice.middleware,
       errorReportSlice.middleware,
-      complainSlice.middleware
+      complainSlice.middleware,
+      headerSlice.middleware,
+      menuSlice.middleware,
+      footerListSlice.middleware,
+      pageSlice.middleware,
+      footerSocialSlice.middleware,
+      aboutUsSlice.middleware,
+      ourValuesSlice.middleware,
+      offreServiceSlice.middleware,
+      iconSlice.middleware,
+      htmlPageSlice.middleware,
+      ourMissionSlice.middleware
     ]);
   },
 });
-// optional, but required for refetchOnFocus/refetchOnReconnect behaviors
+
 setupListeners(store.dispatch);
 export type AppDispatch = typeof store.dispatch;
 export type RootState = ReturnType<typeof store.getState>;

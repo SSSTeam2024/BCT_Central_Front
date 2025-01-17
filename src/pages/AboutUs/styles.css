@@ -1,0 +1,71 @@
+.h2-with-after {
+    position: relative; /* Ensure the ::after is positioned relative to the h2 */
+    font-size: 40px;
+    margin-bottom: 40px;
+  }
+  
+  .h2-with-after::before {
+    position: absolute;
+    bottom: -22px;
+    left: 0;
+    content: "";
+    width: 50px;
+    height: 2px;
+    background-color: #CD2528;
+  }
+  
+  .h2-with-after::after {
+    position: absolute;
+    bottom: -22px;
+    left: 0;
+    content: "";
+    width: 5px;
+    height: 2px;
+    background-color: #ffffff;
+    animation: moveLeftBounces 10s linear infinite;
+    z-index: 1;
+  }
+  
+  /* Add the keyframes for the animation */
+  @keyframes moveLeftBounces {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(-50px);
+    }
+  }
+  
+  .single-service {
+    text-align: center;
+    background-color: #ffffff;
+    -webkit-box-shadow: 0 0 20px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0 20px 3px rgba(0, 0, 0, 0.05);
+    padding: 30px;
+    -webkit-transition: all 0.5s;
+    transition: all 0.5s;
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.single-service::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* background-image: url(../img/service/6903819.png); */
+    background-position: center center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    z-index: -1;
+}
+
+.icon {
+  font-size: 50px;
+  line-height: 1;
+  display: inline-block;
+  margin-bottom: 20px;
+  color: #CD2528;
+}
