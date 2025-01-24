@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row, Card, Col, Form, Image } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
-import Swal from "sweetalert2";
 import {
   AboutUsModel,
   useGetAboutUsComponentsQuery,
@@ -69,7 +68,7 @@ const AboutUs = () => {
     if (
       typeof about[field] === "object" &&
       about[field] !== null &&
-      "display" in about[field]
+      "display" in about[field]!
     ) {
       const updatedData: AboutUsModel = {
         ...about,
@@ -101,7 +100,7 @@ const AboutUs = () => {
     if (
       typeof about[field] === "object" &&
       about[field] !== null &&
-      "name" in about[field]
+      "name" in about[field]!
     ) {
       const updatedData = {
         ...about,
@@ -116,7 +115,7 @@ const AboutUs = () => {
     if (
       typeof about[field] === "object" &&
       about[field] !== null &&
-      "content" in about[field]
+      "content" in about[field]!
     ) {
       const updatedData = {
         ...about,

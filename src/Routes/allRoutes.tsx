@@ -104,6 +104,12 @@ import OurValues from "pages/OurValues";
 import OfferServices from "pages/OfferServices";
 import HtmlPage from "pages/HtmlPage";
 import OurMissions from "pages/OurMissions";
+import BestOffer from "pages/BestOffer";
+import ServicesBlock1 from "pages/ServicesBlock1";
+import VehicleGuideComponent from "pages/VehicleGuideComponent";
+import VehiclesClassComponent from "pages/VehiclesClassComponent";
+import FleetComponent from "pages/FleetComponent";
+import OnTheRoadComponent from "pages/OnTheRoadComponent";
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: <Dashboard /> },
@@ -204,6 +210,13 @@ const authProtectedRoutes = [
   { path: "/website-services-offer", component: <OfferServices /> },
   { path: "/website-page", component: <HtmlPage /> },
   { path: "/website-our-missions", component: <OurMissions /> },
+  { path: "/website-why-choose-us", component: <BestOffer /> },
+  { path: "/website-services-block-1", component: <ServicesBlock1 /> },
+  { path: "/website-vehicles-guide", component: <VehicleGuideComponent /> },
+  { path: "/website-vehicle-classes", component: <VehiclesClassComponent /> },
+  { path: "/website-fleet", component: <FleetComponent /> },
+  { path: "/website-on-the-road", component: <OnTheRoadComponent /> },
+
   //? Feedback & Claims
   { path: "/feedback", component: <Feedback /> },
   { path: "/claims", component: <Claims /> },

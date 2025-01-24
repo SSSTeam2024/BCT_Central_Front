@@ -163,6 +163,106 @@ const WebSites = () => {
                     </Card>
                   </Col>
                 </Row>
+                <Row>
+                  <Col xxl={3}>
+                    <Card className="border card-border-secondary">
+                      <Card.Header>
+                        <Link
+                          to="/website-why-choose-us"
+                          className="link-secondary fw-medium float-end"
+                        >
+                          Read More{" "}
+                          <i className="ri-arrow-right-line align-middle"></i>
+                        </Link>
+                        <h6 className="card-title text-secondary text-opacity-50 mb-0">
+                          Why Choose Us
+                        </h6>
+                      </Card.Header>
+                    </Card>
+                  </Col>
+                  <Col xxl={3}>
+                    <Card className="border card-border-info">
+                      <Card.Header>
+                        <Link
+                          to="/website-services-block-1"
+                          className="link-info fw-medium float-end"
+                        >
+                          Read More{" "}
+                          <i className="ri-arrow-right-line align-middle"></i>
+                        </Link>
+                        <h6 className="card-title text-info text-opacity-50 mb-0">
+                          Services Block 1
+                        </h6>
+                      </Card.Header>
+                    </Card>
+                  </Col>
+                  <Col xxl={3}>
+                    <Card className="border card-border-success">
+                      <Card.Header>
+                        <Link
+                          to="/website-vehicles-guide"
+                          className="link-success fw-medium float-end"
+                        >
+                          Read More{" "}
+                          <i className="ri-arrow-right-line align-middle"></i>
+                        </Link>
+                        <h6 className="card-title text-success text-opacity-50 mb-0">
+                          Vehicle Guide
+                        </h6>
+                      </Card.Header>
+                    </Card>
+                  </Col>
+                  <Col xxl={3}>
+                    <Card className="border card-border-danger">
+                      <Card.Header>
+                        <Link
+                          to="/website-vehicle-classes"
+                          className="link-danger fw-medium float-end"
+                        >
+                          Read More{" "}
+                          <i className="ri-arrow-right-line align-middle"></i>
+                        </Link>
+                        <h6 className="card-title text-danger text-opacity-50 mb-0">
+                          Vehicle Classes
+                        </h6>
+                      </Card.Header>
+                    </Card>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col xxl={3}>
+                    <Card className="border card-border-warning">
+                      <Card.Header>
+                        <Link
+                          to="/website-fleet"
+                          className="link-warning fw-medium float-end"
+                        >
+                          Read More{" "}
+                          <i className="ri-arrow-right-line align-middle"></i>
+                        </Link>
+                        <h6 className="card-title text-warning text-opacity-50 mb-0">
+                          Fleet
+                        </h6>
+                      </Card.Header>
+                    </Card>
+                  </Col>
+                  <Col xxl={3}>
+                    <Card className="border card-border-dark">
+                      <Card.Header>
+                        <Link
+                          to="/website-on-the-road"
+                          className="link-dark fw-medium float-end"
+                        >
+                          Read More{" "}
+                          <i className="ri-arrow-right-line align-middle"></i>
+                        </Link>
+                        <h6 className="card-title text-dark text-opacity-50 mb-0">
+                          On The Road
+                        </h6>
+                      </Card.Header>
+                    </Card>
+                  </Col>
+                </Row>
               </Card.Body>
             </Card>
           </Col>

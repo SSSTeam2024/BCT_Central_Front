@@ -56,6 +56,12 @@ import { offreServiceSlice } from "features/OffreServicesComponent/offreServices
 import { iconSlice } from "features/Icons/iconSlice";
 import { htmlPageSlice } from "features/htmlPage/htmlPageSlice";
 import { ourMissionSlice } from "features/OurMissionsComponent/ourMissionsSlice";
+import { bestOfferSlice } from "features/bestOfferComponent/bestOfferSlice";
+import { block1Slice } from "features/block1Component/block1Slice";
+import { vehicleGuideSlice } from "features/vehicleGuideComponent/vehicleGuideSlice";
+import { vehicleClassSlice } from "features/VehicleClassComponent/vehicleClassSlice";
+import { fleetSlice } from "features/FleetComponent/fleetSlice";
+import { onTheRoadSlice } from "features/OnTheRoadComponent/onTheRoadSlice";
 
 export const store = configureStore({
   reducer: {
@@ -107,6 +113,12 @@ export const store = configureStore({
     [iconSlice.reducerPath]: iconSlice.reducer,
     [htmlPageSlice.reducerPath]: htmlPageSlice.reducer,
     [ourMissionSlice.reducerPath]: ourMissionSlice.reducer,
+    [bestOfferSlice.reducerPath]: bestOfferSlice.reducer,
+    [block1Slice.reducerPath]: block1Slice.reducer,
+    [vehicleGuideSlice.reducerPath]: vehicleGuideSlice.reducer,
+    [vehicleClassSlice.reducerPath]: vehicleClassSlice.reducer,
+    [fleetSlice.reducerPath]: fleetSlice.reducer,
+    [onTheRoadSlice.reducerPath]: onTheRoadSlice.reducer,
     auth: authSlice,
     Layout: LayoutReducer,
     ForgetPassword: ForgetPasswordReducer,
@@ -162,7 +174,13 @@ export const store = configureStore({
       offreServiceSlice.middleware,
       iconSlice.middleware,
       htmlPageSlice.middleware,
-      ourMissionSlice.middleware
+      ourMissionSlice.middleware,
+      bestOfferSlice.middleware,
+      block1Slice.middleware,
+      vehicleGuideSlice.middleware,
+      vehicleClassSlice.middleware,
+      fleetSlice.middleware,
+      onTheRoadSlice.middleware
     ]);
   },
 });

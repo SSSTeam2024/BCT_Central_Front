@@ -9,6 +9,7 @@ import {
 import { useGetMenusQuery } from "features/menu/menuSlice";
 import { useGetOfferServiceQuery } from "features/OffreServicesComponent/offreServicesSlice";
 import { useGetOurValueQuery } from "features/OurValuesComponent/ourValuesSlice";
+import { useAddNewPageMutation } from "features/pageCollection/pageSlice";
 import React, { useEffect, useState } from "react";
 import {
   Container,
@@ -19,6 +20,8 @@ import {
   Button,
   Modal,
 } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const HtmlPage = () => {
   const { data: AllFooterLists = [] } = useGetFooterListsQuery();
@@ -29,8 +32,20 @@ const HtmlPage = () => {
   const { data: AllOurValues = [] } = useGetOurValueQuery();
   const { data: AllAboutUs = [] } = useGetAboutUsComponentsQuery();
   const [listFooter, setListFooter] = useState<any[]>([]);
+  const [newPage] = useAddNewPageMutation();
 
+  const navigate = useNavigate();
   type CheckboxKey = "aboutUs" | "ourValues" | "servicesOffer";
+
+  const notifySuccess = () => {
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: "Page is created successfully",
+      showConfirmButton: false,
+      timer: 2500,
+    });
+  };
 
   const [selectedCheckboxes, setSelectedCheckboxes] = useState<CheckboxKey[]>(
     []
@@ -83,7 +98,7 @@ const HtmlPage = () => {
     const { checked } = e.target;
     setHtmlPage((prevState) => ({
       ...prevState,
-      quoteForm: checked ? "1" : "0", // Update the quoteForm based on the checkbox state
+      quoteForm: checked ? "1" : "0",
     }));
   };
 
@@ -107,7 +122,7 @@ const HtmlPage = () => {
         menu: AllMenu[0]?._id!,
         socialMedia: AllFooterSocial[0]?._id!,
         footerList: listFooter,
-        // Update fields based on selected checkboxes
+
         aboutUs: selectedCheckboxes.includes("aboutUs")
           ? selectedIds?.aboutUs!
           : "",
@@ -119,16 +134,22 @@ const HtmlPage = () => {
           : "",
       };
       const createdHtmlPage = await createHtmlPage(htmlPageForm).unwrap();
-
+      console.log("createdHtmlPage", createdHtmlPage);
+      const sanitizedLink = htmlPageForm.link.replace(/\s+/g, "-");
       if (createdHtmlPage?._id) {
         await triggerGenerateHtmlPage(createdHtmlPage._id).unwrap();
-        alert("HTML Page created and generated successfully!");
+        await newPage({
+          label: htmlPageForm.name,
+          link: `${sanitizedLink}.html`,
+        }).unwrap();
+        notifySuccess();
       } else {
         throw new Error("Failed to retrieve the created HTML page ID.");
       }
       setHtmlPage(initialHtmlPage);
     } catch (error) {
-      alert(error);
+      notifySuccess();
+      navigate("/website-settings");
     }
   };
 
@@ -170,8 +191,8 @@ const HtmlPage = () => {
                           className="form-check-input"
                           type="checkbox"
                           id="quoteForm"
-                          checked={htmlPage.quoteForm === "1"} // Set the checkbox state based on quoteForm
-                          onChange={handleQuoteFromCheckboxChange} // Update state on change
+                          checked={htmlPage.quoteForm === "1"}
+                          onChange={handleQuoteFromCheckboxChange}
                         />
                         <label className="form-check-label" htmlFor="quoteForm">
                           Quote Form
