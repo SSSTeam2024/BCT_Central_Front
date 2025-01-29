@@ -110,6 +110,7 @@ import VehicleGuideComponent from "pages/VehicleGuideComponent";
 import VehiclesClassComponent from "pages/VehiclesClassComponent";
 import FleetComponent from "pages/FleetComponent";
 import OnTheRoadComponent from "pages/OnTheRoadComponent";
+import InThePress from "pages/InThePress";
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: <Dashboard /> },
@@ -216,6 +217,7 @@ const authProtectedRoutes = [
   { path: "/website-vehicle-classes", component: <VehiclesClassComponent /> },
   { path: "/website-fleet", component: <FleetComponent /> },
   { path: "/website-on-the-road", component: <OnTheRoadComponent /> },
+  { path: "/website-in-the-press", component: <InThePress /> },
 
   //? Feedback & Claims
   { path: "/feedback", component: <Feedback /> },

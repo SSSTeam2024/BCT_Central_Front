@@ -24,6 +24,37 @@ import {
   useUpdateBestOfferMutation,
 } from "features/bestOfferComponent/bestOfferSlice";
 
+export interface BestOfferModelInterface {
+  image: {
+    path: string;
+    display: string;
+  };
+  littleTitle: {
+    name: string;
+    display: string;
+  };
+  bigTitle: {
+    name: string;
+    display: string;
+  };
+  subTitle: {
+    name: string;
+    display: string;
+  };
+  liltleSubTitle: {
+    name: string;
+    display: string;
+  };
+  tabs: {
+    title: string;
+    display: string;
+    content: string;
+    buttonLabel: string;
+    buttonLink: string;
+    buttonDisplay: string;
+  }[];
+}
+
 function convertToBase64(
   file: File
 ): Promise<{ base64Data: string; extension: string }> {
@@ -85,7 +116,7 @@ const BestOffer = () => {
 
   const handleCheckboxChange = (
     about: BestOfferModel,
-    field: keyof BestOfferModel,
+    field: keyof BestOfferModelInterface,
     value: boolean
   ) => {
     if (
@@ -146,7 +177,7 @@ const BestOffer = () => {
 
   const handleEditSave = (
     about: BestOfferModel,
-    field: keyof BestOfferModel,
+    field: keyof BestOfferModelInterface,
     index: number,
     subfield: keyof (typeof about.tabs)[0],
     value: string
@@ -171,7 +202,7 @@ const BestOffer = () => {
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
     about: BestOfferModel,
-    field: keyof BestOfferModel
+    field: keyof BestOfferModelInterface
   ) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -220,7 +251,7 @@ const BestOffer = () => {
 
   const handleEditSaveField = (
     about: BestOfferModel,
-    field: keyof BestOfferModel,
+    field: keyof BestOfferModelInterface,
     value: string
   ) => {
     if (

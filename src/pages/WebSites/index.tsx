@@ -94,7 +94,9 @@ const WebSites = () => {
                           Read More{" "}
                           <i className="ri-arrow-right-line align-middle"></i>
                         </Link>
-                        <h6 className="card-title mb-0">Social Media</h6>
+                        <h6 className="card-title text-secondary text-opacity-25 mb-0">
+                          Social Media
+                        </h6>
                       </Card.Header>
                     </Card>
                   </Col>
@@ -258,6 +260,22 @@ const WebSites = () => {
                         </Link>
                         <h6 className="card-title text-dark text-opacity-50 mb-0">
                           On The Road
+                        </h6>
+                      </Card.Header>
+                    </Card>
+                  </Col>
+                  <Col xxl={3}>
+                    <Card className="border card-border-secondary">
+                      <Card.Header>
+                        <Link
+                          to="/website-in-the-press"
+                          className="link-secondary fw-medium float-end"
+                        >
+                          Read More{" "}
+                          <i className="ri-arrow-right-line align-middle"></i>
+                        </Link>
+                        <h6 className="card-title text-secondary text-opacity-75 mb-0">
+                          In The Press
                         </h6>
                       </Card.Header>
                     </Card>

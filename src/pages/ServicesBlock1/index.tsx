@@ -29,6 +29,31 @@ import {
 } from "features/block1Component/block1Slice";
 import aboutus from "assets/images/about-us.jpg";
 import avatar2 from "assets/images/users/avatar-2.jpg";
+
+interface Block1ModelInterface {
+  image: {
+    path: string;
+    display: string;
+  };
+  littleTitle: {
+    name: string;
+    display: string;
+  };
+  bigTitle: {
+    name: string;
+    display: string;
+  };
+  subTitle: {
+    name: string;
+    display: string;
+  };
+  tabs: {
+    title: string;
+    icon: string;
+    content: string;
+  }[];
+}
+
 function convertToBase64(
   file: File
 ): Promise<{ base64Data: string; extension: string }> {
@@ -90,7 +115,7 @@ const ServicesBlock1 = () => {
 
   const handleCheckboxChange = (
     about: Block1Model,
-    field: keyof Block1Model,
+    field: keyof Block1ModelInterface,
     value: boolean
   ) => {
     if (
@@ -151,7 +176,7 @@ const ServicesBlock1 = () => {
 
   const handleEditSave = (
     about: Block1Model,
-    field: keyof Block1Model,
+    field: keyof Block1ModelInterface,
     index: number,
     subfield: keyof (typeof about.tabs)[0],
     value: string
@@ -176,7 +201,7 @@ const ServicesBlock1 = () => {
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
     about: Block1Model,
-    field: keyof Block1Model
+    field: keyof Block1ModelInterface
   ) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -225,7 +250,7 @@ const ServicesBlock1 = () => {
 
   const handleEditSaveField = (
     about: Block1Model,
-    field: keyof Block1Model,
+    field: keyof Block1ModelInterface,
     value: string
   ) => {
     if (

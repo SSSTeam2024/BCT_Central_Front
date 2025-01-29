@@ -9,6 +9,30 @@ import {
 import "./styles.css";
 import { useGetAllPagesQuery } from "features/pageCollection/pageSlice";
 
+interface AboutUsModelInterface {
+  image: {
+    path: string;
+    display: string;
+  };
+  littleTitle: {
+    name: string;
+    display: string;
+  };
+  bigTitle: {
+    name: string;
+    display: string;
+  };
+  paragraph: {
+    content: string;
+    display: string;
+  };
+  button: {
+    label: string;
+    display: string;
+    link: string;
+  };
+}
+
 function convertToBase64(
   file: File
 ): Promise<{ base64Data: string; extension: string }> {
@@ -62,7 +86,7 @@ const AboutUs = () => {
 
   const handleCheckboxChange = (
     about: AboutUsModel,
-    field: keyof AboutUsModel,
+    field: keyof AboutUsModelInterface,
     value: boolean
   ) => {
     if (
@@ -96,7 +120,10 @@ const AboutUs = () => {
     setEditedValue(value);
   };
 
-  const handleEditSave = (about: AboutUsModel, field: keyof AboutUsModel) => {
+  const handleEditSave = (
+    about: AboutUsModel,
+    field: keyof AboutUsModelInterface
+  ) => {
     if (
       typeof about[field] === "object" &&
       about[field] !== null &&
@@ -144,7 +171,7 @@ const AboutUs = () => {
 
   const handleCheckboxChangeWithLocalUpdate = (
     about: AboutUsModel,
-    field: keyof AboutUsModel,
+    field: keyof AboutUsModelInterface,
     value: boolean
   ) => {
     setLocalDisplay(value ? "1" : "0"); // Immediate UI update

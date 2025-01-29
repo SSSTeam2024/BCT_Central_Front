@@ -19,6 +19,34 @@ import {
 } from "features/OurValuesComponent/ourValuesSlice";
 import { useGetAllPagesQuery } from "features/pageCollection/pageSlice";
 
+interface OurValuesModelInterface {
+  image: {
+    path: string;
+    display: string;
+  };
+
+  littleTitle: {
+    name: string;
+    display: string;
+  };
+  bigTitle: {
+    name: string;
+    display: string;
+  };
+  subTitle: {
+    name: string;
+    display: string;
+  };
+  tabs: {
+    title: string;
+    display: string;
+    content: string;
+    buttonLabel: string;
+    buttonLink: string;
+    buttonDisplay: string;
+  }[];
+}
+
 function convertToBase64(
   file: File
 ): Promise<{ base64Data: string; extension: string }> {
@@ -80,7 +108,7 @@ const OurValues = () => {
 
   const handleCheckboxChange = (
     about: OurValuesModel,
-    field: keyof OurValuesModel,
+    field: keyof OurValuesModelInterface,
     value: boolean
   ) => {
     if (
@@ -141,7 +169,7 @@ const OurValues = () => {
 
   const handleEditSave = (
     about: OurValuesModel,
-    field: keyof OurValuesModel,
+    field: keyof OurValuesModelInterface,
     index: number,
     subfield: keyof (typeof about.tabs)[0],
     value: string
@@ -166,7 +194,7 @@ const OurValues = () => {
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
     about: OurValuesModel,
-    field: keyof OurValuesModel
+    field: keyof OurValuesModelInterface
   ) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -215,7 +243,7 @@ const OurValues = () => {
 
   const handleEditSaveField = (
     about: OurValuesModel,
-    field: keyof OurValuesModel,
+    field: keyof OurValuesModelInterface,
     value: string
   ) => {
     if (

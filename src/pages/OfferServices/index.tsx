@@ -11,6 +11,26 @@ import { useGetAllIconsQuery } from "features/Icons/iconSlice";
 import { useLocation } from "react-router-dom";
 import { useGetAllPagesQuery } from "features/pageCollection/pageSlice";
 
+interface OffreServiceModelInterface {
+  littleTitle: {
+    name: string;
+    display: string;
+  };
+  bigTitle: {
+    name: string;
+    display: string;
+  };
+  cards: {
+    title: string;
+    display: string;
+    content: string;
+    icon: string;
+    image: string;
+    image_base64: string;
+    image_extension: string;
+  }[];
+}
+
 function convertToBase64(
   file: File
 ): Promise<{ base64Data: string; extension: string }> {
@@ -56,7 +76,7 @@ const OfferServices = () => {
 
   const handleCheckboxChange = (
     about: OffreServiceModel,
-    field: keyof OffreServiceModel,
+    field: keyof OffreServiceModelInterface,
     value: boolean,
     selectedPageId: string | null
   ) => {
@@ -102,7 +122,7 @@ const OfferServices = () => {
 
   const handleEditSave = (
     about: OffreServiceModel,
-    field: keyof OffreServiceModel,
+    field: keyof OffreServiceModelInterface,
     index: number,
     subfield: keyof (typeof about.cards)[0],
     value: string
@@ -126,7 +146,7 @@ const OfferServices = () => {
 
   const handleEditSaveField = (
     about: OffreServiceModel,
-    field: keyof OffreServiceModel,
+    field: keyof OffreServiceModelInterface,
     value: string
   ) => {
     if (

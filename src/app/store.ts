@@ -62,6 +62,8 @@ import { vehicleGuideSlice } from "features/vehicleGuideComponent/vehicleGuideSl
 import { vehicleClassSlice } from "features/VehicleClassComponent/vehicleClassSlice";
 import { fleetSlice } from "features/FleetComponent/fleetSlice";
 import { onTheRoadSlice } from "features/OnTheRoadComponent/onTheRoadSlice";
+import { inThePressSlice } from "features/InThePressComponent/inThePressSlice";
+import { notificationSlice } from "features/Notifications/notificationSlice";
 
 export const store = configureStore({
   reducer: {
@@ -119,6 +121,8 @@ export const store = configureStore({
     [vehicleClassSlice.reducerPath]: vehicleClassSlice.reducer,
     [fleetSlice.reducerPath]: fleetSlice.reducer,
     [onTheRoadSlice.reducerPath]: onTheRoadSlice.reducer,
+    [inThePressSlice.reducerPath]: inThePressSlice.reducer,
+    [notificationSlice.reducerPath]: notificationSlice.reducer,
     auth: authSlice,
     Layout: LayoutReducer,
     ForgetPassword: ForgetPasswordReducer,
@@ -180,7 +184,9 @@ export const store = configureStore({
       vehicleGuideSlice.middleware,
       vehicleClassSlice.middleware,
       fleetSlice.middleware,
-      onTheRoadSlice.middleware
+      onTheRoadSlice.middleware,
+      inThePressSlice.middleware,
+      notificationSlice.middleware
     ]);
   },
 });
