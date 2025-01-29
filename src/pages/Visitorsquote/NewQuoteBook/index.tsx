@@ -955,7 +955,7 @@ const NewQuoteBook = () => {
       },
       preConfirm: async (password) => {
         try {
-          const validPassword = "123456";
+          const validPassword = "123456789";
 
           if (password !== validPassword) {
             throw new Error("Invalid password");
