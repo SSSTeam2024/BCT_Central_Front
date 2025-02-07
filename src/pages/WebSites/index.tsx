@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Container, Row, Card, Col } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import { Link } from "react-router-dom";
@@ -6,6 +6,7 @@ import { useGetAllHeadersQuery } from "features/header/headerSlice";
 import { useGetMenusQuery } from "features/menu/menuSlice";
 import { useGetOurValueQuery } from "features/OurValuesComponent/ourValuesSlice";
 import { useGetOfferServiceQuery } from "features/OffreServicesComponent/offreServicesSlice";
+import Header from "pages/Header";
 
 const WebSites = () => {
   document.title = "Web Site Settings | Coach Hire Network";
@@ -13,6 +14,9 @@ const WebSites = () => {
   const { data: AllMenu = [] } = useGetMenusQuery();
   const { data: AllOurValues = [] } = useGetOurValueQuery();
   const { data: AllOffers = [] } = useGetOfferServiceQuery();
+
+  const [selectedComponent, setSelectedComponent] = useState<any>(null);
+
   return (
     <React.Fragment>
       <div className="page-content">

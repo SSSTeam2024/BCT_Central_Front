@@ -3,12 +3,14 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export interface AboutUsModel {
   _id?: string;
   page: string;
+  display?: string,
+  newImage?:string,
   image: {
     path: string;
     display: string;
   };
-  image_base64: string;
-  image_extension: string;
+  image_base64?: string;
+  image_extension?: string;
   littleTitle: {
     name: string;
     display: string;
@@ -50,16 +52,19 @@ export const aboutUsSlice = createApi({
         }),
         invalidatesTags: ["AboutUsModel"],
       }),
-      //   deleteMenu: builder.mutation<void, FooterList>({
-      //     query: (_id) => ({
-      //       url: `/deleteMenu/${_id}`,
-      //       method: "Delete",
-      //     }),
-      //     invalidatesTags: ["FooterList"],
-      //   }),
+      addNewAboutUsComponent: builder.mutation<void, AboutUsModel>({
+              query(payload) {
+                return {
+                  url: "/createAboutUsComponent",
+                  method: "POST",
+                  body: payload,
+                };
+              },
+              invalidatesTags: ["AboutUsModel"],
+            }),
     };
   },
 });
 
-export const { useGetAboutUsComponentsQuery, useUpdateAboutUsMutation } =
+export const { useGetAboutUsComponentsQuery, useUpdateAboutUsMutation, useAddNewAboutUsComponentMutation } =
   aboutUsSlice;

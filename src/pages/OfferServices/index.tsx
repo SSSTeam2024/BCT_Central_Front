@@ -49,19 +49,17 @@ function convertToBase64(
   });
 }
 
-const OfferServices = () => {
-  document.title = "Services Offer | Coach Hire Network";
+interface OfferServicesProps {
+  selectedPage: string;
+}
+
+const OfferServices: React.FC<OfferServicesProps> = ({ selectedPage }) => {
   const { data = [] } = useGetOfferServiceQuery();
   const [updateOfferServices] = useUpdateOfferServiceMutation();
   const { data: AllIcons = [] } = useGetAllIconsQuery();
   const { data: AllPages = [] } = useGetAllPagesQuery();
   const [addNewCardForm, setAddNewCardForm] = useState<boolean>(false);
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
-
-  const handleSelectPage = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value;
-    setSelectedPageId(value);
-  };
 
   const filteredServices = data.filter(
     (service) => service.associatedPage === selectedPageId
@@ -327,403 +325,351 @@ const OfferServices = () => {
 
   return (
     <React.Fragment>
-      <div className="page-content">
-        <Container fluid>
-          <Breadcrumb title="Services Offer" pageTitle="Web Site Settings" />
-          <Card>
-            <Card.Header>
-              <Row>
-                <Col lg={4}>
-                  <select
-                    name="buttonLabel"
-                    className="form-select mt-2"
-                    onChange={handleSelectPage}
+      {filteredServices.map((offer) => (
+        <>
+          <Row className="d-flex justify-content-center">
+            <div className="vstack gap-2">
+              <div className="hstack gap-2 justify-content-center">
+                <input
+                  type="checkbox"
+                  checked={offer.littleTitle?.display === "1"}
+                  onChange={(e) =>
+                    handleCheckboxChange(
+                      offer,
+                      "littleTitle",
+                      e.target.checked,
+                      selectedPageId //
+                    )
+                  }
+                />
+                {editingField.id === offer._id &&
+                editingField.field === "littleTitle" ? (
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={editedValue}
+                    autoFocus
+                    onChange={(e) => setEditedValue(e.target.value)}
+                    onBlur={() =>
+                      handleEditSaveField(offer, "littleTitle", editedValue)
+                    }
+                  />
+                ) : (
+                  <span
+                    style={{
+                      textTransform: "uppercase",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      color: "#CD2528",
+                    }}
                   >
-                    <option value="">Select a Page</option>
-                    {AllPages.map((page) => (
-                      <option value={page.link} key={page?._id!}>
-                        {page.label}
+                    {offer.littleTitle.name}
+                  </span>
+                )}
+
+                <i
+                  className="bi bi-pencil"
+                  style={{ cursor: "pointer", marginLeft: "8px" }}
+                  onClick={() =>
+                    handleEditStart(
+                      offer._id as string,
+                      "littleTitle",
+                      offer.littleTitle.name
+                    )
+                  }
+                ></i>
+              </div>
+              <div className="hstack gap-2 justify-content-center">
+                <input
+                  type="checkbox"
+                  checked={offer.bigTitle.display === "1"}
+                  onChange={(e) =>
+                    handleCheckboxChange(
+                      offer,
+                      "bigTitle",
+                      e.target.checked,
+                      selectedPageId //
+                    )
+                  }
+                />
+                {editingField.id === offer._id &&
+                editingField.field === "bigTitle" ? (
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={editedValue}
+                    autoFocus
+                    onChange={(e) => setEditedValue(e.target.value)}
+                    onBlur={() =>
+                      handleEditSaveField(offer, "bigTitle", editedValue)
+                    }
+                  />
+                ) : (
+                  <h2 className="h2-with-after">{offer.bigTitle.name}</h2>
+                )}
+                <i
+                  className="bi bi-pencil"
+                  style={{ cursor: "pointer", marginLeft: "8px" }}
+                  onClick={() =>
+                    handleEditStart(
+                      offer._id as string,
+                      "bigTitle",
+                      offer.bigTitle.name
+                    )
+                  }
+                ></i>
+              </div>
+            </div>
+          </Row>
+          <Row>
+            {offer.cards.map((card, index) => (
+              <Col>
+                <Card
+                  className="single-service"
+                  key={index}
+                  style={{
+                    backgroundImage: `url(${card.image})`,
+                  }}
+                >
+                  <div className="d-flex align-items-start">
+                    <input
+                      type="checkbox"
+                      className="me-2"
+                      checked={card.display === "1"}
+                      onChange={(e) =>
+                        handleTabCheckboxChange(
+                          offer,
+                          index,
+                          e.target.checked,
+                          "display"
+                        )
+                      }
+                    />
+                  </div>
+                  {editingField.id === offer._id &&
+                  editingField.field === `icon-${index}` ? (
+                    <select
+                      className="form-select form-select-sm"
+                      value={card.icon}
+                      onChange={(e) =>
+                        handleSelectChange(offer, index, e.target.value)
+                      }
+                      onBlur={() =>
+                        setEditingField({
+                          id: "",
+                          field: null,
+                        })
+                      }
+                    >
+                      {AllIcons.map((icon) => (
+                        <option key={icon.code} value={icon.code}>
+                          {icon.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="d-flex justify-content-center hstack gap-2">
+                      <i className={`${card.icon} icon`}></i>
+                      <button
+                        className="btn btn-link p-0 ms-2"
+                        onClick={() =>
+                          handleEditStart(
+                            offer?._id!,
+                            `icon-${index}`,
+                            card.icon
+                          )
+                        }
+                      >
+                        <i className="bi bi-pencil"></i>
+                      </button>
+                    </div>
+                  )}
+                  {editingField.id === offer._id &&
+                  editingField.field === `title-${index}` ? (
+                    <input
+                      type="text"
+                      value={editedValue}
+                      onChange={(e) => setEditedValue(e.target.value)}
+                      onBlur={() =>
+                        handleEditSave(
+                          offer,
+                          "cards",
+                          index,
+                          "title",
+                          editedValue
+                        )
+                      }
+                      autoFocus
+                    />
+                  ) : (
+                    <div className="hstack gap-2 d-flex justify-content-center">
+                      <h5>{card.title}</h5>
+                      <button
+                        className="btn btn-link p-0 ms-2"
+                        onClick={() =>
+                          handleEditStart(
+                            offer?._id!,
+                            `title-${index}`,
+                            card.title
+                          )
+                        }
+                      >
+                        <i className="bi bi-pencil"></i>
+                      </button>
+                    </div>
+                  )}
+                  {editingField.id === offer._id &&
+                  editingField.field === `content-${index}` ? (
+                    <textarea
+                      className="form-control"
+                      value={editedValue}
+                      onChange={(e) => setEditedValue(e.target.value)}
+                      onBlur={() =>
+                        handleEditSave(
+                          offer,
+                          "cards",
+                          index,
+                          "content",
+                          editedValue
+                        )
+                      }
+                      autoFocus
+                    />
+                  ) : (
+                    <div className="hstack gap-2 d-flex justify-content-center">
+                      <p>{card.content}</p>
+                      <button
+                        className="btn btn-link p-0 ms-2"
+                        onClick={() =>
+                          handleEditStart(
+                            offer?._id!,
+                            `content-${index}`,
+                            card.content
+                          )
+                        }
+                      >
+                        <i className="bi bi-pencil"></i>
+                      </button>
+                    </div>
+                  )}
+                  <div className="vstack gap-3" key={index}>
+                    <h6>Font Image</h6>
+                    <div className="vstack gap-2">
+                      {imagePreviews[card.title] ? (
+                        <Image
+                          src={imagePreviews[card.title]}
+                          alt="Preview"
+                          className="rounded"
+                          width="160"
+                        />
+                      ) : (
+                        <Image
+                          src={`${process.env.REACT_APP_BASE_URL}/offerService/${card?.image}`}
+                          alt=""
+                          className="rounded"
+                          width="160"
+                        />
+                      )}
+                      <div className="mt-n3" style={{ marginLeft: "-250px" }}>
+                        <label
+                          htmlFor={`image-${card.title}`}
+                          className="mb-0"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="right"
+                          title="Select image"
+                        >
+                          <span className="avatar-xs d-inline-block">
+                            <span className="avatar-title bg-light border rounded-circle text-muted cursor-pointer">
+                              <i className="bi bi-pen"></i>
+                            </span>
+                          </span>
+                        </label>
+                        <input
+                          className="form-control d-none"
+                          type="file"
+                          name="image"
+                          id={`image-${card.title}`}
+                          accept="image/*"
+                          onChange={(e) =>
+                            handleFileUpload(e, card, offer._id!)
+                          }
+                          style={{ width: "210px", height: "120px" }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+          <Row>
+            <Col>
+              <button
+                type="button"
+                className="btn btn-primary mt-3"
+                onClick={() => setAddNewCardForm(!addNewCardForm)}
+              >
+                <span className="icon-on">
+                  <i className="ri-add-line align-bottom"></i> New Card
+                </span>
+              </button>
+            </Col>
+            {addNewCardForm && (
+              <form onSubmit={onSubmitCardForm}>
+                <div className="hstack gap-3 mt-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Card Title"
+                    id="title"
+                    name="title"
+                    value={cardFrom.title}
+                    onChange={onChangeCardForm}
+                  />
+                  <select
+                    className="form-select text-muted"
+                    onChange={handleSelectIcon}
+                  >
+                    <option value="">Select Icon</option>
+                    {AllIcons.map((icon) => (
+                      <option value={icon.code} key={icon?._id!}>
+                        {icon.label}
                       </option>
                     ))}
                   </select>
-                </Col>
-              </Row>
-            </Card.Header>
-            <Card.Body className="p-3">
-              {filteredServices.length !== 0 ? (
-                filteredServices.map((offer) => (
-                  <>
-                    <Row className="d-flex justify-content-center">
-                      <div className="vstack gap-2">
-                        <div className="hstack gap-2 justify-content-center">
-                          <input
-                            type="checkbox"
-                            checked={offer.littleTitle?.display === "1"}
-                            onChange={(e) =>
-                              handleCheckboxChange(
-                                offer,
-                                "littleTitle",
-                                e.target.checked,
-                                selectedPageId //
-                              )
-                            }
-                          />
-                          {editingField.id === offer._id &&
-                          editingField.field === "littleTitle" ? (
-                            <input
-                              type="text"
-                              className="form-control"
-                              value={editedValue}
-                              autoFocus
-                              onChange={(e) => setEditedValue(e.target.value)}
-                              onBlur={() =>
-                                handleEditSaveField(
-                                  offer,
-                                  "littleTitle",
-                                  editedValue
-                                )
-                              }
-                            />
-                          ) : (
-                            <span
-                              style={{
-                                textTransform: "uppercase",
-                                fontSize: "13px",
-                                fontWeight: 600,
-                                color: "#CD2528",
-                              }}
-                            >
-                              {offer.littleTitle.name}
-                            </span>
-                          )}
-
-                          <i
-                            className="bi bi-pencil"
-                            style={{ cursor: "pointer", marginLeft: "8px" }}
-                            onClick={() =>
-                              handleEditStart(
-                                offer._id as string,
-                                "littleTitle",
-                                offer.littleTitle.name
-                              )
-                            }
-                          ></i>
-                        </div>
-                        <div className="hstack gap-2 justify-content-center">
-                          <input
-                            type="checkbox"
-                            checked={offer.bigTitle.display === "1"}
-                            onChange={(e) =>
-                              handleCheckboxChange(
-                                offer,
-                                "bigTitle",
-                                e.target.checked,
-                                selectedPageId //
-                              )
-                            }
-                          />
-                          {editingField.id === offer._id &&
-                          editingField.field === "bigTitle" ? (
-                            <input
-                              type="text"
-                              className="form-control"
-                              value={editedValue}
-                              autoFocus
-                              onChange={(e) => setEditedValue(e.target.value)}
-                              onBlur={() =>
-                                handleEditSaveField(
-                                  offer,
-                                  "bigTitle",
-                                  editedValue
-                                )
-                              }
-                            />
-                          ) : (
-                            <h2 className="h2-with-after">
-                              {offer.bigTitle.name}
-                            </h2>
-                          )}
-                          <i
-                            className="bi bi-pencil"
-                            style={{ cursor: "pointer", marginLeft: "8px" }}
-                            onClick={() =>
-                              handleEditStart(
-                                offer._id as string,
-                                "bigTitle",
-                                offer.bigTitle.name
-                              )
-                            }
-                          ></i>
-                        </div>
-                      </div>
-                    </Row>
-                    <Row>
-                      {offer.cards.map((card, index) => (
-                        <Col>
-                          <Card
-                            className="single-service"
-                            key={index}
-                            style={{
-                              backgroundImage: `url(${card.image})`,
-                            }}
-                          >
-                            <div className="d-flex align-items-start">
-                              <input
-                                type="checkbox"
-                                className="me-2"
-                                checked={card.display === "1"}
-                                onChange={(e) =>
-                                  handleTabCheckboxChange(
-                                    offer,
-                                    index,
-                                    e.target.checked,
-                                    "display"
-                                  )
-                                }
-                              />
-                            </div>
-                            {editingField.id === offer._id &&
-                            editingField.field === `icon-${index}` ? (
-                              <select
-                                className="form-select form-select-sm"
-                                value={card.icon}
-                                onChange={(e) =>
-                                  handleSelectChange(
-                                    offer,
-                                    index,
-                                    e.target.value
-                                  )
-                                }
-                                onBlur={() =>
-                                  setEditingField({
-                                    id: "",
-                                    field: null,
-                                  })
-                                }
-                              >
-                                {AllIcons.map((icon) => (
-                                  <option key={icon.code} value={icon.code}>
-                                    {icon.label}
-                                  </option>
-                                ))}
-                              </select>
-                            ) : (
-                              <div className="d-flex justify-content-center hstack gap-2">
-                                <i className={`${card.icon} icon`}></i>
-                                <button
-                                  className="btn btn-link p-0 ms-2"
-                                  onClick={() =>
-                                    handleEditStart(
-                                      offer?._id!,
-                                      `icon-${index}`,
-                                      card.icon
-                                    )
-                                  }
-                                >
-                                  <i className="bi bi-pencil"></i>
-                                </button>
-                              </div>
-                            )}
-                            {editingField.id === offer._id &&
-                            editingField.field === `title-${index}` ? (
-                              <input
-                                type="text"
-                                value={editedValue}
-                                onChange={(e) => setEditedValue(e.target.value)}
-                                onBlur={() =>
-                                  handleEditSave(
-                                    offer,
-                                    "cards",
-                                    index,
-                                    "title",
-                                    editedValue
-                                  )
-                                }
-                                autoFocus
-                              />
-                            ) : (
-                              <div className="hstack gap-2 d-flex justify-content-center">
-                                <h5>{card.title}</h5>
-                                <button
-                                  className="btn btn-link p-0 ms-2"
-                                  onClick={() =>
-                                    handleEditStart(
-                                      offer?._id!,
-                                      `title-${index}`,
-                                      card.title
-                                    )
-                                  }
-                                >
-                                  <i className="bi bi-pencil"></i>
-                                </button>
-                              </div>
-                            )}
-                            {editingField.id === offer._id &&
-                            editingField.field === `content-${index}` ? (
-                              <textarea
-                                className="form-control"
-                                value={editedValue}
-                                onChange={(e) => setEditedValue(e.target.value)}
-                                onBlur={() =>
-                                  handleEditSave(
-                                    offer,
-                                    "cards",
-                                    index,
-                                    "content",
-                                    editedValue
-                                  )
-                                }
-                                autoFocus
-                              />
-                            ) : (
-                              <div className="hstack gap-2 d-flex justify-content-center">
-                                <p>{card.content}</p>
-                                <button
-                                  className="btn btn-link p-0 ms-2"
-                                  onClick={() =>
-                                    handleEditStart(
-                                      offer?._id!,
-                                      `content-${index}`,
-                                      card.content
-                                    )
-                                  }
-                                >
-                                  <i className="bi bi-pencil"></i>
-                                </button>
-                              </div>
-                            )}
-                            <div className="vstack gap-3" key={index}>
-                              <h6>Font Image</h6>
-                              <div className="vstack gap-2">
-                                {imagePreviews[card.title] ? (
-                                  <Image
-                                    src={imagePreviews[card.title]}
-                                    alt="Preview"
-                                    className="rounded"
-                                    width="160"
-                                  />
-                                ) : (
-                                  <Image
-                                    src={`${process.env.REACT_APP_BASE_URL}/offerService/${card?.image}`}
-                                    alt=""
-                                    className="rounded"
-                                    width="160"
-                                  />
-                                )}
-                                <div
-                                  className="mt-n3"
-                                  style={{ marginLeft: "-250px" }}
-                                >
-                                  <label
-                                    htmlFor={`image-${card.title}`}
-                                    className="mb-0"
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="right"
-                                    title="Select image"
-                                  >
-                                    <span className="avatar-xs d-inline-block">
-                                      <span className="avatar-title bg-light border rounded-circle text-muted cursor-pointer">
-                                        <i className="bi bi-pen"></i>
-                                      </span>
-                                    </span>
-                                  </label>
-                                  <input
-                                    className="form-control d-none"
-                                    type="file"
-                                    name="image"
-                                    id={`image-${card.title}`}
-                                    accept="image/*"
-                                    onChange={(e) =>
-                                      handleFileUpload(e, card, offer._id!)
-                                    }
-                                    style={{ width: "210px", height: "120px" }}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </Card>
-                        </Col>
-                      ))}
-                    </Row>
-                    <Row>
-                      <Col>
-                        <button
-                          type="button"
-                          className="btn btn-primary mt-3"
-                          onClick={() => setAddNewCardForm(!addNewCardForm)}
-                        >
-                          <span className="icon-on">
-                            <i className="ri-add-line align-bottom"></i> New
-                            Card
-                          </span>
-                        </button>
-                      </Col>
-                      {addNewCardForm && (
-                        <form onSubmit={onSubmitCardForm}>
-                          <div className="hstack gap-3 mt-3">
-                            <input
-                              type="text"
-                              className="form-control"
-                              placeholder="Card Title"
-                              id="title"
-                              name="title"
-                              value={cardFrom.title}
-                              onChange={onChangeCardForm}
-                            />
-                            <select
-                              className="form-select text-muted"
-                              onChange={handleSelectIcon}
-                            >
-                              <option value="">Select Icon</option>
-                              {AllIcons.map((icon) => (
-                                <option value={icon.code} key={icon?._id!}>
-                                  {icon.label}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="hstack gap-3 mt-3">
-                            <textarea
-                              className="form-control"
-                              id="content"
-                              name="content"
-                              value={cardFrom.content}
-                              onChange={onChangeCardForm}
-                              placeholder="Card Content"
-                            />
-                            <input
-                              type="file"
-                              className="form-control"
-                              id="image_base64"
-                              onChange={handleFileCardUpload}
-                            />
-                            <Image
-                              src={`data:image/jpeg;base64, ${cardFrom.image_base64}`}
-                              alt="Preview"
-                              className="rounded"
-                              width="160"
-                            />
-                          </div>
-                          <div className="d-flex justify-content-end mt-3">
-                            <button type="submit" className="btn btn-info">
-                              <span className="icon-on">Add</span>
-                            </button>
-                          </div>
-                        </form>
-                      )}
-                    </Row>
-                  </>
-                ))
-              ) : (
-                <h4 className="m-5 d-flex justify-content-center">
-                  Please Select a page with Offer Services Section to update it
-                  !!
-                </h4>
-              )}
-            </Card.Body>
-          </Card>
-        </Container>
-      </div>
+                </div>
+                <div className="hstack gap-3 mt-3">
+                  <textarea
+                    className="form-control"
+                    id="content"
+                    name="content"
+                    value={cardFrom.content}
+                    onChange={onChangeCardForm}
+                    placeholder="Card Content"
+                  />
+                  <input
+                    type="file"
+                    className="form-control"
+                    id="image_base64"
+                    onChange={handleFileCardUpload}
+                  />
+                  <Image
+                    src={`data:image/jpeg;base64, ${cardFrom.image_base64}`}
+                    alt="Preview"
+                    className="rounded"
+                    width="160"
+                  />
+                </div>
+                <div className="d-flex justify-content-end mt-3">
+                  <button type="submit" className="btn btn-info">
+                    <span className="icon-on">Add</span>
+                  </button>
+                </div>
+              </form>
+            )}
+          </Row>
+        </>
+      ))}
     </React.Fragment>
   );
 };

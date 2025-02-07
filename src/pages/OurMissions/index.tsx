@@ -20,20 +20,17 @@ interface MissionGroup {
   missions: Mission[];
 }
 
-const OurMissions = () => {
-  document.title = "Web Site Our Missions | Coach Hire Network";
-  const { data: AllOurMissions = [] } = useGetAllOurMissionsQuery();
-  const { data: AllPages = [] } = useGetAllPagesQuery();
-  const [updateOurMissionMutation] = useUpdateOurMissionMutation();
-  const [expandedPages, setExpandedPages] = useState<any[]>([]);
+interface OurMissionsProps {
+  filtredOurMissionsData: any[];
+  selectedPage: string;
+}
 
-  const togglePage = (pageLink: any) => {
-    setExpandedPages((prev) =>
-      prev.includes(pageLink)
-        ? prev.filter((link) => link !== pageLink)
-        : [...prev, pageLink]
-    );
-  };
+const OurMissions: React.FC<OurMissionsProps> = ({
+  filtredOurMissionsData,
+  selectedPage,
+}) => {
+  const { data: AllOurMissions = [] } = useGetAllOurMissionsQuery();
+  const [updateOurMissionMutation] = useUpdateOurMissionMutation();
 
   const [isEditing, setIsEditing] = useState<{
     [pageLink: string]: {
@@ -80,6 +77,7 @@ const OurMissions = () => {
       (m) => m.page === pageLink
     );
 
+    console.log("mission!!", mission);
     if (!mission) return;
 
     const fieldValue =
@@ -108,7 +106,6 @@ const OurMissions = () => {
     }));
   };
 
-  console.log("updated values", updatedValues);
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     pageLink: string,
@@ -152,7 +149,6 @@ const OurMissions = () => {
       (mission, idx) => {
         if (idx === missionIndex) {
           if (field === "content") {
-            // Update the content directly since it's a string
             return {
               ...mission,
               content:
@@ -161,7 +157,6 @@ const OurMissions = () => {
             };
           }
 
-          // Handle littleTitle and bigTitle (objects with name)
           const fieldValue = mission[field];
           if (
             typeof fieldValue === "object" &&
@@ -183,17 +178,13 @@ const OurMissions = () => {
       }
     );
 
-    console.log("updatedMission", updatedMission);
-
     const updatedCollection = {
       ...AllOurMissions[parentMissionIndex],
       missions: updatedMission,
     };
 
-    // Trigger the mutation
     updateOurMissionMutation(updatedCollection);
 
-    // Reset the editing state
     setIsEditing((prev) => ({
       ...prev,
       [pageLink]: {
@@ -208,293 +199,271 @@ const OurMissions = () => {
 
   return (
     <React.Fragment>
-      <div className="page-content">
-        <Container fluid>
-          <Breadcrumb
-            title="Web Site Our Missions"
-            pageTitle="WebSite Setting"
+      <Row className="border-bottom p-4">
+        <Col lg={1}>
+          <input
+            type="checkbox"
+            checked={filtredOurMissionsData[0]?.display! === "1"}
+            onChange={(e) => {
+              const parentMissionCollection = AllOurMissions.find(
+                (collection) =>
+                  collection.missions.some(
+                    (mission: any) =>
+                      mission?._id! === filtredOurMissionsData[0]?._id
+                  )
+              );
+
+              if (!parentMissionCollection) {
+                console.error("Parent document not found!");
+                return;
+              }
+
+              const updatedMissions = parentMissionCollection.missions.map(
+                (mission: any) =>
+                  mission._id === filtredOurMissionsData[0]?._id
+                    ? { ...mission, display: e.target.checked ? "1" : "0" }
+                    : mission
+              );
+
+              updateOurMissionMutation({
+                _id: parentMissionCollection._id,
+                missions: updatedMissions,
+              });
+            }}
           />
-          <Col lg={12}>
-            <Card>
-              <Card.Body>
-                <div>
-                  <ul>
-                    {AllPages.map((page) => {
-                      const missionsForPage = AllOurMissions.flatMap(
-                        (mission) =>
-                          mission.missions.filter((m) => m.page === page.link)
-                      );
-                      const isExpanded = expandedPages.includes(page.link);
-                      return (
-                        <li key={page.label}>
-                          <strong
-                            className="text-primary text-opacity-75 mb-1"
-                            style={{ cursor: "pointer" }}
-                            onClick={() => togglePage(page.link)}
-                          >
-                            Page: {page.label}
-                          </strong>
-                          {isExpanded && (
-                            <Row>
-                              {missionsForPage.length > 0 ? (
-                                missionsForPage.map((mission, missionIndex) => {
-                                  const allMissionsIndex =
-                                    AllOurMissions.findIndex((m) =>
-                                      m.missions.some(
-                                        (item) => item === mission
-                                      )
-                                    );
+        </Col>
+        <Col>
+          {filtredOurMissionsData.map((mission, missionIndex) => {
+            const allMissionsIndex = AllOurMissions.findIndex((m) =>
+              m.missions.some((item) => item === mission)
+            );
 
-                                  const parentMissionIndex =
-                                    allMissionsIndex !== -1
-                                      ? AllOurMissions[
-                                          allMissionsIndex
-                                        ].missions.findIndex(
-                                          (item) => item === mission
-                                        )
-                                      : -1;
-                                  if (parentMissionIndex === -1) {
-                                    return null;
-                                  }
-
-                                  return (
-                                    <div
-                                      key={`${mission.page}-${parentMissionIndex}`}
-                                      style={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                      }}
-                                    >
-                                      <div
-                                        style={{
-                                          display: "flex",
-                                          alignItems: "center",
-                                        }}
-                                        className="hstack gap-3 m-3"
-                                      >
-                                        <input
-                                          type="checkbox"
-                                          checked={
-                                            mission?.littleTitle.display === "1"
-                                          }
-                                          onChange={() =>
-                                            handleCheckboxToggle(
-                                              allMissionsIndex,
-                                              parentMissionIndex,
-                                              "littleTitle"
-                                            )
-                                          }
-                                        />
-                                        {isEditing[page.link]?.[
-                                          parentMissionIndex
-                                        ]?.littleTitle ? (
-                                          <input
-                                            type="text"
-                                            value={
-                                              updatedValues[page.link]?.[
-                                                parentMissionIndex
-                                              ]?.littleTitle ||
-                                              mission.littleTitle.name
-                                            }
-                                            onChange={(e) =>
-                                              handleInputChange(
-                                                e,
-                                                page.link,
-                                                parentMissionIndex,
-                                                "littleTitle"
-                                              )
-                                            }
-                                            onBlur={() =>
-                                              handleInputBlur(
-                                                page.link,
-                                                parentMissionIndex,
-                                                "littleTitle"
-                                              )
-                                            }
-                                            className="form-control w-50"
-                                          />
-                                        ) : (
-                                          <span
-                                            style={{
-                                              textTransform: "uppercase",
-                                              fontSize: "13px",
-                                              fontWeight: 600,
-                                              color: "#CD2528",
-                                            }}
-                                            className="justify-content-center"
-                                          >
-                                            {mission?.littleTitle.name}
-                                          </span>
-                                        )}
-                                        <i
-                                          className="ri-pencil-line"
-                                          style={{
-                                            cursor: "pointer",
-                                            marginLeft: "8px",
-                                          }}
-                                          onClick={() =>
-                                            handleEditIconClick(
-                                              mission.page,
-                                              parentMissionIndex,
-                                              "littleTitle"
-                                            )
-                                          }
-                                        />
-                                      </div>
-                                      <div
-                                        style={{
-                                          display: "flex",
-                                          alignItems: "center",
-                                        }}
-                                        className="hstack gap-3 m-3"
-                                      >
-                                        <input
-                                          type="checkbox"
-                                          checked={
-                                            mission?.bigTitle.display === "1"
-                                          }
-                                          onChange={() =>
-                                            handleCheckboxToggle(
-                                              allMissionsIndex,
-                                              parentMissionIndex,
-                                              "bigTitle"
-                                            )
-                                          }
-                                        />
-                                        {isEditing[page.link]?.[
-                                          parentMissionIndex
-                                        ]?.bigTitle ? (
-                                          <input
-                                            type="text"
-                                            value={
-                                              updatedValues[page.link]?.[
-                                                parentMissionIndex
-                                              ]?.bigTitle ||
-                                              mission.bigTitle.name
-                                            }
-                                            onChange={(e) =>
-                                              handleInputChange(
-                                                e,
-                                                page.link,
-                                                parentMissionIndex,
-                                                "bigTitle"
-                                              )
-                                            }
-                                            onBlur={() =>
-                                              handleInputBlur(
-                                                page.link,
-                                                parentMissionIndex,
-                                                "bigTitle"
-                                              )
-                                            }
-                                            className="form-control w-50"
-                                          />
-                                        ) : (
-                                          <span
-                                            style={{
-                                              textTransform: "uppercase",
-                                              fontSize: "18px",
-                                              fontWeight: 800,
-                                              color: "#000",
-                                            }}
-                                            className="justify-content-center"
-                                          >
-                                            {mission?.bigTitle.name}
-                                          </span>
-                                        )}
-                                        <i
-                                          className="ri-pencil-line"
-                                          style={{
-                                            cursor: "pointer",
-                                            marginLeft: "8px",
-                                          }}
-                                          onClick={() =>
-                                            handleEditIconClick(
-                                              mission.page,
-                                              parentMissionIndex,
-                                              "bigTitle"
-                                            )
-                                          }
-                                        />
-                                      </div>
-                                      <div
-                                        style={{
-                                          display: "flex",
-                                          alignItems: "center",
-                                        }}
-                                        className="hstack gap-3 m-3"
-                                      >
-                                        {isEditing[page.link]?.[
-                                          parentMissionIndex
-                                        ]?.content ? (
-                                          <input
-                                            type="text"
-                                            value={
-                                              updatedValues[page.link]?.[
-                                                parentMissionIndex
-                                              ]?.content || mission.content
-                                            }
-                                            onChange={(e) =>
-                                              handleInputChange(
-                                                e,
-                                                page.link,
-                                                parentMissionIndex,
-                                                "content"
-                                              )
-                                            }
-                                            onBlur={() =>
-                                              handleInputBlur(
-                                                page.link,
-                                                parentMissionIndex,
-                                                "content"
-                                              )
-                                            }
-                                            className="form-control w-50"
-                                          />
-                                        ) : (
-                                          <span
-                                            style={{
-                                              fontSize: "12px",
-                                              color: "#000",
-                                            }}
-                                            className="justify-content-center"
-                                          >
-                                            {mission?.content}
-                                          </span>
-                                        )}
-                                        <i
-                                          className="ri-pencil-line"
-                                          style={{
-                                            cursor: "pointer",
-                                            marginLeft: "8px",
-                                          }}
-                                          onClick={() =>
-                                            handleEditIconClick(
-                                              mission.page,
-                                              parentMissionIndex,
-                                              "content"
-                                            )
-                                          }
-                                        />
-                                      </div>
-                                    </div>
-                                  );
-                                })
-                              ) : (
-                                <li>No missions available for this page</li>
-                              )}
-                            </Row>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
+            const parentMissionIndex =
+              allMissionsIndex !== -1
+                ? AllOurMissions[allMissionsIndex].missions.findIndex(
+                    (item) => item === mission
+                  )
+                : -1;
+            if (parentMissionIndex === -1) {
+              return null;
+            }
+            return (
+              <div
+                key={`${mission.page}-${parentMissionIndex}`}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                  className="hstack gap-3 m-3"
+                >
+                  <input
+                    type="checkbox"
+                    checked={mission?.littleTitle.display === "1"}
+                    onChange={() =>
+                      handleCheckboxToggle(
+                        allMissionsIndex,
+                        parentMissionIndex,
+                        "littleTitle"
+                      )
+                    }
+                  />
+                  {isEditing[mission.link]?.[parentMissionIndex]
+                    ?.littleTitle ? (
+                    <input
+                      type="text"
+                      value={
+                        updatedValues[mission.link]?.[parentMissionIndex]
+                          ?.littleTitle || mission.littleTitle.name
+                      }
+                      onChange={(e) =>
+                        handleInputChange(
+                          e,
+                          mission.link,
+                          parentMissionIndex,
+                          "littleTitle"
+                        )
+                      }
+                      onBlur={() =>
+                        handleInputBlur(
+                          mission.link,
+                          parentMissionIndex,
+                          "littleTitle"
+                        )
+                      }
+                      className="form-control w-50"
+                    />
+                  ) : (
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        color: "#CD2528",
+                      }}
+                      className="justify-content-center"
+                    >
+                      {mission?.littleTitle.name}
+                    </span>
+                  )}
+                  <i
+                    className="ri-pencil-line"
+                    style={{
+                      cursor: "pointer",
+                      marginLeft: "8px",
+                    }}
+                    onClick={() =>
+                      handleEditIconClick(
+                        mission.page,
+                        parentMissionIndex,
+                        "littleTitle"
+                      )
+                    }
+                  />
                 </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Container>
-      </div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                  className="hstack gap-3 m-3"
+                >
+                  <input
+                    type="checkbox"
+                    checked={mission?.bigTitle.display === "1"}
+                    onChange={() =>
+                      handleCheckboxToggle(
+                        allMissionsIndex,
+                        parentMissionIndex,
+                        "bigTitle"
+                      )
+                    }
+                  />
+                  {isEditing[mission.link]?.[parentMissionIndex]?.bigTitle ? (
+                    <input
+                      type="text"
+                      value={
+                        updatedValues[mission.link]?.[parentMissionIndex]
+                          ?.bigTitle || mission.bigTitle.name
+                      }
+                      onChange={(e) =>
+                        handleInputChange(
+                          e,
+                          mission.link,
+                          parentMissionIndex,
+                          "bigTitle"
+                        )
+                      }
+                      onBlur={() =>
+                        handleInputBlur(
+                          mission.link,
+                          parentMissionIndex,
+                          "bigTitle"
+                        )
+                      }
+                      className="form-control w-50"
+                    />
+                  ) : (
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        fontSize: "18px",
+                        fontWeight: 800,
+                        color: "#000",
+                      }}
+                      className="justify-content-center"
+                    >
+                      {mission?.bigTitle.name}
+                    </span>
+                  )}
+                  <i
+                    className="ri-pencil-line"
+                    style={{
+                      cursor: "pointer",
+                      marginLeft: "8px",
+                    }}
+                    onClick={() =>
+                      handleEditIconClick(
+                        mission.page,
+                        parentMissionIndex,
+                        "bigTitle"
+                      )
+                    }
+                  />
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                  className="hstack gap-3 m-3"
+                >
+                  {isEditing[mission.link]?.[parentMissionIndex]?.content ? (
+                    <input
+                      type="text"
+                      value={
+                        updatedValues[mission.link]?.[parentMissionIndex]
+                          ?.content || mission.content
+                      }
+                      onChange={(e) =>
+                        handleInputChange(
+                          e,
+                          mission.link,
+                          parentMissionIndex,
+                          "content"
+                        )
+                      }
+                      onBlur={() =>
+                        handleInputBlur(
+                          mission.link,
+                          parentMissionIndex,
+                          "content"
+                        )
+                      }
+                      className="form-control w-50"
+                    />
+                  ) : (
+                    <span
+                      style={{
+                        fontSize: "12px",
+                        color: "#000",
+                      }}
+                      className="justify-content-center"
+                    >
+                      {mission?.content?.slice(0, 176)}...
+                    </span>
+                  )}
+                  <i
+                    className="ri-pencil-line"
+                    style={{
+                      cursor: "pointer",
+                      marginLeft: "8px",
+                    }}
+                    onClick={() =>
+                      handleEditIconClick(
+                        mission.page,
+                        parentMissionIndex,
+                        "content"
+                      )
+                    }
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </Col>
+      </Row>
+      {/* )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div> */}
     </React.Fragment>
   );
 };

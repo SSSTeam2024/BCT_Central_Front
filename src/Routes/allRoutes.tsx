@@ -111,6 +111,8 @@ import VehiclesClassComponent from "pages/VehiclesClassComponent";
 import FleetComponent from "pages/FleetComponent";
 import OnTheRoadComponent from "pages/OnTheRoadComponent";
 import InThePress from "pages/InThePress";
+import OurPages from "pages/OurPages";
+import OurComponents from "pages/OurComponents";
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: <Dashboard /> },
@@ -206,18 +208,20 @@ const authProtectedRoutes = [
   { path: "/website-menu", component: <MenuSite /> },
   { path: "/website-footer-list", component: <FooterList /> },
   { path: "/website-social-media", component: <FooterSocial /> },
-  { path: "/website-about-us", component: <AboutUs /> },
-  { path: "/website-our-values", component: <OurValues /> },
-  { path: "/website-services-offer", component: <OfferServices /> },
-  { path: "/website-page", component: <HtmlPage /> },
-  { path: "/website-our-missions", component: <OurMissions /> },
-  { path: "/website-why-choose-us", component: <BestOffer /> },
+  // { path: "/website-about-us", component: <AboutUs /> },
+  // { path: "/website-our-values", component: <OurValues /> },
+  // { path: "/website-services-offer", component: <OfferServices /> },
+  { path: "/website-new-page", component: <HtmlPage /> },
+  // { path: "/website-our-missions", component: <OurMissions /> },
+  // { path: "/website-why-choose-us", component: <BestOffer /> },
   { path: "/website-services-block-1", component: <ServicesBlock1 /> },
   { path: "/website-vehicles-guide", component: <VehicleGuideComponent /> },
   { path: "/website-vehicle-classes", component: <VehiclesClassComponent /> },
   { path: "/website-fleet", component: <FleetComponent /> },
   { path: "/website-on-the-road", component: <OnTheRoadComponent /> },
   { path: "/website-in-the-press", component: <InThePress /> },
+  { path: "/website-pages", component: <OurPages /> },
+  { path: "/website-components", component: <OurComponents /> },
 
   //? Feedback & Claims
   { path: "/feedback", component: <Feedback /> },

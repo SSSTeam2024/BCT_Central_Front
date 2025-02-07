@@ -300,7 +300,7 @@ const FooterList = () => {
         <Container fluid>
           <Breadcrumb title="Footer List" pageTitle="Web Site Settings" />
           <Card>
-            <Card.Header style={{ backgroundColor: "#CD2528" }}>
+            <Card.Header style={{ backgroundColor: "#eee" }}>
               <Row>
                 <DragDropContext onDragEnd={onDragEnd}>
                   <Droppable droppableId="footers">
@@ -379,7 +379,7 @@ const FooterList = () => {
                                       style={{ listStyleType: "none" }}
                                       key={index}
                                     >
-                                      <li className="d-flex align-items-center text-white">
+                                      <li className="d-flex align-items-center text-dark">
                                         {/* Always show checkbox */}
                                         <input
                                           type="checkbox"

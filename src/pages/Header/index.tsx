@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Row, Card, Col, Image } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -30,7 +30,7 @@ function convertToBase64(
 const Header = () => {
   document.title = "Web Site Header | Coach Hire Network";
   const [hovered, setHovered] = useState<string>("");
-
+  const { data = [] } = useGetAllHeadersQuery();
   const navigate = useNavigate();
 
   const notifySuccess = () => {
@@ -53,21 +53,21 @@ const Header = () => {
     });
   };
 
-  const location = useLocation();
-  const data = location.state;
+  // const location = useLocation();
+  // const data = location.state;
   const [isEditingPhoneLabel, setIsEditingPhoneLabel] = useState(false);
   const [isEditingPhoneValue, setIsEditingPhoneValue] = useState(false);
   const [isEditingEmailLabel, setIsEditingEmailLabel] = useState(false);
   const [isEditingEmailValue, setIsEditingEmailValue] = useState(false);
   const [isEditingAddressLabel, setIsEditingAddressLabel] = useState(false);
   const [isEditingAddressValue, setIsEditingAddressValue] = useState(false);
-  const [phoneLabel, setPhoneLabel] = useState(data?.phone_label!);
-  const [phoneValue, setPhoneValue] = useState(data?.phone_value!);
-  const [emailValue, setEmailValue] = useState(data?.email_value!);
-  const [emailLabel, setEmailLabel] = useState(data?.email_label!);
-  const [addressValue, setAddressValue] = useState(data?.address_value!);
-  const [addressLabel, setAddressLabel] = useState(data?.address_label!);
-  const [buttonText, setButtonText] = useState(data?.button_text!);
+  const [phoneLabel, setPhoneLabel] = useState(data[0]?.phone_label!);
+  const [phoneValue, setPhoneValue] = useState(data[0]?.phone_value!);
+  const [emailValue, setEmailValue] = useState(data[0]?.email_value!);
+  const [emailLabel, setEmailLabel] = useState(data[0]?.email_label!);
+  const [addressValue, setAddressValue] = useState(data[0]?.address_value!);
+  const [addressLabel, setAddressLabel] = useState(data[0]?.address_label!);
+  const [buttonText, setButtonText] = useState(data[0]?.button_text!);
   const [isEditing, setIsEditing] = useState(false);
   //   const [isAddressChecked, setIsAddressChecked] = useState(
   //     data[0]?.address_display! === "1"
@@ -75,7 +75,17 @@ const Header = () => {
   //   const [isEmailChecked, setIsEmailChecked] = useState(
   //     data[0]?.email_display! === "1"
   //   );
-
+  useEffect(() => {
+    if (data.length > 0) {
+      setPhoneLabel(data[0]?.phone_label);
+      setPhoneValue(data[0]?.phone_value);
+      setEmailValue(data[0]?.email_value);
+      setEmailLabel(data[0]?.email_label);
+      setAddressValue(data[0]?.address_value);
+      setAddressLabel(data[0]?.address_label);
+      setButtonText(data[0]?.button_text);
+    }
+  }, [data]);
   //! Phone Label
   const handleIconClick = () => {
     setIsEditingPhoneLabel(true);
@@ -289,7 +299,7 @@ const Header = () => {
   ) => {
     e.preventDefault();
     try {
-      updateHeader["_id"] = data?._id!;
+      updateHeader["_id"] = data[0]?._id!;
       updateHeader["phone_label"] = phoneLabel;
       updateHeader["phone_value"] = phoneValue;
       updateHeader["email_label"] = emailLabel;
@@ -301,22 +311,22 @@ const Header = () => {
       if (isAddressChecked) {
         updateHeader["address_display"] = "1";
       } else {
-        updateHeader["address_display"] = data.address_display;
+        updateHeader["address_display"] = data[0].address_display;
       }
       if (isEmailChecked) {
         updateHeader["email_display"] = "1";
       } else {
-        updateHeader["email_display"] = data.email_display;
+        updateHeader["email_display"] = data[0].email_display;
       }
       if (isPhoneChecked) {
         updateHeader["phone_display"] = "1";
       } else {
-        updateHeader["phone_display"] = data.phone_display;
+        updateHeader["phone_display"] = data[0].phone_display;
       }
       if (!updateHeader.logo_base64) {
-        updateHeader["logo"] = data?.logo!;
-        updateHeader["logo_base64"] = data?.logo_base64!;
-        updateHeader["logo_extension"] = data?.logo_extension!;
+        updateHeader["logo"] = data[0]?.logo!;
+        updateHeader["logo_base64"] = data[0]?.logo_base64!;
+        updateHeader["logo_extension"] = data[0]?.logo_extension!;
       }
 
       await updateHeaderMutation(updateHeader);
@@ -332,6 +342,7 @@ const Header = () => {
       <div className="page-content">
         <Container fluid>
           <Breadcrumb title="Header" pageTitle="Web Site Settings" />
+
           <Card>
             <Card.Header>
               <Row className="p-3">
@@ -345,9 +356,8 @@ const Header = () => {
                     />
                   ) : (
                     <Image
-                      src={`${
-                        process.env.REACT_APP_BASE_URL
-                      }/header/${data?.logo!}`}
+                      src={`${process.env.REACT_APP_BASE_URL}/header/${data[0]
+                        ?.logo!}`}
                       alt=""
                       className="img-thumbnail"
                       width="160"

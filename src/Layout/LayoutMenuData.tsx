@@ -11,6 +11,7 @@ const Navdata = () => {
   const [isCorporateTransport, setIsCorporateTransport] = useState(false);
   const [isCorporate, setIsCorporate] = useState(false);
   const [isFeedbackClaims, setIsFeedbackClaims] = useState(false);
+  const [isWeBSite, setIsWebSite] = useState(false);
   const [isReportingManagement, setIsReportingManagement] = useState(false);
   const [isEmailTemplates, setIsEmailTemplates] = useState(false);
   const [isAdministration, setIsAdministration] = useState(false);
@@ -86,6 +87,9 @@ const Navdata = () => {
     if (iscurrentState !== "Administration") {
       setIsAdministration(false);
     }
+    if (iscurrentState !== "WebSite") {
+      setIsWebSite(false);
+    }
   }, [
     iscurrentState,
     isProgramming,
@@ -100,6 +104,7 @@ const Navdata = () => {
     isRevelance,
     isHelp,
     isMessages,
+    isWeBSite,
   ]);
 
   const menuItems: any = [
@@ -412,18 +417,68 @@ const Navdata = () => {
           parentId: "Management",
         },
         {
-          id: "WebSite",
-          label: "Web Site Settings",
-          link: "/website-settings",
-          icon: "mdi mdi-web",
-          parentId: "Management",
-        },
-        {
           id: "Defects",
           label: "Defects",
           link: "/defects-management",
           icon: "mdi mdi-alert",
           parentId: "Management",
+        },
+      ],
+    },
+    {
+      id: "WebSite",
+      label: "WebSite Settings",
+      icon: "mdi mdi-web",
+      link: "/#",
+      click: function (e: any) {
+        e.preventDefault();
+        setIsWebSite(!isWeBSite);
+        setIscurrentState("WebSite");
+        updateIconSidebar(e);
+      },
+      stateVariables: isWeBSite,
+      subItems: [
+        {
+          id: "Header",
+          label: "Header",
+          link: "/website-header",
+          icon: "mdi mdi-view-day-outline",
+          parentId: "WebSite",
+        },
+        {
+          id: "Menu",
+          label: "Menu",
+          link: "/website-menu",
+          icon: "mdi mdi-menu-open",
+          parentId: "WebSite",
+        },
+        {
+          id: "Footer",
+          label: "Footer",
+          link: "/website-footer-list",
+          icon: "mdi mdi-view-agenda-outline",
+          parentId: "WebSite",
+        },
+        {
+          id: "Sub-Footer",
+          label: "SubFooter",
+          link: "/website-social-media",
+          icon: "mdi mdi-text-long",
+          parentId: "WebSite",
+        },
+        {
+          id: "OurPages",
+          label: "Our Pages",
+          link: "/website-pages",
+          icon: "mdi mdi-view-grid-plus-outline",
+          parentId: "WebSite",
+        },
+        {
+          id: "Components",
+          label: "Components",
+          link: "/website-components",
+          icon: "mdi mdi-view-compact-outline",
+          parentId: "WebSite",
         },
       ],
     },

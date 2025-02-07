@@ -7,6 +7,7 @@ export interface BestOfferModel {
     display: string;
   };
   page: string;
+  display?:string
   image_base64: string;
   image_extension: string;
   littleTitle: {

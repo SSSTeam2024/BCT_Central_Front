@@ -4,6 +4,7 @@ export interface OurMissionCollection {
   _id?: string;
   missions: {
     page: string,
+    display?: string,
     littleTitle: {
       name: string,
       display: string
@@ -33,7 +34,7 @@ export const ourMissionSlice = createApi({
       addNewOurMission: builder.mutation<void, OurMissionCollection>({
         query(payload) {
           return {
-            url: "/createPage",
+            url: "/createOurMission",
             method: "POST",
             body: payload,
           };
