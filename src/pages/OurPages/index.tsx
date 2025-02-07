@@ -11,7 +11,10 @@ import {
   useAddNewOurMissionMutation,
   useGetAllOurMissionsQuery,
 } from "features/OurMissionsComponent/ourMissionsSlice";
-import { useGetOurValueQuery } from "features/OurValuesComponent/ourValuesSlice";
+import {
+  useCreateOurValueMutation,
+  useGetOurValueQuery,
+} from "features/OurValuesComponent/ourValuesSlice";
 import { useGetOfferServiceQuery } from "features/OffreServicesComponent/offreServicesSlice";
 import { useGetBestOffersQuery } from "features/bestOfferComponent/bestOfferSlice";
 import BestOffer from "pages/BestOffer";
@@ -31,6 +34,7 @@ const OurPages = () => {
   const { data: AllBestOffers = [] } = useGetBestOffersQuery();
   const [createNewAboutUs] = useAddNewAboutUsComponentMutation();
   const [createNewOurMission] = useAddNewOurMissionMutation();
+  const [createNewOurValue] = useCreateOurValueMutation();
 
   const [selectedPage, setSelectedPage] = useState<string>("");
   const [selectedComponent, setSelectedComponent] = useState<string>("");
@@ -177,6 +181,96 @@ const OurPages = () => {
       setNewSection(false);
     } catch (error) {
       console.log("Error submitting mission:", error);
+    }
+  };
+
+  const initialOurValue = {
+    image: {
+      path: "",
+      display: "",
+    },
+    newImage: "",
+    page: "",
+    display: "",
+    littleTitle: {
+      name: "",
+      display: "",
+    },
+    bigTitle: {
+      name: "",
+      display: "",
+    },
+    subTitle: {
+      name: "",
+      display: "",
+    },
+    tabs: [
+      {
+        title: "",
+        display: "",
+        content: "",
+        buttonLabel: "",
+        buttonLink: "",
+        buttonDisplay: "",
+      },
+    ],
+  };
+
+  const [ourValueComponent, setOurValueComponent] = useState(initialOurValue);
+
+  const onSubmitOurValue = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!AllValues.length) {
+      console.error("No values found in AllValues");
+      return;
+    }
+
+    const firstValue = AllValues[0];
+
+    // Create a new state object to avoid direct mutation
+    const updatedOurValue = {
+      ...ourValueComponent,
+      page: selectedPage,
+      display: "1",
+      newImage: "no",
+      image: {
+        ...ourValueComponent.image,
+        display: "1",
+        path: firstValue.image?.path || "",
+      },
+      littleTitle: {
+        ...ourValueComponent.littleTitle,
+        name: firstValue.littleTitle?.name || "",
+        display: "1",
+      },
+      bigTitle: {
+        ...ourValueComponent.bigTitle,
+        name: firstValue.bigTitle?.name || "",
+        display: "1",
+      },
+      subTitle: {
+        ...ourValueComponent.subTitle,
+        name: firstValue.subTitle?.name || "",
+        display: "1",
+      },
+      tabs: firstValue.tabs.map((tab: any) => ({
+        title: tab.title || "",
+        display: "1",
+        content: tab.content || "",
+        buttonLabel: tab.buttonLabel || "",
+        buttonLink: tab.buttonLink || "",
+        buttonDisplay: "1",
+      })),
+    };
+
+    try {
+      createNewOurValue(updatedOurValue);
+      setOurValueComponent(initialOurValue); // Reset state after submission
+      setSelectedComponent("");
+      setNewSection(false);
+    } catch (error) {
+      console.error("Error submitting value:", error);
     }
   };
 
@@ -378,6 +472,19 @@ const OurPages = () => {
                         type="button"
                         className="btn btn-info w-xs"
                         onClick={onSubmitOurMission}
+                      >
+                        <i className="ri-add-fill align-middle fs-16 me-2"></i>{" "}
+                        Add The Component to this Page
+                      </button>
+                    </div>
+                  )}
+                  {selectedComponent === "OurValues" && (
+                    <div className="vstack gap-2 p-4">
+                      <h3>OurValues Component</h3>
+                      <button
+                        type="button"
+                        className="btn btn-info w-xs"
+                        onClick={onSubmitOurValue}
                       >
                         <i className="ri-add-fill align-middle fs-16 me-2"></i>{" "}
                         Add The Component to this Page

@@ -8,8 +8,9 @@ export interface OurValuesModel {
   };
   page: string;
   display?: string
-  image_base64: string;
-  image_extension: string;
+  newImage?:string;
+  image_base64?: string;
+  image_extension?: string;
   littleTitle: {
     name: string;
     display: string;
@@ -62,10 +63,19 @@ export const ourValuesSlice = createApi({
         }),
         invalidatesTags: ["OurValuesModel"],
       }),
-      
+      createOurValue: builder.mutation<void, OurValuesModel>({
+                    query(payload) {
+                      return {
+                        url: "/createOurValue",
+                        method: "POST",
+                        body: payload,
+                      };
+                    },
+                    invalidatesTags: ["OurValuesModel"],
+                  }),
     };
   },
 });
 
-export const { useGetOurValueQuery, useUpdateOurValuesMutation, useAddTabToOurValueMutation } =
+export const { useGetOurValueQuery, useUpdateOurValuesMutation, useAddTabToOurValueMutation, useCreateOurValueMutation } =
   ourValuesSlice;
