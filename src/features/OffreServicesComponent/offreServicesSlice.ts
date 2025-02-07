@@ -15,11 +15,13 @@ export interface OffreServiceModel {
     display: string;
     content: string;
     icon: string;
+    newImage?: string;
     image: string;
-    image_base64: string;
-    image_extension: string;
+    image_base64?: string;
+    image_extension?: string;
   }[];
-  associatedPage: string
+  associatedPage: string;
+  display?: string
 }
 
 export interface CardOffer {
@@ -55,6 +57,16 @@ export const offreServiceSlice = createApi({
         }),
         invalidatesTags: ["OffreServiceModel"],
       }),
+      addServiceOffer: builder.mutation<void, OffreServiceModel>({
+              query(payload) {
+                return {
+                  url: "/createOfferService",
+                  method: "POST",
+                  body: payload,
+                };
+              },
+              invalidatesTags: ["OffreServiceModel"],
+            }),
       addCardToOfferService: builder.mutation<
         void,
        CardOffer
@@ -74,4 +86,5 @@ export const {
   useAddCardToOfferServiceMutation,
   useGetOfferServiceQuery,
   useUpdateOfferServiceMutation,
+  useAddServiceOfferMutation
 } = offreServiceSlice;

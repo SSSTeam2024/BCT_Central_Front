@@ -73,11 +73,13 @@ const OurMissions: React.FC<OurMissionsProps> = ({
     missionIndex: number,
     field: "littleTitle" | "bigTitle" | "content"
   ) => {
-    const mission = AllOurMissions.flatMap((m) => m.missions).find(
-      (m) => m.page === pageLink
+    const parentMission = AllOurMissions.find((m) =>
+      m.missions.some((mission) => mission.page === pageLink)
     );
 
-    console.log("mission!!", mission);
+    if (!parentMission) return;
+
+    const mission = parentMission.missions[missionIndex];
     if (!mission) return;
 
     const fieldValue =
@@ -107,7 +109,7 @@ const OurMissions: React.FC<OurMissionsProps> = ({
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     pageLink: string,
     missionIndex: number,
     field: "littleTitle" | "bigTitle" | "content"
@@ -131,57 +133,60 @@ const OurMissions: React.FC<OurMissionsProps> = ({
     missionIndex: number,
     field: "littleTitle" | "bigTitle" | "content"
   ) => {
+    console.log(
+      "handleInputBlur triggered for:",
+      pageLink,
+      missionIndex,
+      field
+    );
+
     const parentMissionIndex = AllOurMissions.findIndex((m) =>
       m.missions.some((mission) => mission.page === pageLink)
     );
 
-    if (parentMissionIndex === -1) return;
+    if (parentMissionIndex === -1) {
+      console.error("Parent mission not found!");
+      return;
+    }
 
-    const currentMission =
-      AllOurMissions[parentMissionIndex].missions[missionIndex];
+    const parentMission = AllOurMissions[parentMissionIndex];
+    const currentMission = parentMission.missions[missionIndex];
 
     if (!currentMission) {
       console.error("Mission not found at the given index.");
       return;
     }
 
-    const updatedMission = AllOurMissions[parentMissionIndex].missions.map(
-      (mission, idx) => {
-        if (idx === missionIndex) {
-          if (field === "content") {
-            return {
-              ...mission,
-              content:
-                updatedValues[pageLink]?.[missionIndex]?.content ||
-                mission.content,
-            };
-          }
-
-          const fieldValue = mission[field];
-          if (
-            typeof fieldValue === "object" &&
-            fieldValue !== null &&
-            "name" in fieldValue
-          ) {
-            return {
-              ...mission,
-              [field]: {
-                ...fieldValue,
-                name:
-                  updatedValues[pageLink]?.[missionIndex]?.[field] ||
-                  fieldValue.name,
-              },
-            };
-          }
+    const updatedMissions = parentMission.missions.map((mission, idx) => {
+      if (idx === missionIndex) {
+        if (field === "content") {
+          return {
+            ...mission,
+            content:
+              updatedValues[pageLink]?.[missionIndex]?.content ||
+              mission.content,
+          };
         }
-        return mission;
+
+        return {
+          ...mission,
+          [field]: {
+            ...mission[field],
+            name:
+              updatedValues[pageLink]?.[missionIndex]?.[field] ||
+              mission[field].name,
+          },
+        };
       }
-    );
+      return mission;
+    });
 
     const updatedCollection = {
-      ...AllOurMissions[parentMissionIndex],
-      missions: updatedMission,
+      ...parentMission,
+      missions: updatedMissions,
     };
+
+    console.log("Updating mission with:", updatedCollection);
 
     updateOurMissionMutation(updatedCollection);
 
@@ -191,12 +196,13 @@ const OurMissions: React.FC<OurMissionsProps> = ({
         ...prev[pageLink],
         [missionIndex]: {
           ...prev[pageLink]?.[missionIndex],
-          [field]: false,
+          [field]: false, // Close input after update
         },
       },
     }));
   };
 
+  // console.log("filtredOurMissionsData", filtredOurMissionsData)
   return (
     <React.Fragment>
       <Row className="border-bottom p-4">
@@ -273,25 +279,25 @@ const OurMissions: React.FC<OurMissionsProps> = ({
                       )
                     }
                   />
-                  {isEditing[mission.link]?.[parentMissionIndex]
+                  {isEditing[mission.page]?.[parentMissionIndex]
                     ?.littleTitle ? (
                     <input
                       type="text"
                       value={
-                        updatedValues[mission.link]?.[parentMissionIndex]
+                        updatedValues[mission.page]?.[parentMissionIndex]
                           ?.littleTitle || mission.littleTitle.name
                       }
                       onChange={(e) =>
                         handleInputChange(
                           e,
-                          mission.link,
+                          mission.page,
                           parentMissionIndex,
                           "littleTitle"
                         )
                       }
                       onBlur={() =>
                         handleInputBlur(
-                          mission.link,
+                          mission.page,
                           parentMissionIndex,
                           "littleTitle"
                         )
@@ -344,24 +350,24 @@ const OurMissions: React.FC<OurMissionsProps> = ({
                       )
                     }
                   />
-                  {isEditing[mission.link]?.[parentMissionIndex]?.bigTitle ? (
+                  {isEditing[mission.page]?.[parentMissionIndex]?.bigTitle ? (
                     <input
                       type="text"
                       value={
-                        updatedValues[mission.link]?.[parentMissionIndex]
+                        updatedValues[mission.page]?.[parentMissionIndex]
                           ?.bigTitle || mission.bigTitle.name
                       }
                       onChange={(e) =>
                         handleInputChange(
                           e,
-                          mission.link,
+                          mission.page,
                           parentMissionIndex,
                           "bigTitle"
                         )
                       }
                       onBlur={() =>
                         handleInputBlur(
-                          mission.link,
+                          mission.page,
                           parentMissionIndex,
                           "bigTitle"
                         )
@@ -403,29 +409,29 @@ const OurMissions: React.FC<OurMissionsProps> = ({
                   }}
                   className="hstack gap-3 m-3"
                 >
-                  {isEditing[mission.link]?.[parentMissionIndex]?.content ? (
-                    <input
-                      type="text"
+                  {isEditing[mission.page]?.[parentMissionIndex]?.content ? (
+                    <textarea
+                      rows={3}
                       value={
-                        updatedValues[mission.link]?.[parentMissionIndex]
+                        updatedValues[mission.page]?.[parentMissionIndex]
                           ?.content || mission.content
                       }
                       onChange={(e) =>
                         handleInputChange(
                           e,
-                          mission.link,
+                          mission.page,
                           parentMissionIndex,
                           "content"
                         )
                       }
                       onBlur={() =>
                         handleInputBlur(
-                          mission.link,
+                          mission.page,
                           parentMissionIndex,
                           "content"
                         )
                       }
-                      className="form-control w-50"
+                      className="form-control"
                     />
                   ) : (
                     <span

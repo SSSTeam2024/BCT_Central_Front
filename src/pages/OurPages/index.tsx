@@ -15,7 +15,10 @@ import {
   useCreateOurValueMutation,
   useGetOurValueQuery,
 } from "features/OurValuesComponent/ourValuesSlice";
-import { useGetOfferServiceQuery } from "features/OffreServicesComponent/offreServicesSlice";
+import {
+  useAddServiceOfferMutation,
+  useGetOfferServiceQuery,
+} from "features/OffreServicesComponent/offreServicesSlice";
 import { useGetBestOffersQuery } from "features/bestOfferComponent/bestOfferSlice";
 import BestOffer from "pages/BestOffer";
 import OfferServices from "pages/OfferServices";
@@ -35,6 +38,7 @@ const OurPages = () => {
   const [createNewAboutUs] = useAddNewAboutUsComponentMutation();
   const [createNewOurMission] = useAddNewOurMissionMutation();
   const [createNewOurValue] = useCreateOurValueMutation();
+  const [createNewServiceOffer] = useAddServiceOfferMutation();
 
   const [selectedPage, setSelectedPage] = useState<string>("");
   const [selectedComponent, setSelectedComponent] = useState<string>("");
@@ -228,7 +232,6 @@ const OurPages = () => {
 
     const firstValue = AllValues[0];
 
-    // Create a new state object to avoid direct mutation
     const updatedOurValue = {
       ...ourValueComponent,
       page: selectedPage,
@@ -266,7 +269,78 @@ const OurPages = () => {
 
     try {
       createNewOurValue(updatedOurValue);
-      setOurValueComponent(initialOurValue); // Reset state after submission
+      setOurValueComponent(initialOurValue);
+      setSelectedComponent("");
+      setNewSection(false);
+    } catch (error) {
+      console.error("Error submitting value:", error);
+    }
+  };
+
+  const initialServiceOffer = {
+    littleTitle: {
+      name: "",
+      display: "",
+    },
+    bigTitle: {
+      name: "",
+      display: "",
+    },
+    cards: [
+      {
+        title: "",
+        display: "",
+        content: "",
+        icon: "",
+        image: "",
+        newImage: "no",
+        image_base64: "",
+        image_extension: "",
+      },
+    ],
+    associatedPage: "",
+    display: "",
+  };
+
+  const [offerServiceComponent, setOfferServiceComponent] =
+    useState(initialServiceOffer);
+
+  const onSubmitOfferService = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!AllOfferServices.length) {
+      console.error("No values found in AllOfferServices");
+      return;
+    }
+
+    const firstValue = AllOfferServices[0];
+
+    const updatedOfferService = {
+      ...offerServiceComponent,
+      associatedPage: selectedPage,
+      display: "1",
+      littleTitle: {
+        ...offerServiceComponent.littleTitle,
+        name: firstValue.littleTitle?.name || "",
+        display: "1",
+      },
+      bigTitle: {
+        ...offerServiceComponent.bigTitle,
+        name: firstValue.bigTitle?.name || "",
+        display: "1",
+      },
+      cards: firstValue.cards.map((card: any) => ({
+        title: card.title || "",
+        display: "1",
+        content: card.content || "",
+        icon: card.icon || "",
+        image: card.image || "",
+      })),
+    };
+
+    try {
+      createNewServiceOffer(updatedOfferService);
+      setOfferServiceComponent(initialServiceOffer);
       setSelectedComponent("");
       setNewSection(false);
     } catch (error) {
@@ -491,6 +565,20 @@ const OurPages = () => {
                       </button>
                     </div>
                   )}
+                  {selectedComponent === "ServicesOfferd" && (
+                    <div className="vstack gap-2 p-4">
+                      <h3>Offer Service Component</h3>
+                      <button
+                        type="button"
+                        className="btn btn-info w-xs"
+                        onClick={onSubmitOfferService}
+                      >
+                        <i className="ri-add-fill align-middle fs-16 me-2"></i>{" "}
+                        Add The Component to this Page
+                      </button>
+                    </div>
+                  )}
+
                   {/* {selectedPage && selectedComponent && (
                     <button
                       type="button"

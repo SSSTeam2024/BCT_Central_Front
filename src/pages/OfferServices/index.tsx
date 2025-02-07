@@ -62,7 +62,7 @@ const OfferServices: React.FC<OfferServicesProps> = ({ selectedPage }) => {
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
 
   const filteredServices = data.filter(
-    (service) => service.associatedPage === selectedPageId
+    (service) => service.associatedPage === selectedPage
   );
 
   const [editingField, setEditingField] = useState<{
