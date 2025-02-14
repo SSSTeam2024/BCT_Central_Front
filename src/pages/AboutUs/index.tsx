@@ -370,7 +370,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ selectedPage }) => {
                   )}
                   <div className="d-flex justify-content-center mt-n2">
                     <label
-                      htmlFor="image"
+                      htmlFor={`image_${about?.image.path}`}
                       className="mb-0"
                       data-bs-toggle="tooltip"
                       data-bs-placement="right"
@@ -385,7 +385,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ selectedPage }) => {
                     <input
                       className="form-control d-none"
                       type="file"
-                      name="image"
+                      name={`image_${about?.image.path}`}
                       id={`image_${about?.image.path}`}
                       accept="image/*"
                       onChange={(e) => handleFileUpload(e, about, "image")}

@@ -59,7 +59,7 @@ const OurComponents = () => {
                   autoHide={false}
                   data-simplebar-track="primary"
                   className="overflow-auto mb-4"
-                  style={{ height: "445px" }}
+                  style={{ height: "676px" }}
                 >
                   <Card>
                     <div>
@@ -82,7 +82,9 @@ const OurComponents = () => {
                                   </div>
                                 </div>
                                 <div className="flex-shrink-0 ms-2">
-                                  <h6 className="fs-14 mb-0">Know Us More</h6>
+                                  <h6 className="fs-14 mb-0">
+                                    Left Single Image
+                                  </h6>
                                 </div>
                               </div>
                             </div>
@@ -106,7 +108,7 @@ const OurComponents = () => {
                                   </div>
                                 </div>
                                 <div className="flex-shrink-0 ms-2">
-                                  <h6 className="fs-14 mb-0">Our Values</h6>
+                                  <h6 className="fs-14 mb-0">Tabs Bordered</h6>
                                 </div>
                               </div>
                             </div>
@@ -130,7 +132,7 @@ const OurComponents = () => {
                                   </div>
                                 </div>
                                 <div className="flex-shrink-0 ms-2">
-                                  <h6 className="fs-14 mb-0">Our Missions</h6>
+                                  <h6 className="fs-14 mb-0">Article</h6>
                                 </div>
                               </div>
                             </div>
@@ -154,7 +156,7 @@ const OurComponents = () => {
                                   </div>
                                 </div>
                                 <div className="flex-shrink-0 ms-2">
-                                  <h6 className="fs-14 mb-0">Services Offer</h6>
+                                  <h6 className="fs-14 mb-0">Card Alignment</h6>
                                 </div>
                               </div>
                             </div>
@@ -178,7 +180,9 @@ const OurComponents = () => {
                                   </div>
                                 </div>
                                 <div className="flex-shrink-0 ms-2">
-                                  <h6 className="fs-14 mb-0">Vehicles Types</h6>
+                                  <h6 className="fs-14 mb-0">
+                                    Vertical Nav Tabs
+                                  </h6>
                                 </div>
                               </div>
                             </div>
@@ -203,7 +207,7 @@ const OurComponents = () => {
                                 </div>
                                 <div className="flex-shrink-0 ms-2">
                                   <h6 className="fs-14 mb-0">
-                                    Vehicle Classes
+                                    Card Border Color
                                   </h6>
                                 </div>
                               </div>
@@ -228,7 +232,9 @@ const OurComponents = () => {
                                   </div>
                                 </div>
                                 <div className="flex-shrink-0 ms-2">
-                                  <h6 className="fs-14 mb-0">In The Press</h6>
+                                  <h6 className="fs-14 mb-0">
+                                    Card Image Overlays
+                                  </h6>
                                 </div>
                               </div>
                             </div>
@@ -252,7 +258,9 @@ const OurComponents = () => {
                                   </button>
                                 </div>
                                 <div className="flex-shrink-0 ms-2">
-                                  <h6 className="fs-14 mb-0">Why Choose Us</h6>
+                                  <h6 className="fs-14 mb-0">
+                                    Grid With Background
+                                  </h6>
                                 </div>
                               </div>
                             </div>
@@ -276,7 +284,7 @@ const OurComponents = () => {
                                   </button>
                                 </div>
                                 <div className="flex-shrink-0 ms-2">
-                                  <h6 className="fs-14 mb-0">The Fleet</h6>
+                                  <h6 className="fs-14 mb-0">Image Grid</h6>
                                 </div>
                               </div>
                             </div>
@@ -300,7 +308,9 @@ const OurComponents = () => {
                                   </button>
                                 </div>
                                 <div className="flex-shrink-0 ms-2">
-                                  <h6 className="fs-14 mb-0">On The Road</h6>
+                                  <h6 className="fs-14 mb-0">
+                                    Grid Full Width
+                                  </h6>
                                 </div>
                               </div>
                             </div>
@@ -325,7 +335,7 @@ const OurComponents = () => {
                                 </div>
                                 <div className="flex-shrink-0 ms-2">
                                   <h6 className="fs-14 mb-0">
-                                    Terms Conditions
+                                    Simple Paragraph
                                   </h6>
                                 </div>
                               </div>

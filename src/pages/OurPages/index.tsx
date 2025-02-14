@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Col, Image, Row } from "react-bootstrap";
+import { Card, Col, Image, Nav, Row, Tab } from "react-bootstrap";
 import { useGetAllPagesQuery } from "features/pageCollection/pageSlice";
 import SimpleBar from "simplebar-react";
 import {
@@ -536,17 +536,19 @@ const OurPages = () => {
                         >
                           <option value="">Choose ...</option>
                           <option value="KnowMoreAboutUs">
-                            Know More About Us
+                            Left Single Image
                           </option>
-                          <option value="OurValues">Our Values</option>
-                          <option value="OurMissions">Our Missions</option>
-                          <option value="ServicesOfferd">Service Offers</option>
-                          <option value="VehicleTypes">Vehicle Types</option>
+                          <option value="OurValues">Tabs Bordered</option>
+                          <option value="OurMissions">Article</option>
+                          <option value="ServicesOfferd">Card Alignment</option>
+                          {/* <option value="VehicleTypes">
+                            Vertical Nav Tabs
+                          </option>
                           <option value="VehicleClasses">
-                            Vehicle Classes
-                          </option>
+                            Card Border Color
+                          </option> */}
                           <option value="TermsCondition">
-                            Terms Conditions
+                            Simple Paragraph
                           </option>
                         </select>
                       </Col>
@@ -661,7 +663,7 @@ const OurPages = () => {
                     </button>
                   </div>
                 )}
-              {selectedComponent === "OurMissions" && (
+              {selectedComponent === "OurMissions" && selectedOrder !== "" && (
                 <div className="vstack gap-2 p-4">
                   <div className="hstack gap-2">
                     <span
@@ -698,9 +700,85 @@ const OurPages = () => {
                   </button>
                 </div>
               )}
-              {selectedComponent === "OurValues" && (
+              {selectedComponent === "OurValues" && selectedOrder !== "" && (
                 <div className="vstack gap-2 p-4">
-                  <h3>OurValues Component</h3>
+                  <Row className="d-flex justify-content-center p-4">
+                    <div className="vstack gap-2">
+                      <div className="hstack gap-2 justify-content-center">
+                        <span
+                          style={{
+                            textTransform: "uppercase",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            color: "#CD2528",
+                          }}
+                        >
+                          {AllValues[0].littleTitle.name}
+                        </span>
+                      </div>
+                      <div className="hstack gap-2 justify-content-center">
+                        <h2 className="h2-with-after">
+                          {AllValues[0].bigTitle.name}
+                        </h2>
+                      </div>
+                    </div>
+                  </Row>
+                  <Row>
+                    <Col lg={3} className="d-flex justify-content-end">
+                      <div className="hstack gap-2">
+                        <div className="vstack gap-2">
+                          <Image
+                            src={`${process.env.REACT_APP_BASE_URL}/ourValue/${AllValues[0]?.image.path}`}
+                            alt=""
+                            className="rounded"
+                            width="280"
+                          />
+                        </div>
+                      </div>
+                    </Col>
+                    <Col>
+                      <Card className="border-0">
+                        <Card.Body>
+                          <Tab.Container
+                            defaultActiveKey={AllValues[0].tabs[0]?.title}
+                          >
+                            <Nav
+                              as="ul"
+                              variant="tabs"
+                              className="nav-tabs-custom nav-success nav-justified mb-3"
+                            >
+                              {AllValues[0].tabs.map((tab, index) => (
+                                <Nav.Item as="li" key={index}>
+                                  <div className="d-flex align-items-center">
+                                    <Nav.Link
+                                      eventKey={tab.title}
+                                      className="d-flex align-items-center"
+                                    >
+                                      {tab.title}
+                                    </Nav.Link>
+                                  </div>
+                                </Nav.Item>
+                              ))}
+                            </Nav>
+                            <Tab.Content className="text-muted">
+                              {AllValues[0].tabs.map((tab, index) => (
+                                <Tab.Pane eventKey={tab.title} key={index}>
+                                  <div className="d-flex">
+                                    <div className="flex-grow-1 ms-2">
+                                      <div className="d-flex align-items-center">
+                                        {tab.content}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </Tab.Pane>
+                              ))}
+                            </Tab.Content>
+                          </Tab.Container>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  </Row>
+
                   <button
                     type="button"
                     className="btn btn-info w-xs"
@@ -711,19 +789,78 @@ const OurPages = () => {
                   </button>
                 </div>
               )}
-              {selectedComponent === "ServicesOfferd" && (
-                <div className="vstack gap-2 p-4">
-                  <h3>Offer Service Component</h3>
-                  <button
-                    type="button"
-                    className="btn btn-info w-xs"
-                    onClick={onSubmitOfferService}
-                  >
-                    <i className="ri-add-fill align-middle fs-16 me-2"></i> Add
-                    The Component to this Page
-                  </button>
-                </div>
-              )}
+              {selectedComponent === "ServicesOfferd" &&
+                selectedOrder !== "" && (
+                  <div className="vstack gap-2 p-4">
+                    <Row className="d-flex justify-content-center">
+                      <div className="vstack gap-2">
+                        <div className="hstack gap-2 justify-content-center">
+                          <span
+                            style={{
+                              textTransform: "uppercase",
+                              fontSize: "13px",
+                              fontWeight: 600,
+                              color: "#CD2528",
+                            }}
+                          >
+                            {AllOfferServices[0].littleTitle.name}
+                          </span>
+                        </div>
+                        <div className="hstack gap-2 justify-content-center">
+                          <h2 className="h2-with-after">
+                            {AllOfferServices[0].bigTitle.name}
+                          </h2>
+                        </div>
+                      </div>
+                    </Row>
+                    <Row>
+                      {AllOfferServices[0].cards.map((card, index) => (
+                        <Col>
+                          <Card
+                            className="single-service"
+                            key={index}
+                            style={{
+                              backgroundImage: `url(${card.image})`,
+                            }}
+                          >
+                            <div className="d-flex justify-content-center hstack gap-2">
+                              <i className={`${card.icon} icon`}></i>
+                            </div>
+
+                            <div className="hstack gap-2 d-flex justify-content-center">
+                              <h5>{card.title}</h5>
+                            </div>
+
+                            <div className="hstack gap-2 d-flex justify-content-center">
+                              <p>{card.content}</p>
+                            </div>
+
+                            <div className="vstack gap-3" key={index}>
+                              <h6>Font Image</h6>
+                              <div className="vstack gap-2">
+                                <Image
+                                  src={`${process.env.REACT_APP_BASE_URL}/offerService/${card?.image}`}
+                                  alt=""
+                                  className="rounded"
+                                  width="160"
+                                />
+                              </div>
+                            </div>
+                          </Card>
+                        </Col>
+                      ))}
+                    </Row>
+
+                    <button
+                      type="button"
+                      className="btn btn-info w-xs"
+                      onClick={onSubmitOfferService}
+                    >
+                      <i className="ri-add-fill align-middle fs-16 me-2"></i>{" "}
+                      Add The Component to this Page
+                    </button>
+                  </div>
+                )}
               {selectedComponent === "TermsCondition" && (
                 <div className="vstack gap-2 p-4">
                   <h3>{AllTermsConditions[0]?.bigTitle?.content!}</h3>

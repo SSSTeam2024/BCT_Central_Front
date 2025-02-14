@@ -483,7 +483,7 @@ const OurValues: React.FC<OurValuesProps> = ({ selectedPage }) => {
                     )}
                     <div className="mt-n3" style={{ marginLeft: "130px" }}>
                       <label
-                        htmlFor="image"
+                        htmlFor={`image_${value?.image.path}`}
                         className="mb-0"
                         data-bs-toggle="tooltip"
                         data-bs-placement="right"
@@ -498,7 +498,7 @@ const OurValues: React.FC<OurValuesProps> = ({ selectedPage }) => {
                       <input
                         className="form-control d-none"
                         type="file"
-                        name="image"
+                        name={`image_${value?.image.path}`}
                         id={`image_${value?.image.path}`}
                         accept="image/*"
                         onChange={(e) => handleFileUpload(e, value, "image")}
