@@ -13,7 +13,9 @@ export interface OurMissionCollection {
       name: string,
       display: string
     };
-    content: string
+    content: string,
+    typeComponent?: string, 
+    order?: string
   }[]
 }
 

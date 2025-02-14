@@ -602,11 +602,11 @@ const OfferServices: React.FC<OfferServicesProps> = ({ selectedPage }) => {
               </Col>
             ))}
           </Row>
-          <Row>
+          <Row className="border-bottom">
             <Col>
               <button
                 type="button"
-                className="btn btn-primary mt-3"
+                className="btn btn-primary mt-3 mb-3"
                 onClick={() => setAddNewCardForm(!addNewCardForm)}
               >
                 <span className="icon-on">

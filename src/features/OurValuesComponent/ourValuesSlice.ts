@@ -31,6 +31,8 @@ export interface OurValuesModel {
     buttonLink: string;
     buttonDisplay: string;
   }[];
+  order?: string,
+  typeComponent?: string
 }
 
 export const ourValuesSlice = createApi({

@@ -10,6 +10,7 @@ import {
   Tab,
 } from "react-bootstrap";
 import BreadCrumb from "Common/BreadCrumb";
+import SimpleBar from "simplebar-react";
 import { useGetOurValueQuery } from "features/OurValuesComponent/ourValuesSlice";
 import { useGetAllOurMissionsQuery } from "features/OurMissionsComponent/ourMissionsSlice";
 import { useGetAboutUsComponentsQuery } from "features/AboutUsComponent/aboutUsSlice";
@@ -17,6 +18,18 @@ import { useGetOfferServiceQuery } from "features/OffreServicesComponent/offreSe
 import { useGetVehicleGuidesQuery } from "features/vehicleGuideComponent/vehicleGuideSlice";
 import { useGetVehicleClassQuery } from "features/VehicleClassComponent/vehicleClassSlice";
 import { Link } from "react-router-dom";
+import { useGetAllInThePressQuery } from "features/InThePressComponent/inThePressSlice";
+import { useGetBlock1sQuery } from "features/block1Component/block1Slice";
+import Masonry from "react-responsive-masonry";
+import img1 from "assets/images/02.jpg";
+import img2 from "assets/images/clients.jpg";
+import img3 from "assets/images/test-2.jpg";
+import img4 from "assets/images/test1.jpg";
+import img5 from "assets/images/a-YhuJeQ-min.jpeg";
+import img6 from "assets/images/about-us.jpg";
+
+import { useGetAllFleetQuery } from "features/FleetComponent/fleetSlice";
+import { useGetTermsConditionsQuery } from "features/TermsConditionsComponent/termsCoditionSlice";
 
 const OurComponents = () => {
   document.title = "Web Site Our Components | Coach Hire Network";
@@ -27,6 +40,10 @@ const OurComponents = () => {
   const { data: AllOffers = [] } = useGetOfferServiceQuery();
   const { data: AllVehiclesGuide = [] } = useGetVehicleGuidesQuery();
   const { data: AllVehicleClasses = [] } = useGetVehicleClassQuery();
+  const { data: AllInThePress = [] } = useGetAllInThePressQuery();
+  const { data: AllServicesBlock1 = [] } = useGetBlock1sQuery();
+  const { data: AllFleet = [] } = useGetAllFleetQuery();
+  const { data: AllTermsConditions = [] } = useGetTermsConditionsQuery();
 
   const [selectedSection, setSelectedSection] = useState<string>("about");
 
@@ -38,156 +55,287 @@ const OurComponents = () => {
           <Card className="p-3">
             <Row>
               <Col lg={3}>
-                <Card>
-                  <div data-simplebar style={{ maxHeight: "215px" }}>
-                    <ul className="list-group">
-                      <li
-                        className={`${
-                          selectedSection === "about"
-                            ? "list-group-item bg-light"
-                            : "list-group-item"
-                        }`}
-                        style={{ cursor: "pointer" }}
-                        onClick={() => setSelectedSection("about")}
-                      >
-                        <div className="d-flex align-items-center">
-                          <div className="flex-grow-1">
-                            <div className="d-flex">
-                              <div className="flex-shrink-0 avatar-xs">
-                                <div className="avatar-title bg-info-subtle text-info rounded">
-                                  <i className="ph ph-warning-octagon"></i>
+                <SimpleBar
+                  autoHide={false}
+                  data-simplebar-track="primary"
+                  className="overflow-auto mb-4"
+                  style={{ height: "445px" }}
+                >
+                  <Card>
+                    <div>
+                      <ul className="list-group">
+                        <li
+                          className={`${
+                            selectedSection === "about"
+                              ? "list-group-item bg-light"
+                              : "list-group-item"
+                          }`}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => setSelectedSection("about")}
+                        >
+                          <div className="d-flex align-items-center">
+                            <div className="flex-grow-1">
+                              <div className="d-flex">
+                                <div className="flex-shrink-0 avatar-xs">
+                                  <div className="avatar-title bg-info-subtle text-info rounded">
+                                    <i className="ph ph-warning-octagon"></i>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex-shrink-0 ms-2">
-                                <h6 className="fs-14 mb-0">Know Us More</h6>
+                                <div className="flex-shrink-0 ms-2">
+                                  <h6 className="fs-14 mb-0">Know Us More</h6>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </li>
-                      <li
-                        className={`${
-                          selectedSection === "values"
-                            ? "list-group-item bg-light"
-                            : "list-group-item"
-                        }`}
-                        onClick={() => setSelectedSection("values")}
-                        style={{ cursor: "pointer" }}
-                      >
-                        <div className="d-flex align-items-center">
-                          <div className="flex-grow-1">
-                            <div className="d-flex">
-                              <div className="flex-shrink-0 avatar-xs">
-                                <div className="avatar-title bg-success-subtle text-success rounded">
-                                  <i className="ph ph-sketch-logo"></i>
+                        </li>
+                        <li
+                          className={`${
+                            selectedSection === "values"
+                              ? "list-group-item bg-light"
+                              : "list-group-item"
+                          }`}
+                          onClick={() => setSelectedSection("values")}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <div className="d-flex align-items-center">
+                            <div className="flex-grow-1">
+                              <div className="d-flex">
+                                <div className="flex-shrink-0 avatar-xs">
+                                  <div className="avatar-title bg-success-subtle text-success rounded">
+                                    <i className="ph ph-sketch-logo"></i>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex-shrink-0 ms-2">
-                                <h6 className="fs-14 mb-0">Our Values</h6>
+                                <div className="flex-shrink-0 ms-2">
+                                  <h6 className="fs-14 mb-0">Our Values</h6>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </li>
-                      <li
-                        className={`${
-                          selectedSection === "missions"
-                            ? "list-group-item bg-light"
-                            : "list-group-item"
-                        }`}
-                        onClick={() => setSelectedSection("missions")}
-                        style={{ cursor: "pointer" }}
-                      >
-                        <div className="d-flex align-items-center">
-                          <div className="flex-grow-1">
-                            <div className="d-flex">
-                              <div className="flex-shrink-0 avatar-xs">
-                                <div className="avatar-title bg-primary-subtle text-primary rounded">
-                                  <i className="ph ph-target"></i>
+                        </li>
+                        <li
+                          className={`${
+                            selectedSection === "missions"
+                              ? "list-group-item bg-light"
+                              : "list-group-item"
+                          }`}
+                          onClick={() => setSelectedSection("missions")}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <div className="d-flex align-items-center">
+                            <div className="flex-grow-1">
+                              <div className="d-flex">
+                                <div className="flex-shrink-0 avatar-xs">
+                                  <div className="avatar-title bg-primary-subtle text-primary rounded">
+                                    <i className="ph ph-target"></i>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex-shrink-0 ms-2">
-                                <h6 className="fs-14 mb-0">Our Missions</h6>
+                                <div className="flex-shrink-0 ms-2">
+                                  <h6 className="fs-14 mb-0">Our Missions</h6>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </li>
-                      <li
-                        className={`${
-                          selectedSection === "offers"
-                            ? "list-group-item bg-light"
-                            : "list-group-item"
-                        }`}
-                        style={{ cursor: "pointer" }}
-                        onClick={() => setSelectedSection("offers")}
-                      >
-                        <div className="d-flex align-items-center">
-                          <div className="flex-grow-1">
-                            <div className="d-flex">
-                              <div className="flex-shrink-0 avatar-xs">
-                                <div className="avatar-title bg-secondary-subtle text-secondary rounded">
-                                  <i className="ri-hand-heart-line"></i>
+                        </li>
+                        <li
+                          className={`${
+                            selectedSection === "offers"
+                              ? "list-group-item bg-light"
+                              : "list-group-item"
+                          }`}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => setSelectedSection("offers")}
+                        >
+                          <div className="d-flex align-items-center">
+                            <div className="flex-grow-1">
+                              <div className="d-flex">
+                                <div className="flex-shrink-0 avatar-xs">
+                                  <div className="avatar-title bg-secondary-subtle text-secondary rounded">
+                                    <i className="ri-hand-heart-line"></i>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex-shrink-0 ms-2">
-                                <h6 className="fs-14 mb-0">Services Offer</h6>
+                                <div className="flex-shrink-0 ms-2">
+                                  <h6 className="fs-14 mb-0">Services Offer</h6>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </li>
-                      <li
-                        className={`${
-                          selectedSection === "vehicle_types"
-                            ? "list-group-item bg-light"
-                            : "list-group-item"
-                        }`}
-                        style={{ cursor: "pointer" }}
-                        onClick={() => setSelectedSection("vehicle_types")}
-                      >
-                        <div className="d-flex align-items-center">
-                          <div className="flex-grow-1">
-                            <div className="d-flex">
-                              <div className="flex-shrink-0 avatar-xs">
-                                <div className="avatar-title bg-dark-subtle text-dark rounded">
-                                  <i className="ph ph-bus"></i>
+                        </li>
+                        <li
+                          className={`${
+                            selectedSection === "vehicle_types"
+                              ? "list-group-item bg-light"
+                              : "list-group-item"
+                          }`}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => setSelectedSection("vehicle_types")}
+                        >
+                          <div className="d-flex align-items-center">
+                            <div className="flex-grow-1">
+                              <div className="d-flex">
+                                <div className="flex-shrink-0 avatar-xs">
+                                  <div className="avatar-title bg-dark-subtle text-dark rounded">
+                                    <i className="ph ph-bus"></i>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex-shrink-0 ms-2">
-                                <h6 className="fs-14 mb-0">Vehicles Types</h6>
+                                <div className="flex-shrink-0 ms-2">
+                                  <h6 className="fs-14 mb-0">Vehicles Types</h6>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </li>
-                      <li
-                        className={`${
-                          selectedSection === "vehicle_classes"
-                            ? "list-group-item bg-light"
-                            : "list-group-item"
-                        }`}
-                        style={{ cursor: "pointer" }}
-                        onClick={() => setSelectedSection("vehicle_classes")}
-                      >
-                        <div className="d-flex align-items-center">
-                          <div className="flex-grow-1">
-                            <div className="d-flex">
-                              <div className="flex-shrink-0 avatar-xs">
-                                <div className="avatar-title bg-warning-subtle text-warning rounded">
-                                  <i className="ph ph-car-simple"></i>
+                        </li>
+                        <li
+                          className={`${
+                            selectedSection === "vehicle_classes"
+                              ? "list-group-item bg-light"
+                              : "list-group-item"
+                          }`}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => setSelectedSection("vehicle_classes")}
+                        >
+                          <div className="d-flex align-items-center">
+                            <div className="flex-grow-1">
+                              <div className="d-flex">
+                                <div className="flex-shrink-0 avatar-xs">
+                                  <div className="avatar-title bg-warning-subtle text-warning rounded">
+                                    <i className="ph ph-car-simple"></i>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex-shrink-0 ms-2">
-                                <h6 className="fs-14 mb-0">Vehicle Classes</h6>
+                                <div className="flex-shrink-0 ms-2">
+                                  <h6 className="fs-14 mb-0">
+                                    Vehicle Classes
+                                  </h6>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                </Card>
+                        </li>
+                        <li
+                          className={`${
+                            selectedSection === "in_the_press"
+                              ? "list-group-item bg-light"
+                              : "list-group-item"
+                          }`}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => setSelectedSection("in_the_press")}
+                        >
+                          <div className="d-flex align-items-center">
+                            <div className="flex-grow-1">
+                              <div className="d-flex">
+                                <div className="flex-shrink-0 avatar-xs">
+                                  <div className="avatar-title bg-danger-subtle text-danger rounded">
+                                    <i className="ph ph-newspaper"></i>
+                                  </div>
+                                </div>
+                                <div className="flex-shrink-0 ms-2">
+                                  <h6 className="fs-14 mb-0">In The Press</h6>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </li>
+                        <li
+                          className={`${
+                            selectedSection === "why_choose_us"
+                              ? "list-group-item bg-light"
+                              : "list-group-item"
+                          }`}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => setSelectedSection("why_choose_us")}
+                        >
+                          <div className="d-flex align-items-center">
+                            <div className="flex-grow-1">
+                              <div className="d-flex">
+                                <div className="flex-shrink-0 avatar-xs">
+                                  <button className="btn btn-darken-info btn-sm">
+                                    <i className="ph ph-question fs-15"></i>
+                                  </button>
+                                </div>
+                                <div className="flex-shrink-0 ms-2">
+                                  <h6 className="fs-14 mb-0">Why Choose Us</h6>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </li>
+                        <li
+                          className={`${
+                            selectedSection === "fleet"
+                              ? "list-group-item bg-light"
+                              : "list-group-item"
+                          }`}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => setSelectedSection("fleet")}
+                        >
+                          <div className="d-flex align-items-center">
+                            <div className="flex-grow-1">
+                              <div className="d-flex">
+                                <div className="flex-shrink-0 avatar-xs">
+                                  <button className="btn btn-darken-success btn-sm">
+                                    <i className="ph ph-image-square fs-15"></i>
+                                  </button>
+                                </div>
+                                <div className="flex-shrink-0 ms-2">
+                                  <h6 className="fs-14 mb-0">The Fleet</h6>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </li>
+                        <li
+                          className={`${
+                            selectedSection === "on_the_road"
+                              ? "list-group-item bg-light"
+                              : "list-group-item"
+                          }`}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => setSelectedSection("on_the_road")}
+                        >
+                          <div className="d-flex align-items-center">
+                            <div className="flex-grow-1">
+                              <div className="d-flex">
+                                <div className="flex-shrink-0 avatar-xs">
+                                  <button className="btn btn-darken-primary btn-sm">
+                                    <i className="ph ph-path fs-15"></i>
+                                  </button>
+                                </div>
+                                <div className="flex-shrink-0 ms-2">
+                                  <h6 className="fs-14 mb-0">On The Road</h6>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </li>
+                        <li
+                          className={`${
+                            selectedSection === "terms"
+                              ? "list-group-item bg-light"
+                              : "list-group-item"
+                          }`}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => setSelectedSection("terms")}
+                        >
+                          <div className="d-flex align-items-center">
+                            <div className="flex-grow-1">
+                              <div className="d-flex">
+                                <div className="flex-shrink-0 avatar-xs">
+                                  <button className="btn btn-darken-light btn-sm">
+                                    <i className="ph ph-path fs-15"></i>
+                                  </button>
+                                </div>
+                                <div className="flex-shrink-0 ms-2">
+                                  <h6 className="fs-14 mb-0">
+                                    Terms Conditions
+                                  </h6>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </Card>
+                </SimpleBar>
               </Col>
               <Col>
                 <Card>
@@ -415,7 +563,7 @@ const OurComponents = () => {
                     </>
                   )}
                   {selectedSection === "vehicle_types" && (
-                    <div>
+                    <div className="p-3">
                       <Row className="mb-3">
                         <div className="vstack gap-2">
                           <div className="hstack gap-2">
@@ -518,6 +666,242 @@ const OurComponents = () => {
                         ))}
                       </Row>
                     </>
+                  )}
+                  {selectedSection === "in_the_press" && (
+                    <div className="vstack gap-2 p-3">
+                      <div className="hstack gap-2 d-flex justify-content-center">
+                        <h2 className="text-center">
+                          {AllInThePress[0].title}
+                        </h2>
+                      </div>
+                      <div className="hstack gap-2 d-flex justify-content-center">
+                        <p className="text-center">
+                          {AllInThePress[0].paragraph}
+                        </p>
+                      </div>
+                      <Row className="d-flex justify-content-center">
+                        <Col lg={6}>
+                          <Card className="p-3">
+                            <Card.Header className="d-flex justify-content-center border-0">
+                              <img
+                                className="card-img-top img-fluid w-50"
+                                src={`${process.env.REACT_APP_BASE_URL}/inThePressFiles/${AllInThePress[0].news[0]?.image}`}
+                                alt="Card img cap"
+                              />
+                            </Card.Header>
+                            <Card.Body>
+                              <div className="hstack gap-2 mb-2">
+                                <span className="fw-bold">
+                                  {AllInThePress[0].news[0].by}
+                                </span>{" "}
+                                <span className="fw-medium text-muted">
+                                  {AllInThePress[0].news[0].date}
+                                </span>
+                              </div>
+                              <div className="hstack gap-2">
+                                <h4 className="card-title mb-2">
+                                  {AllInThePress[0].news[0].title}
+                                </h4>
+                              </div>
+                              <div className="hstack gap-2">
+                                <p className="card-text text-muted">
+                                  {AllInThePress[0].news[0].content}
+                                </p>
+                              </div>
+                            </Card.Body>
+                          </Card>
+                        </Col>
+                      </Row>
+                    </div>
+                  )}
+                  {selectedSection === "why_choose_us" && (
+                    <>
+                      <Row className="d-flex justify-content-center p-3">
+                        <div className="vstack gap-2">
+                          <div className="hstack gap-2 justify-content-center">
+                            <span
+                              style={{
+                                textTransform: "uppercase",
+                                fontSize: "13px",
+                                fontWeight: 600,
+                                color: "#CD2528",
+                              }}
+                            >
+                              {AllServicesBlock1[0].littleTitle.name}
+                            </span>
+                          </div>
+                          <div className="hstack gap-2 justify-content-center">
+                            <h2 className="h2-with-after">
+                              {AllServicesBlock1[0].bigTitle.name}
+                            </h2>
+                          </div>
+                        </div>
+                      </Row>
+                      <Row className="p-3">
+                        <div>
+                          <Card className="w-75">
+                            <Card.Header className="bg-transparent border-0">
+                              <div className="hstack gap-3">
+                                <h4>{AllServicesBlock1[0].subTitle.name}</h4>
+                              </div>
+                            </Card.Header>
+                            <Card.Body
+                              style={{
+                                backgroundImage: `url(${process.env.REACT_APP_BASE_URL}/Block1/${AllServicesBlock1[0]?.image.path})`,
+                                backgroundSize: "cover",
+                                backgroundPosition: "center",
+                                backgroundRepeat: "no-repeat",
+                              }}
+                            >
+                              {/* First row with the first 3 tabs */}
+                              <Row>
+                                {AllServicesBlock1[0].tabs.map((tab, index) => (
+                                  <Col
+                                    lg={4}
+                                    key={index}
+                                    //   className="w-25 border-bottom border-end p-3"
+                                    className="border-bottom border-end"
+                                  >
+                                    <div className="vstack gap-2">
+                                      <div className="hstack gap-2">
+                                        <h6>{tab.title}</h6>
+                                      </div>
+                                    </div>
+                                  </Col>
+                                ))}
+                              </Row>
+
+                              {/* Second row with the next 3 tabs */}
+                              {/* <tr>
+                                  {value.tabs.slice(3, 6).map((tab, index) => (
+                                    <td
+                                      key={index}
+                                      className="w-25 border-end p-3"
+                                    >
+                                      <div className="vstack gap-2">
+                                        {editingField.id === value._id &&
+                                        editingField.field ===
+                                          `title-${index}` ? (
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            value={editedValue}
+                                            onChange={(e) =>
+                                              setEditedValue(e.target.value)
+                                            }
+                                            onBlur={() =>
+                                              handleEditSave(
+                                                value,
+                                                "tabs",
+                                                index,
+                                                "title",
+                                                editedValue
+                                              )
+                                            }
+                                            autoFocus
+                                          />
+                                        ) : (
+                                          <div className="hstack gap-2">
+                                            <h6>{tab.title}</h6>
+                                            <button
+                                              className="btn btn-link p-0 ms-2"
+                                              onClick={() =>
+                                                handleEditStart(
+                                                  value?._id!,
+                                                  `title-${index}`,
+                                                  tab.title
+                                                )
+                                              }
+                                            >
+                                              <i className="bi bi-pencil"></i>
+                                            </button>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </td>
+                                  ))}
+                                </tr> */}
+                            </Card.Body>
+                          </Card>
+                        </div>
+                      </Row>
+                    </>
+                  )}
+                  {selectedSection === "fleet" && (
+                    <Masonry className="my-masonry-grid_column me-3">
+                      {AllFleet.map((fleet: any) => (
+                        <Col className="p-2">
+                          <div>
+                            <img
+                              src={`${process.env.REACT_APP_BASE_URL}/fleetFiles/${fleet.grids[0]?.image}`}
+                              className="card-img-top w-50 p-2"
+                              alt="..."
+                            />
+                            <div>
+                              <h5 className="card-title mb-1">
+                                {fleet.grids[0]?.title}
+                              </h5>
+                            </div>
+                          </div>
+                        </Col>
+                      ))}
+                    </Masonry>
+                  )}
+                  {selectedSection === "on_the_road" && (
+                    <>
+                      <Row>
+                        <Col>
+                          <img
+                            src={img1}
+                            className="card-img-top w-75 p-2"
+                            alt="..."
+                          />
+                        </Col>
+                        <Col>
+                          <img
+                            src={img2}
+                            className="card-img-top w-75 p-2"
+                            alt="..."
+                          />
+                        </Col>
+                        <Col>
+                          <img
+                            src={img3}
+                            className="card-img-top w-75 p-2"
+                            alt="..."
+                          />
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col>
+                          <img
+                            src={img4}
+                            className="card-img-top w-75 p-2"
+                            alt="..."
+                          />
+                        </Col>
+                        <Col>
+                          <img
+                            src={img5}
+                            className="card-img-top w-75 p-2"
+                            alt="..."
+                          />
+                        </Col>
+                        <Col>
+                          <img
+                            src={img6}
+                            className="card-img-top w-100 p-2"
+                            alt="..."
+                          />
+                        </Col>
+                      </Row>
+                    </>
+                  )}
+                  {selectedSection === "terms" && (
+                    <div className="vstack gap-2 p-3">
+                      <h3>{AllTermsConditions[0]?.bigTitle?.content!}</h3>
+                      <p>{AllTermsConditions[0]?.paragraph?.content!}</p>
+                    </div>
                   )}
                 </Card>
               </Col>

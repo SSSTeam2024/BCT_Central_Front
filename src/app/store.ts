@@ -64,6 +64,7 @@ import { fleetSlice } from "features/FleetComponent/fleetSlice";
 import { onTheRoadSlice } from "features/OnTheRoadComponent/onTheRoadSlice";
 import { inThePressSlice } from "features/InThePressComponent/inThePressSlice";
 import { notificationSlice } from "features/Notifications/notificationSlice";
+import { termConditionSlice } from "features/TermsConditionsComponent/termsCoditionSlice";
 
 export const store = configureStore({
   reducer: {
@@ -123,6 +124,7 @@ export const store = configureStore({
     [onTheRoadSlice.reducerPath]: onTheRoadSlice.reducer,
     [inThePressSlice.reducerPath]: inThePressSlice.reducer,
     [notificationSlice.reducerPath]: notificationSlice.reducer,
+    [termConditionSlice.reducerPath]: termConditionSlice.reducer,
     auth: authSlice,
     Layout: LayoutReducer,
     ForgetPassword: ForgetPasswordReducer,
@@ -186,7 +188,8 @@ export const store = configureStore({
       fleetSlice.middleware,
       onTheRoadSlice.middleware,
       inThePressSlice.middleware,
-      notificationSlice.middleware
+      notificationSlice.middleware,
+      termConditionSlice.middleware
     ]);
   },
 });

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { Card, Col, Container, Image, Nav, Row, Tab } from "react-bootstrap";
+import { Card, Col, Image, Row } from "react-bootstrap";
 import { useGetAllPagesQuery } from "features/pageCollection/pageSlice";
-import BreadCrumb from "Common/BreadCrumb";
 import SimpleBar from "simplebar-react";
 import {
   useAddNewAboutUsComponentMutation,
@@ -25,6 +24,19 @@ import OfferServices from "pages/OfferServices";
 import OurValues from "pages/OurValues";
 import OurMissions from "pages/OurMissions";
 import AboutUs from "pages/AboutUs";
+import {
+  useAddNewTermConditionMutation,
+  useGetTermsConditionsQuery,
+} from "features/TermsConditionsComponent/termsCoditionSlice";
+import TermsConditions from "pages/TermsConditions";
+import { useGetVehicleClassQuery } from "features/VehicleClassComponent/vehicleClassSlice";
+import VehiclesClassComponent from "pages/VehiclesClassComponent";
+import { useGetVehicleGuidesQuery } from "features/vehicleGuideComponent/vehicleGuideSlice";
+import VehicleGuideComponent from "pages/VehicleGuideComponent";
+import { useGetAllFleetQuery } from "features/FleetComponent/fleetSlice";
+import FleetComponent from "pages/FleetComponent";
+import { useGetAllInThePressQuery } from "features/InThePressComponent/inThePressSlice";
+import InThePress from "pages/InThePress";
 
 const OurPages = () => {
   document.title = "Web Site Our Pages | Coach Hire Network";
@@ -35,22 +47,42 @@ const OurPages = () => {
   const { data: AllValues = [] } = useGetOurValueQuery();
   const { data: AllOfferServices = [] } = useGetOfferServiceQuery();
   const { data: AllBestOffers = [] } = useGetBestOffersQuery();
+  const { data: AllTermsConditions = [] } = useGetTermsConditionsQuery();
+  const { data: AllVehicleClasses = [] } = useGetVehicleClassQuery();
+  const { data: AllVehicleGuide = [] } = useGetVehicleGuidesQuery();
+  const { data: AllFleet = [] } = useGetAllFleetQuery();
+  const { data: AllInThePress = [] } = useGetAllInThePressQuery();
+
   const [createNewAboutUs] = useAddNewAboutUsComponentMutation();
   const [createNewOurMission] = useAddNewOurMissionMutation();
   const [createNewOurValue] = useCreateOurValueMutation();
   const [createNewServiceOffer] = useAddServiceOfferMutation();
+  const [createNewTermCondition] = useAddNewTermConditionMutation();
 
-  const [selectedPage, setSelectedPage] = useState<string>("");
+  const [selectedPage, setSelectedPage] = useState<string>("about.html");
   const [selectedComponent, setSelectedComponent] = useState<string>("");
+  const [selectedOrder, setSelectedOrder] = useState<string>("");
 
   const handleSelectedComponent = (e: any) => {
     const value = e.target.value;
     setSelectedComponent(value);
   };
+  const handleSelectedOrder = (e: any) => {
+    const value = e.target.value;
+    setSelectedOrder(value);
+  };
   const [newSection, setNewSection] = useState<boolean>(false);
 
   const filtredAboutUsData = aboutUsData.filter(
     (aboutUs) => aboutUs.page === selectedPage
+  );
+
+  const filtredInThePressData = AllInThePress.filter(
+    (inThePress) => inThePress.page === selectedPage
+  );
+
+  const filtredVehicleGuideData = AllVehicleGuide.filter(
+    (vehicleGuide) => vehicleGuide.page === selectedPage
   );
 
   const filtredOurMissionsData = AllOurMissions.flatMap((missionCollection) =>
@@ -70,6 +102,16 @@ const OurPages = () => {
   const filtredBestOfferData = AllBestOffers.filter(
     (ourValue) => ourValue.page === selectedPage
   );
+
+  const filtredTermsConditionData = AllTermsConditions.filter(
+    (term) => term.page === selectedPage
+  );
+
+  const filtredVehiclesClassesData = AllVehicleClasses.filter(
+    (vehicleClasse) => vehicleClasse.page === selectedPage
+  );
+
+  const filtredFleet = AllFleet.filter((fleet) => fleet.page === selectedPage);
 
   const initialAboutUs = {
     page: "",
@@ -143,6 +185,8 @@ const OurPages = () => {
           display: "",
         },
         content: "",
+        typeComponent: "",
+        order: "",
       },
     ],
   };
@@ -164,14 +208,16 @@ const OurPages = () => {
       page: selectedPage,
       display: "1",
       littleTitle: {
-        name: AllOurMissions[0]?.missions[0]?.littleTitle?.name || "",
-        display: AllOurMissions[0]?.missions[0]?.littleTitle?.display || "",
+        name: "Title",
+        display: "1",
       },
       bigTitle: {
-        name: AllOurMissions[0]?.missions[0]?.bigTitle?.name || "",
-        display: AllOurMissions[0]?.missions[0]?.bigTitle?.display || "",
+        name: "This is for the subTitle",
+        display: "1",
       },
-      content: AllOurMissions[0]?.missions[0]?.content || "",
+      content: "This a paragraph ...",
+      typeComponent: "ourMissions",
+      order: selectedOrder,
     };
 
     setOurMissionComponent((prevState) => ({
@@ -348,84 +394,142 @@ const OurPages = () => {
     }
   };
 
+  const initialTermCondition = {
+    page: "",
+    display: "",
+    bigTitle: {
+      content: "",
+      display: "",
+    },
+    paragraph: {
+      content: "",
+      display: "",
+    },
+  };
+
+  const [termConditionComponent, setTermConditionComponent] =
+    useState(initialTermCondition);
+
+  // const { page, image, littleTitle, bigTitle, paragraph, button } =
+  //   aboutUsComponent;
+
+  const onSubmitTermCondition = (e: any) => {
+    termConditionComponent["page"] = selectedPage;
+    termConditionComponent["display"] = "1";
+    termConditionComponent["bigTitle"].content =
+      AllTermsConditions[0].bigTitle.content;
+    termConditionComponent["bigTitle"].display = "1";
+    termConditionComponent["paragraph"].content =
+      aboutUsData[0].paragraph.content;
+    termConditionComponent["paragraph"].display = "1";
+    e.preventDefault();
+    try {
+      createNewTermCondition(termConditionComponent);
+      setSelectedComponent("");
+      setNewSection(false);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
   return (
     <React.Fragment>
-      <div className="page-content">
-        <Container fluid={true}>
-          <BreadCrumb title="Our Pages" pageTitle="Web Site Settings" />
-          <Card className="p-3">
-            <Row>
-              <Col lg={2}>
-                <Card>
-                  <SimpleBar
-                    autoHide={false}
-                    data-simplebar-track="dark"
-                    className="overflow-auto mb-4"
-                    style={{ height: "650px" }}
-                  >
-                    <ul className="list-group">
-                      {AllPages.map((page) => (
-                        <li
-                          key={page?._id!}
-                          className={`list-group-item cursor-pointer ${
-                            selectedPage === page.link
-                              ? "bg-primary text-white"
-                              : ""
-                          }`}
-                          onClick={() => setSelectedPage(page.link)}
-                          style={{ cursor: "pointer" }}
-                        >
-                          {page.label}
-                        </li>
-                      ))}
-                    </ul>
-                  </SimpleBar>
-                </Card>
-              </Col>
-              <Col lg={10}>
-                <SimpleBar
-                  autoHide={false}
-                  data-simplebar-track="primary"
-                  className="overflow-auto mb-4"
-                  style={{ height: "650px" }}
-                >
-                  <Card>
-                    {filtredAboutUsData.length !== 0 && (
-                      <AboutUs selectedPage={selectedPage} />
-                    )}
-                    {filtredOurMissionsData.length !== 0 && (
-                      <OurMissions
-                        filtredOurMissionsData={filtredOurMissionsData}
-                        selectedPage={selectedPage}
-                      />
-                    )}
-                    {filtredOurValuesData.length !== 0 && (
-                      <OurValues selectedPage={selectedPage} />
-                    )}
-                    {filtredOfferServicesData.length !== 0 && (
-                      <OfferServices selectedPage={selectedPage} />
-                    )}
-                    {filtredBestOfferData.length !== 0 && (
-                      <BestOffer selectedPage={selectedPage} />
-                    )}
-                  </Card>
-                </SimpleBar>
-
-                <div className="d-flex justify-content-end">
-                  <button
-                    type="button"
-                    className="btn btn-info btn-label"
-                    onClick={() => setNewSection(!newSection)}
-                    disabled={selectedPage === ""}
-                  >
-                    <i className="ri-add-fill label-icon align-middle fs-16 me-2"></i>{" "}
-                    New Section
-                  </button>
-                </div>
+      <Card className="p-4 mt-5">
+        <Row>
+          <Col lg={2}>
+            <Card>
+              <SimpleBar
+                autoHide={false}
+                data-simplebar-track="dark"
+                className="overflow-auto mb-4"
+                style={{ height: "781px" }}
+              >
+                <ul className="list-group">
+                  {AllPages.map((page) => (
+                    <li
+                      key={page?._id!}
+                      className={`list-group-item cursor-pointer ${
+                        selectedPage === page.link
+                          ? "bg-primary text-white"
+                          : ""
+                      }`}
+                      onClick={() => setSelectedPage(page.link)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      {page.label}
+                    </li>
+                  ))}
+                </ul>
+              </SimpleBar>
+            </Card>
+          </Col>
+          <Col lg={10}>
+            <SimpleBar
+              autoHide={false}
+              data-simplebar-track="primary"
+              className="overflow-auto mb-4"
+              style={{ height: "740px" }}
+            >
+              <Card>
+                {filtredAboutUsData.length !== 0 && (
+                  <AboutUs selectedPage={selectedPage} />
+                )}
+                {filtredOurMissionsData.length !== 0 && (
+                  <OurMissions
+                    filtredOurMissionsData={filtredOurMissionsData}
+                    selectedPage={selectedPage}
+                  />
+                )}
+                {filtredOurValuesData.length !== 0 && (
+                  <OurValues selectedPage={selectedPage} />
+                )}
+                {filtredOfferServicesData.length !== 0 && (
+                  <OfferServices selectedPage={selectedPage} />
+                )}
+                {filtredBestOfferData.length !== 0 && (
+                  <BestOffer selectedPage={selectedPage} />
+                )}
+                {filtredTermsConditionData.length !== 0 && (
+                  <TermsConditions selectedPage={selectedPage} />
+                )}
+                {filtredVehiclesClassesData.length !== 0 && (
+                  <VehiclesClassComponent selectedPage={selectedPage} />
+                )}
+                {filtredVehicleGuideData.length !== 0 && (
+                  <VehicleGuideComponent selectedPage={selectedPage} />
+                )}
+                {filtredFleet.length !== 0 && (
+                  <FleetComponent selectedPage={selectedPage} />
+                )}
+                {filtredFleet.length !== 0 && (
+                  <FleetComponent selectedPage={selectedPage} />
+                )}
+                {filtredInThePressData.length !== 0 && (
+                  <InThePress selectedPage={selectedPage} />
+                )}
+              </Card>
+            </SimpleBar>
+            <Row className="d-flex justify-content-end">
+              <Col lg={4}>
                 <div className="vstack gap-3">
                   {newSection && (
-                    <Row className="mt-2">
-                      <Col lg={4}>
+                    <Row>
+                      <Col>
+                        {selectedComponent !== "" && (
+                          <select
+                            className="form-select"
+                            onChange={handleSelectedOrder}
+                          >
+                            <option value="">Choose ...</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                          </select>
+                        )}
+                      </Col>
+                      <Col lg={6}>
                         <select
                           className="form-select"
                           onChange={handleSelectedComponent}
@@ -441,12 +545,53 @@ const OurPages = () => {
                           <option value="VehicleClasses">
                             Vehicle Classes
                           </option>
+                          <option value="TermsCondition">
+                            Terms Conditions
+                          </option>
                         </select>
                       </Col>
                     </Row>
                   )}
-                  <hr />
-                  {selectedComponent === "KnowMoreAboutUs" && (
+                </div>
+              </Col>
+              <Col lg={2}>
+                <div>
+                  <button
+                    type="button"
+                    className="btn btn-info btn-label"
+                    onClick={() => setNewSection(!newSection)}
+                    disabled={selectedPage === ""}
+                  >
+                    <i className="ri-add-fill label-icon align-middle fs-16 me-2"></i>{" "}
+                    New Section
+                  </button>
+                </div>
+              </Col>
+              <Col lg={2}>
+                <div>
+                  <button
+                    type="button"
+                    className="btn btn-warning btn-label"
+                    onClick={() => {
+                      if (selectedPage) {
+                        window.open(
+                          `http://www.coachhirenetwork.co.uk/${selectedPage}`,
+                          "_blank"
+                        );
+                      }
+                    }}
+                    disabled={selectedPage === ""}
+                  >
+                    <i className="ri-eye-2-line label-icon align-middle fs-16 me-2"></i>
+                    Live Demo
+                  </button>
+                </div>
+              </Col>
+            </Row>
+            <Row>
+              {selectedComponent === "KnowMoreAboutUs" &&
+                selectedOrder !== "" && (
+                  <div className="vstack gap-1 mb-2">
                     <div className="hstack gap-2 p-4">
                       <div className="vstack gap-2">
                         <Image
@@ -505,96 +650,101 @@ const OurPages = () => {
                           </button>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        className="btn btn-info w-xs"
-                        onClick={onSubmitAboutUs}
-                      >
-                        <i className="ri-add-fill align-middle fs-16 me-2"></i>{" "}
-                        Add The Component to this Page
-                      </button>
                     </div>
-                  )}
-                  {selectedComponent === "OurMissions" && (
-                    <div className="vstack gap-2 p-4">
-                      <div className="hstack gap-2">
-                        <span
-                          style={{
-                            textTransform: "uppercase",
-                            fontSize: "13px",
-                            fontWeight: 600,
-                            marginBottom: "10px",
-                            marginTop: "-8px",
-                            color: "#CD2528",
-                          }}
-                        >
-                          {AllOurMissions[0].missions[0].littleTitle.name}
-                        </span>
-                      </div>
-                      <div className="hstack gap-2">
-                        <h2 className="h2-with-after">
-                          {AllOurMissions[0].missions[0].bigTitle.name}
-                        </h2>
-                      </div>
-                      <div className="hstack gap-2">
-                        <span>
-                          {AllOurMissions[0].missions[0].content.slice(0, 210)}
-                          ...
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        className="btn btn-info w-xs"
-                        onClick={onSubmitOurMission}
-                      >
-                        <i className="ri-add-fill align-middle fs-16 me-2"></i>{" "}
-                        Add The Component to this Page
-                      </button>
-                    </div>
-                  )}
-                  {selectedComponent === "OurValues" && (
-                    <div className="vstack gap-2 p-4">
-                      <h3>OurValues Component</h3>
-                      <button
-                        type="button"
-                        className="btn btn-info w-xs"
-                        onClick={onSubmitOurValue}
-                      >
-                        <i className="ri-add-fill align-middle fs-16 me-2"></i>{" "}
-                        Add The Component to this Page
-                      </button>
-                    </div>
-                  )}
-                  {selectedComponent === "ServicesOfferd" && (
-                    <div className="vstack gap-2 p-4">
-                      <h3>Offer Service Component</h3>
-                      <button
-                        type="button"
-                        className="btn btn-info w-xs"
-                        onClick={onSubmitOfferService}
-                      >
-                        <i className="ri-add-fill align-middle fs-16 me-2"></i>{" "}
-                        Add The Component to this Page
-                      </button>
-                    </div>
-                  )}
-
-                  {/* {selectedPage && selectedComponent && (
                     <button
                       type="button"
-                      className="btn btn-info btn-label"
+                      className="btn btn-info w-xs btn-sm mb-2"
                       onClick={onSubmitAboutUs}
                     >
                       <i className="ri-add-fill align-middle fs-16 me-2"></i>{" "}
                       Add The Component to this Page
                     </button>
-                  )} */}
+                  </div>
+                )}
+              {selectedComponent === "OurMissions" && (
+                <div className="vstack gap-2 p-4">
+                  <div className="hstack gap-2">
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        marginBottom: "10px",
+                        marginTop: "-8px",
+                        color: "#CD2528",
+                      }}
+                    >
+                      {AllOurMissions[0].missions[0].littleTitle.name}
+                    </span>
+                  </div>
+                  <div className="hstack gap-2">
+                    <h2 className="h2-with-after">
+                      {AllOurMissions[0].missions[0].bigTitle.name}
+                    </h2>
+                  </div>
+                  <div className="hstack gap-2">
+                    <span>
+                      {AllOurMissions[0].missions[0].content.slice(0, 210)}
+                      ...
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-info w-xs"
+                    onClick={onSubmitOurMission}
+                  >
+                    <i className="ri-add-fill align-middle fs-16 me-2"></i> Add
+                    The Component to this Page
+                  </button>
                 </div>
-              </Col>
+              )}
+              {selectedComponent === "OurValues" && (
+                <div className="vstack gap-2 p-4">
+                  <h3>OurValues Component</h3>
+                  <button
+                    type="button"
+                    className="btn btn-info w-xs"
+                    onClick={onSubmitOurValue}
+                  >
+                    <i className="ri-add-fill align-middle fs-16 me-2"></i> Add
+                    The Component to this Page
+                  </button>
+                </div>
+              )}
+              {selectedComponent === "ServicesOfferd" && (
+                <div className="vstack gap-2 p-4">
+                  <h3>Offer Service Component</h3>
+                  <button
+                    type="button"
+                    className="btn btn-info w-xs"
+                    onClick={onSubmitOfferService}
+                  >
+                    <i className="ri-add-fill align-middle fs-16 me-2"></i> Add
+                    The Component to this Page
+                  </button>
+                </div>
+              )}
+              {selectedComponent === "TermsCondition" && (
+                <div className="vstack gap-2 p-4">
+                  <h3>{AllTermsConditions[0]?.bigTitle?.content!}</h3>
+                  <p>
+                    {AllTermsConditions[0]?.paragraph?.content?.slice(0, 177)}
+                    ...
+                  </p>
+                  <button
+                    type="button"
+                    className="btn btn-info w-xs"
+                    onClick={onSubmitTermCondition}
+                  >
+                    <i className="ri-add-fill align-middle fs-16 me-2"></i> Add
+                    The Component to this Page
+                  </button>
+                </div>
+              )}
             </Row>
-          </Card>
-        </Container>
-      </div>
+          </Col>
+        </Row>
+      </Card>
     </React.Fragment>
   );
 };

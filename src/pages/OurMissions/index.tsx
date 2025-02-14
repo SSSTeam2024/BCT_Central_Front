@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Container, Row, Card, Col } from "react-bootstrap";
+import { Container, Row, Card, Col, Dropdown } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import {
   useGetAllOurMissionsQuery,
@@ -202,7 +202,6 @@ const OurMissions: React.FC<OurMissionsProps> = ({
     }));
   };
 
-  // console.log("filtredOurMissionsData", filtredOurMissionsData)
   return (
     <React.Fragment>
       <Row className="border-bottom p-4">
@@ -254,222 +253,259 @@ const OurMissions: React.FC<OurMissionsProps> = ({
               return null;
             }
             return (
-              <div
-                key={`${mission.page}-${parentMissionIndex}`}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
+              <>
+                <div className="position-relative">
+                  <div className="position-absolute rounded-5 top-0 end-0">
+                    <Dropdown
+                      className="topbar-head-dropdown ms-1 header-item"
+                      id="notificationDropdown"
+                    >
+                      <Dropdown.Toggle
+                        id="notification"
+                        type="button"
+                        className="btn btn-icon btn-topbar btn-ghost-light rounded-circle arrow-none btn-sm"
+                      >
+                        <span className="position-absolute topbar-badge fs-10 translate-middle badge rounded-pill bg-info">
+                          <span className="notification-badge">
+                            {mission?.order!}
+                          </span>
+                          <span className="visually-hidden">
+                            unread messages
+                          </span>
+                        </span>
+                      </Dropdown.Toggle>
+                      <Dropdown.Menu
+                        className="dropdown-menu-xs dropdown-menu-end p-0"
+                        aria-labelledby="page-header-notifications-dropdown"
+                      >
+                        <div
+                          className="py-2 ps-2"
+                          id="notificationItemsTabContent"
+                        >
+                          <ul className="list-unstyled">
+                            <li>1</li>
+                            <li>2</li>
+                            <li>3</li>
+                            <li>4</li>
+                            <li>5</li>
+                            <li>6</li>
+                          </ul>
+                        </div>
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  </div>
+                </div>
                 <div
+                  key={`${mission.page}-${parentMissionIndex}`}
                   style={{
                     display: "flex",
-                    alignItems: "center",
+                    flexDirection: "column",
                   }}
-                  className="hstack gap-3 m-3"
                 >
-                  <input
-                    type="checkbox"
-                    checked={mission?.littleTitle.display === "1"}
-                    onChange={() =>
-                      handleCheckboxToggle(
-                        allMissionsIndex,
-                        parentMissionIndex,
-                        "littleTitle"
-                      )
-                    }
-                  />
-                  {isEditing[mission.page]?.[parentMissionIndex]
-                    ?.littleTitle ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                    className="hstack gap-3 m-3"
+                  >
                     <input
-                      type="text"
-                      value={
-                        updatedValues[mission.page]?.[parentMissionIndex]
-                          ?.littleTitle || mission.littleTitle.name
+                      type="checkbox"
+                      checked={mission?.littleTitle.display === "1"}
+                      onChange={() =>
+                        handleCheckboxToggle(
+                          allMissionsIndex,
+                          parentMissionIndex,
+                          "littleTitle"
+                        )
                       }
-                      onChange={(e) =>
-                        handleInputChange(
-                          e,
+                    />
+                    {isEditing[mission.page]?.[parentMissionIndex]
+                      ?.littleTitle ? (
+                      <input
+                        type="text"
+                        value={
+                          updatedValues[mission.page]?.[parentMissionIndex]
+                            ?.littleTitle || mission.littleTitle.name
+                        }
+                        onChange={(e) =>
+                          handleInputChange(
+                            e,
+                            mission.page,
+                            parentMissionIndex,
+                            "littleTitle"
+                          )
+                        }
+                        onBlur={() =>
+                          handleInputBlur(
+                            mission.page,
+                            parentMissionIndex,
+                            "littleTitle"
+                          )
+                        }
+                        className="form-control w-50"
+                      />
+                    ) : (
+                      <span
+                        style={{
+                          textTransform: "uppercase",
+                          fontSize: "13px",
+                          fontWeight: 600,
+                          color: "#CD2528",
+                        }}
+                        className="justify-content-center"
+                      >
+                        {mission?.littleTitle.name}
+                      </span>
+                    )}
+                    <i
+                      className="ri-pencil-line"
+                      style={{
+                        cursor: "pointer",
+                        marginLeft: "8px",
+                      }}
+                      onClick={() =>
+                        handleEditIconClick(
                           mission.page,
                           parentMissionIndex,
                           "littleTitle"
                         )
                       }
-                      onBlur={() =>
-                        handleInputBlur(
-                          mission.page,
-                          parentMissionIndex,
-                          "littleTitle"
-                        )
-                      }
-                      className="form-control w-50"
                     />
-                  ) : (
-                    <span
-                      style={{
-                        textTransform: "uppercase",
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        color: "#CD2528",
-                      }}
-                      className="justify-content-center"
-                    >
-                      {mission?.littleTitle.name}
-                    </span>
-                  )}
-                  <i
-                    className="ri-pencil-line"
+                  </div>
+                  <div
                     style={{
-                      cursor: "pointer",
-                      marginLeft: "8px",
+                      display: "flex",
+                      alignItems: "center",
                     }}
-                    onClick={() =>
-                      handleEditIconClick(
-                        mission.page,
-                        parentMissionIndex,
-                        "littleTitle"
-                      )
-                    }
-                  />
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                  className="hstack gap-3 m-3"
-                >
-                  <input
-                    type="checkbox"
-                    checked={mission?.bigTitle.display === "1"}
-                    onChange={() =>
-                      handleCheckboxToggle(
-                        allMissionsIndex,
-                        parentMissionIndex,
-                        "bigTitle"
-                      )
-                    }
-                  />
-                  {isEditing[mission.page]?.[parentMissionIndex]?.bigTitle ? (
+                    className="hstack gap-3 m-3"
+                  >
                     <input
-                      type="text"
-                      value={
-                        updatedValues[mission.page]?.[parentMissionIndex]
-                          ?.bigTitle || mission.bigTitle.name
+                      type="checkbox"
+                      checked={mission?.bigTitle.display === "1"}
+                      onChange={() =>
+                        handleCheckboxToggle(
+                          allMissionsIndex,
+                          parentMissionIndex,
+                          "bigTitle"
+                        )
                       }
-                      onChange={(e) =>
-                        handleInputChange(
-                          e,
+                    />
+                    {isEditing[mission.page]?.[parentMissionIndex]?.bigTitle ? (
+                      <input
+                        type="text"
+                        value={
+                          updatedValues[mission.page]?.[parentMissionIndex]
+                            ?.bigTitle || mission.bigTitle.name
+                        }
+                        onChange={(e) =>
+                          handleInputChange(
+                            e,
+                            mission.page,
+                            parentMissionIndex,
+                            "bigTitle"
+                          )
+                        }
+                        onBlur={() =>
+                          handleInputBlur(
+                            mission.page,
+                            parentMissionIndex,
+                            "bigTitle"
+                          )
+                        }
+                        className="form-control w-50"
+                      />
+                    ) : (
+                      <span
+                        style={{
+                          textTransform: "uppercase",
+                          fontSize: "18px",
+                          fontWeight: 800,
+                          color: "#000",
+                        }}
+                        className="justify-content-center"
+                      >
+                        {mission?.bigTitle.name}
+                      </span>
+                    )}
+                    <i
+                      className="ri-pencil-line"
+                      style={{
+                        cursor: "pointer",
+                        marginLeft: "8px",
+                      }}
+                      onClick={() =>
+                        handleEditIconClick(
                           mission.page,
                           parentMissionIndex,
                           "bigTitle"
                         )
                       }
-                      onBlur={() =>
-                        handleInputBlur(
-                          mission.page,
-                          parentMissionIndex,
-                          "bigTitle"
-                        )
-                      }
-                      className="form-control w-50"
                     />
-                  ) : (
-                    <span
-                      style={{
-                        textTransform: "uppercase",
-                        fontSize: "18px",
-                        fontWeight: 800,
-                        color: "#000",
-                      }}
-                      className="justify-content-center"
-                    >
-                      {mission?.bigTitle.name}
-                    </span>
-                  )}
-                  <i
-                    className="ri-pencil-line"
+                  </div>
+                  <div
                     style={{
-                      cursor: "pointer",
-                      marginLeft: "8px",
+                      display: "flex",
+                      alignItems: "center",
                     }}
-                    onClick={() =>
-                      handleEditIconClick(
-                        mission.page,
-                        parentMissionIndex,
-                        "bigTitle"
-                      )
-                    }
-                  />
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                  className="hstack gap-3 m-3"
-                >
-                  {isEditing[mission.page]?.[parentMissionIndex]?.content ? (
-                    <textarea
-                      rows={3}
-                      value={
-                        updatedValues[mission.page]?.[parentMissionIndex]
-                          ?.content || mission.content
-                      }
-                      onChange={(e) =>
-                        handleInputChange(
-                          e,
+                    className="hstack gap-3 m-3"
+                  >
+                    {isEditing[mission.page]?.[parentMissionIndex]?.content ? (
+                      <textarea
+                        rows={3}
+                        value={
+                          updatedValues[mission.page]?.[parentMissionIndex]
+                            ?.content || mission.content
+                        }
+                        onChange={(e) =>
+                          handleInputChange(
+                            e,
+                            mission.page,
+                            parentMissionIndex,
+                            "content"
+                          )
+                        }
+                        onBlur={() =>
+                          handleInputBlur(
+                            mission.page,
+                            parentMissionIndex,
+                            "content"
+                          )
+                        }
+                        className="form-control"
+                      />
+                    ) : (
+                      <span
+                        style={{
+                          fontSize: "12px",
+                          color: "#000",
+                        }}
+                        className="justify-content-center"
+                      >
+                        {mission?.content?.slice(0, 176)}...
+                      </span>
+                    )}
+                    <i
+                      className="ri-pencil-line"
+                      style={{
+                        cursor: "pointer",
+                        marginLeft: "8px",
+                      }}
+                      onClick={() =>
+                        handleEditIconClick(
                           mission.page,
                           parentMissionIndex,
                           "content"
                         )
                       }
-                      onBlur={() =>
-                        handleInputBlur(
-                          mission.page,
-                          parentMissionIndex,
-                          "content"
-                        )
-                      }
-                      className="form-control"
                     />
-                  ) : (
-                    <span
-                      style={{
-                        fontSize: "12px",
-                        color: "#000",
-                      }}
-                      className="justify-content-center"
-                    >
-                      {mission?.content?.slice(0, 176)}...
-                    </span>
-                  )}
-                  <i
-                    className="ri-pencil-line"
-                    style={{
-                      cursor: "pointer",
-                      marginLeft: "8px",
-                    }}
-                    onClick={() =>
-                      handleEditIconClick(
-                        mission.page,
-                        parentMissionIndex,
-                        "content"
-                      )
-                    }
-                  />
+                  </div>
                 </div>
-              </div>
+              </>
             );
           })}
         </Col>
       </Row>
-      {/* )}
-                    </li>
-                  );
-                })}
-              </ul>
-            </div> */}
     </React.Fragment>
   );
 };

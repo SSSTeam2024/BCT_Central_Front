@@ -28,6 +28,8 @@ export interface AboutUsModel {
     display: string;
     link: string;
   };
+  order?: string
+  typeComponent?: string
 }
 
 export const aboutUsSlice = createApi({

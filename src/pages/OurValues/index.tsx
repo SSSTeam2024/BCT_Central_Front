@@ -1,15 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Container,
-  Row,
-  Card,
-  Col,
-  Image,
-  Tab,
-  Nav,
-  Form,
-} from "react-bootstrap";
-import Breadcrumb from "Common/BreadCrumb";
+import { Row, Card, Col, Image, Tab, Nav, Dropdown } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
 import {
   OurValuesModel,
@@ -347,6 +337,45 @@ const OurValues: React.FC<OurValuesProps> = ({ selectedPage }) => {
           </Col>
           <Col lg={11}>
             <Row className="d-flex justify-content-center p-4">
+              <div className="position-relative">
+                <div className="position-absolute rounded-5 top-0 end-0">
+                  <Dropdown
+                    className="topbar-head-dropdown ms-1 header-item"
+                    id="notificationDropdown"
+                  >
+                    <Dropdown.Toggle
+                      id="notification"
+                      type="button"
+                      className="btn btn-icon btn-topbar btn-ghost-light rounded-circle arrow-none btn-sm"
+                    >
+                      <span className="position-absolute topbar-badge fs-10 translate-middle badge rounded-pill bg-info">
+                        <span className="notification-badge">
+                          {value?.order!}
+                        </span>
+                        <span className="visually-hidden">unread messages</span>
+                      </span>
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu
+                      className="dropdown-menu-xs dropdown-menu-end p-0"
+                      aria-labelledby="page-header-notifications-dropdown"
+                    >
+                      <div
+                        className="py-2 ps-2"
+                        id="notificationItemsTabContent"
+                      >
+                        <ul className="list-unstyled">
+                          <li>1</li>
+                          <li>2</li>
+                          <li>3</li>
+                          <li>4</li>
+                          <li>5</li>
+                          <li>6</li>
+                        </ul>
+                      </div>
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </div>
+              </div>
               <div className="vstack gap-2">
                 <div className="hstack gap-2 justify-content-center">
                   <input

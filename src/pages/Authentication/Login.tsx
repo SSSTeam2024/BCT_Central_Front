@@ -63,6 +63,25 @@ const Login = () => {
   const [show, setShow] = React.useState(false);
   const handleClick = () => setShow(!show);
 
+  const handleLogin = async () => {
+    try {
+      const user: any = await login(formState).unwrap();
+      if (user) {
+        if (user.central.status === "Active") {
+          dispatch(setCredentials(user));
+          Cookies.set("astk", user.central.api_token, { expires: 1 / 4 });
+          notify();
+        } else {
+          Errornotify("Your Account is Inactive!");
+        }
+      } else {
+        Errornotify(msgError);
+      }
+    } catch (err: any) {
+      console.log(err);
+    }
+  };
+
   return (
     <React.Fragment>
       <section className="auth-page-wrapper position-relative bg-light min-vh-100 d-flex align-items-center justify-content-between">
@@ -115,91 +134,76 @@ const Login = () => {
                         <span className="text-danger">Coach Hire Network</span>{" "}
                         Dashboard.
                       </p>
-                      <div className="p-2">
-                        <div className="mb-3">
-                          <Form.Label htmlFor="username">Login</Form.Label>
-                          <Form.Control
-                            type="email"
-                            className="form-control"
-                            placeholder="Enter username"
-                            onChange={handleChange}
-                            name="login"
-                          />
-                        </div>
-
-                        <div className="mb-3">
-                          <div className="float-end">
-                            <Link to="/forgot-password" className="text-muted">
-                              Forgot password?
-                            </Link>
-                          </div>
-                          <Form.Label htmlFor="password-input">
-                            Password
-                          </Form.Label>
-                          <div className="position-relative auth-pass-inputgroup mb-3">
+                      <Form
+                        onSubmit={async (e) => {
+                          e.preventDefault(); // Prevent default form submission behavior
+                          handleLogin(); // Call the same function used in onClick
+                        }}
+                      >
+                        <div className="p-2">
+                          <div className="mb-3">
+                            <Form.Label htmlFor="username">Login</Form.Label>
                             <Form.Control
-                              className="form-control pe-5 password-input"
-                              placeholder="Enter password"
-                              id="password-input"
-                              name="password"
+                              type="email"
+                              className="form-control"
+                              placeholder="Enter username"
                               onChange={handleChange}
-                              type={show ? "text" : "password"}
+                              name="login"
                             />
+                          </div>
+
+                          <div className="mb-3">
+                            <div className="float-end">
+                              <Link
+                                to="/forgot-password"
+                                className="text-muted"
+                              >
+                                Forgot password?
+                              </Link>
+                            </div>
+                            <Form.Label htmlFor="password-input">
+                              Password
+                            </Form.Label>
+                            <div className="position-relative auth-pass-inputgroup mb-3">
+                              <Form.Control
+                                className="form-control pe-5 password-input"
+                                placeholder="Enter password"
+                                id="password-input"
+                                name="password"
+                                onChange={handleChange}
+                                type={show ? "text" : "password"}
+                              />
+                              <Button
+                                variant="link"
+                                className="position-absolute end-0 top-0 text-decoration-none text-muted password-addon"
+                                type="button"
+                                id="password-addon"
+                                onClick={handleClick}
+                              >
+                                <i className="ri-eye-fill align-middle"></i>
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="form-check">
+                            <Form.Check
+                              type="checkbox"
+                              value=""
+                              id="auth-remember-check"
+                            />
+                            <Form.Label htmlFor="auth-remember-check">
+                              Remember me
+                            </Form.Label>
+                          </div>
+                          <div>
                             <Button
-                              variant="link"
-                              className="position-absolute end-0 top-0 text-decoration-none text-muted password-addon"
-                              type="button"
-                              id="password-addon"
-                              onClick={handleClick}
+                              className="w-100 btn btn-darken-danger"
+                              type="submit"
                             >
-                              <i className="ri-eye-fill align-middle"></i>
+                              Sign In
                             </Button>
                           </div>
                         </div>
-                        <div className="form-check">
-                          <Form.Check
-                            type="checkbox"
-                            value=""
-                            id="auth-remember-check"
-                          />
-                          <Form.Label htmlFor="auth-remember-check">
-                            Remember me
-                          </Form.Label>
-                        </div>
-                        <div>
-                          <Button
-                            className="w-100 btn btn-darken-danger"
-                            type="submit"
-                            onClick={async () => {
-                              try {
-                                const user: any = await login(
-                                  formState
-                                ).unwrap();
-                                if (user) {
-                                  if (user.central.status === "Active") {
-                                    dispatch(setCredentials(user));
-                                    Cookies.set(
-                                      "astk",
-                                      user.central.api_token,
-                                      { expires: 1 / 4 }
-                                    );
-                                    notify();
-                                  }
-                                  if (user.central.status !== "Active") {
-                                    Errornotify("Your Account is Inactive!");
-                                  }
-                                } else {
-                                  Errornotify(msgError);
-                                }
-                              } catch (err: any) {
-                                console.log(err);
-                              }
-                            }}
-                          >
-                            Sign In
-                          </Button>
-                        </div>
-                      </div>
+                      </Form>
                     </Card.Body>
                   </Card>
                 </div>
