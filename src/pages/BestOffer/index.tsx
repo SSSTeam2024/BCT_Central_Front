@@ -8,6 +8,7 @@ import {
   Tab,
   Nav,
   Form,
+  Dropdown,
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import { Link, useLocation } from "react-router-dom";
@@ -23,6 +24,24 @@ import {
   useGetBestOffersQuery,
   useUpdateBestOfferMutation,
 } from "features/bestOfferComponent/bestOfferSlice";
+import { useGetVehicleGuidesQuery } from "features/vehicleGuideComponent/vehicleGuideSlice";
+import {
+  useGetOfferServiceQuery,
+  useUpdateOfferServiceMutation,
+} from "features/OffreServicesComponent/offreServicesSlice";
+import {
+  useGetAboutUsComponentsQuery,
+  useUpdateAboutUsMutation,
+} from "features/AboutUsComponent/aboutUsSlice";
+import {
+  useGetAllOurMissionsQuery,
+  useUpdateOurMissionMutation,
+} from "features/OurMissionsComponent/ourMissionsSlice";
+import {
+  useGetAllInThePressQuery,
+  useUpdateInThePressMutation,
+} from "features/InThePressComponent/inThePressSlice";
+import { useUpdateBlock1Mutation } from "features/block1Component/block1Slice";
 
 export interface BestOfferModelInterface {
   image: {
@@ -79,10 +98,54 @@ interface BestOfferProps {
 
 const BestOffer: React.FC<BestOfferProps> = ({ selectedPage }) => {
   const { data = [] } = useGetBestOffersQuery();
-  const [updateOurValue] = useUpdateBestOfferMutation();
+  const { data: AllVehicleGuides = [] } = useGetVehicleGuidesQuery();
+  const { data: AllOfferServices = [] } = useGetOfferServiceQuery();
+  const { data: aboutUsData = [] } = useGetAboutUsComponentsQuery();
+  const { data: AllOurMissions = [] } = useGetAllOurMissionsQuery();
+  const { data: AllValues = [] } = useGetOurValueQuery();
+  const { data: AllInThePress = [] } = useGetAllInThePressQuery();
+  const [updateBestOffer, { isLoading }] = useUpdateBestOfferMutation();
+  const [updatedInThePress] = useUpdateInThePressMutation();
+  const [updateOfferServices] = useUpdateOfferServiceMutation();
+  const [updateAboutUs] = useUpdateAboutUsMutation();
+  const [updateOurValues] = useUpdateOurValuesMutation();
+  const [updateOurMission] = useUpdateOurMissionMutation();
+  const [updatedBlock1] = useUpdateBlock1Mutation();
   const { data: AllPages = [] } = useGetAllPagesQuery();
 
-  const filtredOurValuesData = data.filter(
+  const filtredBestOfferData = data.filter(
+    (ourValue) => ourValue.page === selectedPage
+  );
+
+  const filtredBlock1Data = data.filter(
+    (block1) => block1.page === selectedPage
+  );
+
+  const filtredInThePressData = AllInThePress.filter(
+    (inThePress) => inThePress.page === selectedPage
+  );
+  const filtredVehicleGuideData = AllVehicleGuides.filter(
+    (ourValue) => ourValue.page.toLowerCase() === selectedPage
+  );
+
+  const filteredServices = AllOfferServices.filter(
+    (service) => service.associatedPage === selectedPage
+  );
+
+  const filtredAboutUsData = aboutUsData.filter(
+    (aboutUs) => aboutUs.page === selectedPage
+  );
+
+  const filtredOurMissionsData = AllOurMissions.flatMap((missionCollection) =>
+    missionCollection.missions
+      .filter((mission) => mission.page === selectedPage)
+      .map((mission) => ({
+        ...mission,
+        parentId: missionCollection._id,
+      }))
+  );
+
+  const filtredOurValuesData = AllValues.filter(
     (ourValue) => ourValue.page === selectedPage
   );
 
@@ -129,7 +192,7 @@ const BestOffer: React.FC<BestOfferProps> = ({ selectedPage }) => {
         },
       };
 
-      updateOurValue(updatedData)
+      updateBestOffer(updatedData)
         .unwrap()
         .then(() => {
           console.log("Update successful");
@@ -161,7 +224,7 @@ const BestOffer: React.FC<BestOfferProps> = ({ selectedPage }) => {
     );
 
     const updatedData = { ...about, tabs: updatedTabs };
-    updateOurValue(updatedData)
+    updateBestOffer(updatedData)
       .unwrap()
       .then(() => console.log("Checkbox update successful"))
       .catch((error) => console.error("Checkbox update failed:", error));
@@ -190,7 +253,7 @@ const BestOffer: React.FC<BestOfferProps> = ({ selectedPage }) => {
 
     const updatedData = { ...about, tabs: updatedTabs };
 
-    updateOurValue(updatedData)
+    updateBestOffer(updatedData)
       .unwrap()
       .then(() => setEditingField({ id: "", field: null }))
       .catch((error) => console.error("Update failed:", error));
@@ -215,7 +278,7 @@ const BestOffer: React.FC<BestOfferProps> = ({ selectedPage }) => {
       };
       console.log("updated data", updatedData);
       setPreviewImage(`data:image/${extension};base64,${base64Data}`);
-      updateOurValue(updatedData);
+      updateBestOffer(updatedData);
       setEditingField({ id: "", field: null });
     }
   };
@@ -240,7 +303,7 @@ const BestOffer: React.FC<BestOfferProps> = ({ selectedPage }) => {
 
       const updatedData = { ...about, tabs: updatedTabs };
 
-      updateOurValue(updatedData)
+      updateBestOffer(updatedData)
         .unwrap()
         .then(() => console.log("Button update successful"))
         .catch((error) => console.error("Button update failed:", error));
@@ -262,7 +325,7 @@ const BestOffer: React.FC<BestOfferProps> = ({ selectedPage }) => {
         [field]: { ...about[field], name: value },
       };
 
-      updateOurValue(updatedData)
+      updateBestOffer(updatedData)
         .unwrap()
         .then(() => setEditingField({ id: "", field: null }))
         .catch((error) => console.error("Edit save failed:", error));
@@ -335,23 +398,87 @@ const BestOffer: React.FC<BestOfferProps> = ({ selectedPage }) => {
     }
   };
 
+  const handleUpdateOrder = async (
+    offer: BestOfferModel,
+    selectedOrder: string
+  ) => {
+    if (!offer?._id) return;
+
+    try {
+      const aboutToSwap = filtredAboutUsData.find(
+        (item) => item.order === selectedOrder
+      );
+      const valueToSwap = filtredOurValuesData.find(
+        (item) => item.order === selectedOrder
+      );
+      const missionToSwap: any = filtredOurMissionsData.find(
+        (item) => item.order === selectedOrder
+      );
+      const offerServiceToSwap: any = filteredServices.find(
+        (item) => item.order === selectedOrder
+      );
+      // const offerServiceToSwap: any = filteredServices.find(
+      //   (item) => item.order === selectedOrder
+      // );
+
+      const updatePromises = [];
+
+      updatePromises.push(updateBestOffer({ ...offer, order: selectedOrder }));
+
+      if (aboutToSwap) {
+        updatePromises.push(
+          updateAboutUs({ ...aboutToSwap, order: offer.order })
+        );
+      }
+
+      if (valueToSwap) {
+        updatePromises.push(
+          updateOurValues({ ...valueToSwap, order: offer.order })
+        );
+      }
+
+      if (offerServiceToSwap) {
+        updatePromises.push(
+          updateOfferServices({ ...offerServiceToSwap, order: offer.order })
+        );
+      }
+
+      if (missionToSwap) {
+        updatePromises.push(
+          updateOurMission({
+            _id: missionToSwap.parentId,
+            missions: filtredOurMissionsData.map((mission) =>
+              mission.order === selectedOrder
+                ? { ...mission, order: offer.order }
+                : mission
+            ),
+          })
+        );
+      }
+
+      await Promise.all(updatePromises);
+    } catch (error) {
+      console.error("Error updating orders:", error);
+    }
+  };
+
   return (
     <React.Fragment>
-      {filtredOurValuesData.map((value) => (
-        <Row>
+      {filtredBestOfferData.map((value) => (
+        <Row className="p-4">
           <Col lg={1} className="p-4">
             <input
               type="checkbox"
-              checked={filtredOurValuesData[0]?.display! === "1"}
+              checked={filtredBestOfferData[0]?.display! === "1"}
               onChange={(e) =>
-                updateOurValue({
-                  ...filtredOurValuesData[0],
+                updateBestOffer({
+                  ...filtredBestOfferData[0],
                   display: e.target.checked ? "1" : "0",
                 })
               }
             />
           </Col>
-          <Col lg={11}>
+          <Col lg={10}>
             <Row className="d-flex justify-content-center p-4">
               <div className="vstack gap-2">
                 <div className="hstack gap-2 justify-content-center">
@@ -870,6 +997,57 @@ const BestOffer: React.FC<BestOfferProps> = ({ selectedPage }) => {
                 </Card>
               </Col>
             </Row>
+          </Col>
+          <Col lg={1}>
+            <div className="position-relative">
+              <div className="position-absolute rounded-5 top-0 end-0">
+                <Dropdown
+                  className="topbar-head-dropdown ms-1 header-item"
+                  id="notificationDropdown"
+                >
+                  <Dropdown.Toggle
+                    id="notification"
+                    type="button"
+                    className="btn btn-icon btn-topbar btn-ghost-light rounded-circle arrow-none btn-sm"
+                  >
+                    <span className="position-absolute topbar-badge fs-10 translate-middle badge rounded-pill bg-info">
+                      <span className="notification-badge">
+                        {value?.order!}
+                      </span>
+                      <span className="visually-hidden">unread messages</span>
+                    </span>
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu
+                    className="dropdown-menu-xs dropdown-menu-end p-0"
+                    aria-labelledby="page-header-notifications-dropdown"
+                  >
+                    <div className="py-2 ps-2" id="notificationItemsTabContent">
+                      {isLoading ? (
+                        <span>Loading ...</span>
+                      ) : (
+                        <ul className="list-unstyled">
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num) => (
+                            <li key={num}>
+                              <button
+                                className="dropdown-item"
+                                onClick={() =>
+                                  handleUpdateOrder(
+                                    filtredBlock1Data[0],
+                                    num.toString()
+                                  )
+                                }
+                              >
+                                {num}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </div>
+            </div>
           </Col>
         </Row>
       ))}

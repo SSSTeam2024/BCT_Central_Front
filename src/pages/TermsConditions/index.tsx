@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Card, Col, Form, Image } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Card,
+  Col,
+  Form,
+  Image,
+  Dropdown,
+} from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import {
   useGetAboutUsComponentsQuery,
@@ -11,6 +19,18 @@ import {
   useGetTermsConditionsQuery,
   useUpdateTermConditionMutation,
 } from "features/TermsConditionsComponent/termsCoditionSlice";
+import {
+  useGetOurValueQuery,
+  useUpdateOurValuesMutation,
+} from "features/OurValuesComponent/ourValuesSlice";
+import {
+  useGetAllOurMissionsQuery,
+  useUpdateOurMissionMutation,
+} from "features/OurMissionsComponent/ourMissionsSlice";
+import {
+  useGetOfferServiceQuery,
+  useUpdateOfferServiceMutation,
+} from "features/OffreServicesComponent/offreServicesSlice";
 
 interface TermsConditionsModelInterface {
   bigTitle: {
@@ -29,10 +49,40 @@ interface TermsConditionProps {
 
 const TermsConditions: React.FC<TermsConditionProps> = ({ selectedPage }) => {
   const { data: AllTermsConditions = [] } = useGetTermsConditionsQuery();
-  const [updateTermCondition] = useUpdateTermConditionMutation();
+  const { data: aboutUsData = [] } = useGetAboutUsComponentsQuery();
+  const { data: AllValues = [] } = useGetOurValueQuery();
+  const { data: AllOurMissions = [] } = useGetAllOurMissionsQuery();
+  const { data: AllOfferServices = [] } = useGetOfferServiceQuery();
+
+  const [updateTermCondition, { isLoading }] = useUpdateTermConditionMutation();
+  const [updateOfferServices] = useUpdateOfferServiceMutation();
+  const [updateAboutUs] = useUpdateAboutUsMutation();
+  const [updateOurValues] = useUpdateOurValuesMutation();
+  const [updateOurMission] = useUpdateOurMissionMutation();
 
   const filtredTermsConditionData = AllTermsConditions.filter(
     (term) => term.page === selectedPage
+  );
+
+  const filtredAboutUsData = aboutUsData.filter(
+    (aboutUs) => aboutUs.page === selectedPage
+  );
+
+  const filtredOurValuesData = AllValues.filter(
+    (ourValue) => ourValue.page === selectedPage
+  );
+
+  const filtredOurMissionsData = AllOurMissions.flatMap((missionCollection) =>
+    missionCollection.missions
+      .filter((mission) => mission.page === selectedPage)
+      .map((mission) => ({
+        ...mission,
+        parentId: missionCollection._id,
+      }))
+  );
+
+  const filteredServices = AllOfferServices.filter(
+    (service) => service.associatedPage === selectedPage
   );
 
   const [editingField, setEditingField] = useState<{
@@ -114,34 +164,100 @@ const TermsConditions: React.FC<TermsConditionProps> = ({ selectedPage }) => {
     }
   };
 
+  const handleUpdateOrder = async (
+    term: TermConditionModel,
+    selectedOrder: string
+  ) => {
+    if (!term?._id) return;
+
+    try {
+      const aboutToSwap = filtredAboutUsData.find(
+        (item) => item.order === selectedOrder
+      );
+      const valueToSwap = filtredOurValuesData.find(
+        (item) => item.order === selectedOrder
+      );
+      const missionToSwap: any = filtredOurMissionsData.find(
+        (item) => item.order === selectedOrder
+      );
+      const offerServiceToSwap: any = filteredServices.find(
+        (item) => item.order === selectedOrder
+      );
+      // const offerServiceToSwap: any = filteredServices.find(
+      //   (item) => item.order === selectedOrder
+      // );
+
+      const updatePromises = [];
+
+      updatePromises.push(
+        updateTermCondition({ ...term, order: selectedOrder })
+      );
+
+      if (aboutToSwap) {
+        updatePromises.push(
+          updateAboutUs({ ...aboutToSwap, order: term.order })
+        );
+      }
+
+      if (valueToSwap) {
+        updatePromises.push(
+          updateOurValues({ ...valueToSwap, order: term.order })
+        );
+      }
+
+      if (offerServiceToSwap) {
+        updatePromises.push(
+          updateOfferServices({ ...offerServiceToSwap, order: term.order })
+        );
+      }
+
+      if (missionToSwap) {
+        updatePromises.push(
+          updateOurMission({
+            _id: missionToSwap.parentId,
+            missions: filtredOurMissionsData.map((mission) =>
+              mission.order === selectedOrder
+                ? { ...mission, order: term.order }
+                : mission
+            ),
+          })
+        );
+      }
+
+      await Promise.all(updatePromises);
+    } catch (error) {
+      console.error("Error updating orders:", error);
+    }
+  };
+
   return (
     <React.Fragment>
-      {filtredTermsConditionData.map((about) => (
-        <Row className="p-4">
+      {filtredTermsConditionData.map((term) => (
+        <Row className="border-bottom p-4">
           <Col lg={1}>
             <input
               type="checkbox"
-              checked={about?.display === "1"}
+              checked={term?.display === "1"}
               onChange={(e) =>
                 updateTermCondition({
-                  ...about,
+                  ...term,
                   display: e.target.checked ? "1" : "0",
                 })
               }
             />
           </Col>
-          <Col lg={11}>
+          <Col lg={10}>
             <div className="hstack gap-2">
               <div className="vstack gap-3">
                 <div className="hstack gap-2">
                   <input
                     type="checkbox"
-                    checked={about.bigTitle.display === "1"}
+                    checked={term.bigTitle.display === "1"}
                     onChange={(e) =>
-                      handleCheckboxChange(about, "bigTitle", e.target.checked)
+                      handleCheckboxChange(term, "bigTitle", e.target.checked)
                     }
                   />
-                  {editingField.id === about._id &&
+                  {editingField.id === term._id &&
                   editingField.field === "bigTitle" ? (
                     <input
                       className="form-control"
@@ -149,19 +265,19 @@ const TermsConditions: React.FC<TermsConditionProps> = ({ selectedPage }) => {
                       autoFocus
                       value={editedValue}
                       onChange={(e) => setEditedValue(e.target.value)}
-                      onBlur={() => handleEditSave(about, "bigTitle")}
+                      onBlur={() => handleEditSave(term, "bigTitle")}
                     />
                   ) : (
-                    <h3>{about.bigTitle.content}</h3>
+                    <h3>{term.bigTitle.content}</h3>
                   )}
                   <i
                     className="bi bi-pencil"
                     style={{ cursor: "pointer", marginLeft: "8px" }}
                     onClick={() =>
                       handleEditStart(
-                        about._id as string,
+                        term._id as string,
                         "bigTitle",
-                        about.bigTitle.content
+                        term.bigTitle.content
                       )
                     }
                   ></i>
@@ -169,12 +285,12 @@ const TermsConditions: React.FC<TermsConditionProps> = ({ selectedPage }) => {
                 <div className="hstack gap-2">
                   <input
                     type="checkbox"
-                    checked={about.paragraph.display === "1"}
+                    checked={term.paragraph.display === "1"}
                     onChange={(e) =>
-                      handleCheckboxChange(about, "paragraph", e.target.checked)
+                      handleCheckboxChange(term, "paragraph", e.target.checked)
                     }
                   />
-                  {editingField.id === about._id &&
+                  {editingField.id === term._id &&
                   editingField.field === "paragraph" ? (
                     <textarea
                       className="form-control"
@@ -182,27 +298,73 @@ const TermsConditions: React.FC<TermsConditionProps> = ({ selectedPage }) => {
                       onChange={(e) => setEditedValue(e.target.value)}
                       onBlur={() => {
                         if (editedValue.trim() !== "") {
-                          handleEditSave(about, "paragraph");
+                          handleEditSave(term, "paragraph");
                         } else {
                           setEditingField({ id: "", field: null });
                         }
                       }}
                     />
                   ) : (
-                    <span>{about.paragraph.content.slice(0, 178)}...</span>
+                    <span>{term.paragraph.content.slice(0, 178)}...</span>
                   )}
                   <i
                     className="bi bi-pencil"
                     style={{ cursor: "pointer", marginLeft: "8px" }}
                     onClick={() =>
                       handleEditStart(
-                        about._id as string,
+                        term._id as string,
                         "paragraph",
-                        about.paragraph.content
+                        term.paragraph.content
                       )
                     }
                   />
                 </div>
+              </div>
+            </div>
+          </Col>
+          <Col lg={1}>
+            <div className="position-relative">
+              <div className="position-absolute rounded-5 top-0 end-0">
+                <Dropdown
+                  className="topbar-head-dropdown ms-1 header-item"
+                  id="notificationDropdown"
+                >
+                  <Dropdown.Toggle
+                    id="notification"
+                    type="button"
+                    className="btn btn-icon btn-topbar btn-ghost-light rounded-circle arrow-none btn-sm"
+                  >
+                    <span className="position-absolute topbar-badge fs-10 translate-middle badge rounded-pill bg-info">
+                      <span className="notification-badge">{term?.order!}</span>
+                      <span className="visually-hidden">unread messages</span>
+                    </span>
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu
+                    className="dropdown-menu-xs dropdown-menu-end p-0"
+                    aria-labelledby="page-header-notifications-dropdown"
+                  >
+                    <div className="py-2 ps-2" id="notificationItemsTabContent">
+                      {isLoading ? (
+                        <span>Loading ...</span>
+                      ) : (
+                        <ul className="list-unstyled">
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num) => (
+                            <li key={num}>
+                              <button
+                                className="dropdown-item"
+                                onClick={() =>
+                                  handleUpdateOrder(term, num.toString())
+                                }
+                              >
+                                {num}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </Dropdown.Menu>
+                </Dropdown>
               </div>
             </div>
           </Col>

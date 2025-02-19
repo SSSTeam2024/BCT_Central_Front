@@ -10,7 +10,10 @@ export interface VehiclesClassModel {
     link: string,
     icon: string,
     display: string
-  }[]
+  }[],
+  display?: string,
+  order?: string,
+  typeComponent?: string,
 }
 
 export const vehicleClassSlice = createApi({
@@ -35,8 +38,18 @@ export const vehicleClassSlice = createApi({
               }),
               invalidatesTags: ["VehiclesClassModel"],
             }),
+            addVehicleClasse: builder.mutation<void, VehiclesClassModel>({
+                                      query(payload) {
+                                        return {
+                                          url: "/createVehiclesClass",
+                                          method: "POST",
+                                          body: payload,
+                                        };
+                                      },
+                                      invalidatesTags: ["VehiclesClassModel"],
+                                    }),
     };
   },
 });
 
-export const { useGetVehicleClassQuery, useUpdateVehicleClassMutation } = vehicleClassSlice;
+export const { useGetVehicleClassQuery, useUpdateVehicleClassMutation,useAddVehicleClasseMutation } = vehicleClassSlice;

@@ -34,6 +34,9 @@ export interface BestOfferModel {
     buttonLink: string;
     buttonDisplay: string;
   }[];
+  order?: string
+  typeComponent?: string
+  newImage?: string,
 }
 
 export const bestOfferSlice = createApi({

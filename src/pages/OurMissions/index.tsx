@@ -30,7 +30,8 @@ const OurMissions: React.FC<OurMissionsProps> = ({
   selectedPage,
 }) => {
   const { data: AllOurMissions = [] } = useGetAllOurMissionsQuery();
-  const [updateOurMissionMutation] = useUpdateOurMissionMutation();
+  const [updateOurMissionMutation, { isLoading }] =
+    useUpdateOurMissionMutation();
 
   const [isEditing, setIsEditing] = useState<{
     [pageLink: string]: {
@@ -186,8 +187,6 @@ const OurMissions: React.FC<OurMissionsProps> = ({
       missions: updatedMissions,
     };
 
-    console.log("Updating mission with:", updatedCollection);
-
     updateOurMissionMutation(updatedCollection);
 
     setIsEditing((prev) => ({
@@ -196,7 +195,7 @@ const OurMissions: React.FC<OurMissionsProps> = ({
         ...prev[pageLink],
         [missionIndex]: {
           ...prev[pageLink]?.[missionIndex],
-          [field]: false, // Close input after update
+          [field]: false,
         },
       },
     }));
@@ -282,14 +281,26 @@ const OurMissions: React.FC<OurMissionsProps> = ({
                           className="py-2 ps-2"
                           id="notificationItemsTabContent"
                         >
-                          <ul className="list-unstyled">
-                            <li>1</li>
-                            <li>2</li>
-                            <li>3</li>
-                            <li>4</li>
-                            <li>5</li>
-                            <li>6</li>
-                          </ul>
+                          {isLoading ? (
+                            <span>Loading ...</span>
+                          ) : (
+                            <ul className="list-unstyled">
+                              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(
+                                (num) => (
+                                  <li key={num}>
+                                    <button
+                                      className="dropdown-item"
+                                      // onClick={() =>
+                                      //   handleUpdateOrder(about, num.toString())
+                                      // }
+                                    >
+                                      {num}
+                                    </button>
+                                  </li>
+                                )
+                              )}
+                            </ul>
+                          )}
                         </div>
                       </Dropdown.Menu>
                     </Dropdown>

@@ -8,6 +8,7 @@ import {
   Tab,
   Nav,
   Image,
+  Dropdown,
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import { useGetAllPagesQuery } from "features/pageCollection/pageSlice";
@@ -16,6 +17,22 @@ import {
   useGetVehicleGuidesQuery,
   useUpdateVehicleGuideMutation,
 } from "features/vehicleGuideComponent/vehicleGuideSlice";
+import {
+  useGetOfferServiceQuery,
+  useUpdateOfferServiceMutation,
+} from "features/OffreServicesComponent/offreServicesSlice";
+import {
+  useGetAboutUsComponentsQuery,
+  useUpdateAboutUsMutation,
+} from "features/AboutUsComponent/aboutUsSlice";
+import {
+  useGetAllOurMissionsQuery,
+  useUpdateOurMissionMutation,
+} from "features/OurMissionsComponent/ourMissionsSlice";
+import {
+  useGetOurValueQuery,
+  useUpdateOurValuesMutation,
+} from "features/OurValuesComponent/ourValuesSlice";
 
 interface VehicleGuideProps {
   selectedPage: string;
@@ -24,8 +41,16 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
   selectedPage,
 }) => {
   const { data = [] } = useGetVehicleGuidesQuery();
-  const [updateVehicleGuide] = useUpdateVehicleGuideMutation();
+  const [updateVehicleGuide, { isLoading }] = useUpdateVehicleGuideMutation();
   const { data: AllPages = [] } = useGetAllPagesQuery();
+  const { data: AllOfferServices = [] } = useGetOfferServiceQuery();
+  const { data: aboutUsData = [] } = useGetAboutUsComponentsQuery();
+  const { data: AllOurMissions = [] } = useGetAllOurMissionsQuery();
+  const { data: AllValues = [] } = useGetOurValueQuery();
+  const [updateOfferServices] = useUpdateOfferServiceMutation();
+  const [updateAboutUs] = useUpdateAboutUsMutation();
+  const [updateOurValues] = useUpdateOurValuesMutation();
+  const [updateOurMission] = useUpdateOurMissionMutation();
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [updatedParagraph, setUpdatedParagraph] = useState<string>("");
@@ -41,8 +66,29 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
     setEditingId(null);
   };
 
-  const filtredOurValuesData = data.filter(
+  const filtredVehicleGuideData = data.filter(
     (ourValue) => ourValue.page.toLowerCase() === selectedPage
+  );
+
+  const filteredServices = AllOfferServices.filter(
+    (service) => service.associatedPage === selectedPage
+  );
+
+  const filtredAboutUsData = aboutUsData.filter(
+    (aboutUs) => aboutUs.page === selectedPage
+  );
+
+  const filtredOurMissionsData = AllOurMissions.flatMap((missionCollection) =>
+    missionCollection.missions
+      .filter((mission) => mission.page === selectedPage)
+      .map((mission) => ({
+        ...mission,
+        parentId: missionCollection._id,
+      }))
+  );
+
+  const filtredOurValuesData = AllValues.filter(
+    (ourValue) => ourValue.page === selectedPage
   );
 
   const handleEditClick = (id: string, paragraph: string) => {
@@ -71,7 +117,7 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
     isChecked: boolean,
     parentId: string
   ) => {
-    const updatedData = filtredOurValuesData.map((item) => {
+    const updatedData = filtredVehicleGuideData.map((item) => {
       if (item._id === parentId) {
         return {
           ...item,
@@ -104,7 +150,7 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
 
   const handleVehicleBlur = (parentId: string) => {
     if (editingVehicle) {
-      const updatedData = filtredOurValuesData.map((item) => {
+      const updatedData = filtredVehicleGuideData.map((item) => {
         if (item._id === parentId) {
           return {
             ...item,
@@ -126,187 +172,311 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
         updateVehicleGuide(updatedVehicleGuide);
       }
 
-      setEditingVehicle(null); // Exit editing mode
+      setEditingVehicle(null);
     }
   };
 
+  const handleUpdateOrder = async (
+    offer: VehicleGuideModel,
+    selectedOrder: string
+  ) => {
+    if (!offer?._id) return;
+
+    try {
+      const aboutToSwap = filtredAboutUsData.find(
+        (item) => item.order === selectedOrder
+      );
+      const valueToSwap = filtredOurValuesData.find(
+        (item) => item.order === selectedOrder
+      );
+      const missionToSwap: any = filtredOurMissionsData.find(
+        (item) => item.order === selectedOrder
+      );
+      const offerServiceToSwap: any = filteredServices.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const updatePromises = [];
+
+      updatePromises.push(
+        updateVehicleGuide({ ...offer, order: selectedOrder })
+      );
+
+      if (valueToSwap) {
+        updatePromises.push(
+          updateOurValues({ ...valueToSwap, order: offer.order })
+        );
+      }
+
+      if (valueToSwap) {
+        updatePromises.push(
+          updateOurValues({ ...valueToSwap, order: offer.order })
+        );
+      }
+
+      if (offerServiceToSwap) {
+        updatePromises.push(
+          updateOfferServices({ ...offerServiceToSwap, order: offer.order })
+        );
+      }
+
+      if (missionToSwap) {
+        updatePromises.push(
+          updateOurMission({
+            _id: missionToSwap.parentId,
+            missions: filtredOurMissionsData.map((mission) =>
+              mission.order === selectedOrder
+                ? { ...mission, order: offer.order }
+                : mission
+            ),
+          })
+        );
+      }
+
+      await Promise.all(updatePromises);
+    } catch (error) {
+      console.error("Error updating orders:", error);
+    }
+  };
   return (
     <React.Fragment>
-      <div className="p-4">
-        {filtredOurValuesData.length !== 0 ? (
-          filtredOurValuesData.map((value) => (
-            <div key={value._id}>
-              <Row className="mb-3">
-                <div className="vstack gap-2">
-                  <div className="hstack gap-2">
-                    {editingId === value._id ? (
-                      <textarea
-                        value={updatedParagraph}
-                        onChange={handleParagraphChange}
-                        onBlur={() => handleBlur(value._id!)}
-                        autoFocus
-                        className="form-control"
-                      />
-                    ) : (
-                      <>
-                        <p>{value.paragraph}</p>
-                        <i
-                          className="bi bi-pencil"
-                          style={{
-                            cursor: "pointer",
-                            marginLeft: "8px",
-                          }}
-                          onClick={() =>
-                            handleEditClick(value._id!, value.paragraph)
-                          }
-                        ></i>
-                      </>
-                    )}
-                  </div>
+      <Row className="p-4 border-bottom">
+        <Col lg={1}>
+          <input
+            type="checkbox"
+            checked={filtredVehicleGuideData[0]?.display === "1"}
+            onChange={(e) =>
+              updateVehicleGuide({
+                ...filtredVehicleGuideData[0],
+                display: e.target.checked ? "1" : "0",
+              })
+            }
+          />
+        </Col>
+        <Col lg={11}>
+          {filtredVehicleGuideData.map((value) => (
+            <>
+              <div className="position-relative">
+                <div className="position-absolute rounded-5 top-0 end-0">
+                  <Dropdown
+                    className="topbar-head-dropdown ms-1 header-item"
+                    id="notificationDropdown"
+                  >
+                    <Dropdown.Toggle
+                      id="notification"
+                      type="button"
+                      className="btn btn-icon btn-topbar btn-ghost-light rounded-circle arrow-none btn-sm"
+                    >
+                      <span className="position-absolute topbar-badge fs-10 translate-middle badge rounded-pill bg-info">
+                        <span className="notification-badge">
+                          {filtredVehicleGuideData[0]?.order!}
+                        </span>
+                        <span className="visually-hidden">unread messages</span>
+                      </span>
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu
+                      className="dropdown-menu-xs dropdown-menu-end p-0"
+                      aria-labelledby="page-header-notifications-dropdown"
+                    >
+                      <div
+                        className="py-2 ps-2"
+                        id="notificationItemsTabContent"
+                      >
+                        {isLoading ? (
+                          <span>Loading ...</span>
+                        ) : (
+                          <ul className="list-unstyled">
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num) => (
+                              <li key={num}>
+                                <button
+                                  className="dropdown-item"
+                                  onClick={() =>
+                                    handleUpdateOrder(
+                                      filtredVehicleGuideData[0],
+                                      num.toString()
+                                    )
+                                  }
+                                >
+                                  {num}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </Dropdown.Menu>
+                  </Dropdown>
                 </div>
-              </Row>
-              <Tab.Container
-                defaultActiveKey={`v-pills-${value.vehicleType[0]?.title
-                  .replace(/\s+/g, "-")
-                  .toLowerCase()}`}
-              >
-                <Row>
-                  <Col md={3}>
-                    <Nav
-                      variant="pills"
-                      className="flex-column text-center"
-                      id="v-pills-tab"
-                      aria-orientation="vertical"
-                    >
-                      {value.vehicleType.map((vt: any, index: any) => (
-                        <Nav.Link
-                          key={index}
-                          eventKey={`v-pills-${vt.title
-                            .replace(/\s+/g, "-")
-                            .toLowerCase()}`}
-                          className="mb-2"
-                        >
-                          <div className="hstack gap-1">
-                            <Form.Check
-                              type="checkbox"
-                              checked={vt.display === "true"}
-                              onChange={(e) =>
-                                handleCheckboxChange(
-                                  vt.title,
-                                  e.target.checked,
-                                  value._id!
-                                )
-                              }
-                              className="me-2"
-                            />
-                            {editingVehicle?.id === vt.title &&
-                            editingVehicle?.field === "title" ? (
-                              <input
-                                value={editingVehicle.value}
-                                onChange={(e) =>
-                                  setEditingVehicle((prev) => ({
-                                    ...prev!,
-                                    value: e.target.value,
-                                  }))
-                                }
-                                onBlur={() => handleVehicleBlur(value._id!)}
-                                autoFocus
-                                className="form-control"
-                              />
-                            ) : (
-                              <>
-                                {vt.title}
-                                <i
-                                  className="bi bi-pencil ms-2"
-                                  style={{ cursor: "pointer" }}
-                                  onClick={() =>
-                                    handleVehicleEdit(
-                                      vt.title,
-                                      "title",
-                                      vt.title
-                                    )
-                                  }
-                                ></i>
-                              </>
-                            )}
-                          </div>
-                        </Nav.Link>
-                      ))}
-                    </Nav>
-                  </Col>
-                  <Col md={9}>
-                    <Tab.Content
-                      className="text-muted mt-4 mt-md-0"
-                      id="v-pills-tabContent"
-                    >
-                      {value.vehicleType.map((vt, index) => (
-                        <Tab.Pane
-                          key={index}
-                          eventKey={`v-pills-${vt.title
-                            .replace(/\s+/g, "-")
-                            .toLowerCase()}`}
-                        >
-                          <div className="hstack gap-2 mb-3">
-                            {editingVehicle?.id === vt.title &&
-                            editingVehicle?.field === "content" ? (
-                              <textarea
-                                value={editingVehicle.value}
-                                onChange={(e) =>
-                                  setEditingVehicle((prev) => ({
-                                    ...prev!,
-                                    value: e.target.value,
-                                  }))
-                                }
-                                onBlur={() => handleVehicleBlur(value._id!)}
-                                autoFocus
-                                className="form-control"
-                              />
-                            ) : (
-                              <>
-                                <p>{vt.content}</p>
-                                <i
-                                  className="bi bi-pencil ms-2"
-                                  style={{ cursor: "pointer" }}
-                                  onClick={() =>
-                                    handleVehicleEdit(
-                                      vt.title,
-                                      "content",
-                                      vt.content
-                                    )
-                                  }
-                                ></i>
-                              </>
-                            )}
-                          </div>
-                          <div className="d-flex mb-2">
-                            <div className="flex-shrink-0">
-                              <Image
-                                src={`${process.env.REACT_APP_BASE_URL}/VehicleGuide/${vt?.image}`}
-                                alt=""
-                                width="150"
-                                className="rounded"
-                              />
-                              <i
-                                className="bi bi-upload ms-2 mt-1"
-                                style={{ cursor: "pointer" }}
-                                title="Change Image"
-                              ></i>
-                            </div>
-                          </div>
-                        </Tab.Pane>
-                      ))}
-                    </Tab.Content>
-                  </Col>
+              </div>
+              <div key={value._id}>
+                <Row className="mb-3">
+                  <div className="vstack gap-2">
+                    <div className="hstack gap-2">
+                      {editingId === value._id ? (
+                        <textarea
+                          value={updatedParagraph}
+                          onChange={handleParagraphChange}
+                          onBlur={() => handleBlur(value._id!)}
+                          autoFocus
+                          className="form-control"
+                        />
+                      ) : (
+                        <>
+                          <p>{value.paragraph}</p>
+                          <i
+                            className="bi bi-pencil"
+                            style={{
+                              cursor: "pointer",
+                              marginLeft: "8px",
+                            }}
+                            onClick={() =>
+                              handleEditClick(value._id!, value.paragraph)
+                            }
+                          ></i>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </Row>
-              </Tab.Container>
-            </div>
-          ))
-        ) : (
-          <h4 className="m-5 d-flex justify-content-center">
-            Please Select a page with Vehicles Guide Section to update it !!
-          </h4>
-        )}
-      </div>
+                <Tab.Container
+                  defaultActiveKey={`v-pills-${value.vehicleType[0]?.title
+                    .replace(/\s+/g, "-")
+                    .toLowerCase()}`}
+                >
+                  <Row>
+                    <Col md={3}>
+                      <Nav
+                        variant="pills"
+                        className="flex-column text-center"
+                        id="v-pills-tab"
+                        aria-orientation="vertical"
+                      >
+                        {value.vehicleType.map((vt: any, index: any) => (
+                          <Nav.Link
+                            key={index}
+                            eventKey={`v-pills-${vt.title
+                              .replace(/\s+/g, "-")
+                              .toLowerCase()}`}
+                            className="mb-2"
+                          >
+                            <div className="hstack gap-1">
+                              <Form.Check
+                                type="checkbox"
+                                checked={vt.display === "true"}
+                                onChange={(e) =>
+                                  handleCheckboxChange(
+                                    vt.title,
+                                    e.target.checked,
+                                    value._id!
+                                  )
+                                }
+                                className="me-2"
+                              />
+                              {editingVehicle?.id === vt.title &&
+                              editingVehicle?.field === "title" ? (
+                                <input
+                                  value={editingVehicle.value}
+                                  onChange={(e) =>
+                                    setEditingVehicle((prev) => ({
+                                      ...prev!,
+                                      value: e.target.value,
+                                    }))
+                                  }
+                                  onBlur={() => handleVehicleBlur(value._id!)}
+                                  autoFocus
+                                  className="form-control"
+                                />
+                              ) : (
+                                <>
+                                  {vt.title}
+                                  <i
+                                    className="bi bi-pencil ms-2"
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() =>
+                                      handleVehicleEdit(
+                                        vt.title,
+                                        "title",
+                                        vt.title
+                                      )
+                                    }
+                                  ></i>
+                                </>
+                              )}
+                            </div>
+                          </Nav.Link>
+                        ))}
+                      </Nav>
+                    </Col>
+                    <Col md={9}>
+                      <Tab.Content
+                        className="text-muted mt-4 mt-md-0"
+                        id="v-pills-tabContent"
+                      >
+                        {value.vehicleType.map((vt, index) => (
+                          <Tab.Pane
+                            key={index}
+                            eventKey={`v-pills-${vt.title
+                              .replace(/\s+/g, "-")
+                              .toLowerCase()}`}
+                          >
+                            <div className="hstack gap-2 mb-3">
+                              {editingVehicle?.id === vt.title &&
+                              editingVehicle?.field === "content" ? (
+                                <textarea
+                                  value={editingVehicle.value}
+                                  onChange={(e) =>
+                                    setEditingVehicle((prev) => ({
+                                      ...prev!,
+                                      value: e.target.value,
+                                    }))
+                                  }
+                                  onBlur={() => handleVehicleBlur(value._id!)}
+                                  autoFocus
+                                  className="form-control"
+                                />
+                              ) : (
+                                <>
+                                  <p>{vt.content}</p>
+                                  <i
+                                    className="bi bi-pencil ms-2"
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() =>
+                                      handleVehicleEdit(
+                                        vt.title,
+                                        "content",
+                                        vt.content
+                                      )
+                                    }
+                                  ></i>
+                                </>
+                              )}
+                            </div>
+                            <div className="d-flex mb-2">
+                              <div className="flex-shrink-0">
+                                <Image
+                                  src={`${process.env.REACT_APP_BASE_URL}/VehicleGuide/${vt?.image}`}
+                                  alt=""
+                                  width="150"
+                                  className="rounded"
+                                />
+                                <i
+                                  className="bi bi-upload ms-2 mt-1"
+                                  style={{ cursor: "pointer" }}
+                                  title="Change Image"
+                                ></i>
+                              </div>
+                            </div>
+                          </Tab.Pane>
+                        ))}
+                      </Tab.Content>
+                    </Col>
+                  </Row>
+                </Tab.Container>
+              </div>
+            </>
+          ))}
+        </Col>
+      </Row>
     </React.Fragment>
   );
 };

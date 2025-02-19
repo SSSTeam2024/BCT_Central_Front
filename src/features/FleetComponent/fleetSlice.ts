@@ -7,9 +7,13 @@ export interface FleetModel {
         image: string;
         title: string;
         details: string;
-        image_base64: string;
-  image_extension: string;
-    }[]
+        image_base64?: string;
+  image_extension?: string;
+    }[],
+    display?: string,
+      order?: string,
+      typeComponent?: string,
+      newImage?: string,
   }
   
 export const fleetSlice = createApi({
@@ -29,16 +33,27 @@ export const fleetSlice = createApi({
       updateFleet: builder.mutation<void, FleetModel>({
         query: ({ _id, ...rest }) => ({
           url: `/update-fleet/${_id}`,
-          method: "PUT",
+          method: "PATCH",
           body: rest,
         }),
         invalidatesTags: ["FleetModel"],
       }),
+      addNewFleetComponent: builder.mutation<void, FleetModel>({
+              query(payload) {
+                return {
+                  url: "/create-fleet",
+                  method: "POST",
+                  body: payload,
+                };
+              },
+              invalidatesTags: ["FleetModel"],
+            }),
     };
   },
 });
 
 export const {
   useGetAllFleetQuery,
-  useUpdateFleetMutation
+  useUpdateFleetMutation,
+  useAddNewFleetComponentMutation
 } = fleetSlice;

@@ -11,7 +11,9 @@ export interface TermConditionModel {
     content: string,
     display: string,
   },
-  display: string,
+  display?: string,
+  order?: string,
+  typeComponent?: string,
 }
 
 export const termConditionSlice = createApi({

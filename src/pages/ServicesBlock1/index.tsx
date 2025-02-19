@@ -8,6 +8,7 @@ import {
   Tab,
   Nav,
   Form,
+  Dropdown,
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import { Link, useLocation } from "react-router-dom";
@@ -29,6 +30,23 @@ import {
 } from "features/block1Component/block1Slice";
 import aboutus from "assets/images/about-us.jpg";
 import avatar2 from "assets/images/users/avatar-2.jpg";
+import { useGetVehicleGuidesQuery } from "features/vehicleGuideComponent/vehicleGuideSlice";
+import {
+  useGetOfferServiceQuery,
+  useUpdateOfferServiceMutation,
+} from "features/OffreServicesComponent/offreServicesSlice";
+import {
+  useGetAboutUsComponentsQuery,
+  useUpdateAboutUsMutation,
+} from "features/AboutUsComponent/aboutUsSlice";
+import {
+  useGetAllOurMissionsQuery,
+  useUpdateOurMissionMutation,
+} from "features/OurMissionsComponent/ourMissionsSlice";
+import {
+  useGetAllInThePressQuery,
+  useUpdateInThePressMutation,
+} from "features/InThePressComponent/inThePressSlice";
 
 interface Block1ModelInterface {
   image: {
@@ -72,19 +90,55 @@ function convertToBase64(
   });
 }
 
-const ServicesBlock1 = () => {
-  document.title = "Services Block 1 | Coach Hire Network";
+interface Block1Props {
+  selectedPage: string;
+}
+
+const ServicesBlock1: React.FC<Block1Props> = ({ selectedPage }) => {
   const { data = [] } = useGetBlock1sQuery();
-  const [updateOurValue] = useUpdateBlock1Mutation();
+  const [updatedBlock1, { isLoading }] = useUpdateBlock1Mutation();
   const { data: AllPages = [] } = useGetAllPagesQuery();
+  const { data: AllVehicleGuides = [] } = useGetVehicleGuidesQuery();
+  const { data: AllOfferServices = [] } = useGetOfferServiceQuery();
+  const { data: aboutUsData = [] } = useGetAboutUsComponentsQuery();
+  const { data: AllOurMissions = [] } = useGetAllOurMissionsQuery();
+  const { data: AllValues = [] } = useGetOurValueQuery();
+  const { data: AllInThePress = [] } = useGetAllInThePressQuery();
+  const [updatedInThePress] = useUpdateInThePressMutation();
+  const [updateOfferServices] = useUpdateOfferServiceMutation();
+  const [updateAboutUs] = useUpdateAboutUsMutation();
+  const [updateOurValues] = useUpdateOurValuesMutation();
+  const [updateOurMission] = useUpdateOurMissionMutation();
 
-  const [selectedPage, setSelectedPage] = useState<string>("");
-  const handleSelectPage = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value;
-    setSelectedPage(value);
-  };
+  const filtredBlock1Data = data.filter(
+    (block1) => block1.page === selectedPage
+  );
 
-  const filtredOurValuesData = data.filter(
+  const filtredInThePressData = AllInThePress.filter(
+    (inThePress) => inThePress.page === selectedPage
+  );
+  const filtredVehicleGuideData = AllVehicleGuides.filter(
+    (ourValue) => ourValue.page.toLowerCase() === selectedPage
+  );
+
+  const filteredServices = AllOfferServices.filter(
+    (service) => service.associatedPage === selectedPage
+  );
+
+  const filtredAboutUsData = aboutUsData.filter(
+    (aboutUs) => aboutUs.page === selectedPage
+  );
+
+  const filtredOurMissionsData = AllOurMissions.flatMap((missionCollection) =>
+    missionCollection.missions
+      .filter((mission) => mission.page === selectedPage)
+      .map((mission) => ({
+        ...mission,
+        parentId: missionCollection._id,
+      }))
+  );
+
+  const filtredOurValuesData = AllValues.filter(
     (ourValue) => ourValue.page === selectedPage
   );
 
@@ -131,7 +185,7 @@ const ServicesBlock1 = () => {
         },
       };
 
-      updateOurValue(updatedData)
+      updatedBlock1(updatedData)
         .unwrap()
         .then(() => {
           console.log("Update successful");
@@ -163,7 +217,7 @@ const ServicesBlock1 = () => {
     );
 
     const updatedData = { ...about, tabs: updatedTabs };
-    updateOurValue(updatedData)
+    updatedBlock1(updatedData)
       .unwrap()
       .then(() => console.log("Checkbox update successful"))
       .catch((error) => console.error("Checkbox update failed:", error));
@@ -192,7 +246,7 @@ const ServicesBlock1 = () => {
 
     const updatedData = { ...about, tabs: updatedTabs };
 
-    updateOurValue(updatedData)
+    updatedBlock1(updatedData)
       .unwrap()
       .then(() => setEditingField({ id: "", field: null }))
       .catch((error) => console.error("Update failed:", error));
@@ -216,7 +270,7 @@ const ServicesBlock1 = () => {
         },
       };
       setPreviewImage(`data:image/${extension};base64,${base64Data}`);
-      updateOurValue(updatedData);
+      updatedBlock1(updatedData);
       setEditingField({ id: "", field: null });
     }
   };
@@ -241,7 +295,7 @@ const ServicesBlock1 = () => {
 
       const updatedData = { ...about, tabs: updatedTabs };
 
-      updateOurValue(updatedData)
+      updatedBlock1(updatedData)
         .unwrap()
         .then(() => console.log("Button update successful"))
         .catch((error) => console.error("Button update failed:", error));
@@ -263,7 +317,7 @@ const ServicesBlock1 = () => {
         [field]: { ...about[field], name: value },
       };
 
-      updateOurValue(updatedData)
+      updatedBlock1(updatedData)
         .unwrap()
         .then(() => setEditingField({ id: "", field: null }))
         .catch((error) => console.error("Edit save failed:", error));
@@ -320,7 +374,7 @@ const ServicesBlock1 = () => {
     e.preventDefault();
     try {
       await addTabToOurValue({
-        _id: filtredOurValuesData[0]?._id!,
+        _id: filtredBlock1Data[0]?._id!,
         tabData: formData,
       }).unwrap();
       alert("Tab added successfully!");
@@ -339,249 +393,293 @@ const ServicesBlock1 = () => {
     }
   };
 
+  const handleUpdateOrder = async (
+    offer: Block1Model,
+    selectedOrder: string
+  ) => {
+    if (!offer?._id) return;
+
+    try {
+      const aboutToSwap = filtredAboutUsData.find(
+        (item) => item.order === selectedOrder
+      );
+      const valueToSwap = filtredOurValuesData.find(
+        (item) => item.order === selectedOrder
+      );
+      const missionToSwap: any = filtredOurMissionsData.find(
+        (item) => item.order === selectedOrder
+      );
+      const offerServiceToSwap: any = filteredServices.find(
+        (item) => item.order === selectedOrder
+      );
+      // const offerServiceToSwap: any = filteredServices.find(
+      //   (item) => item.order === selectedOrder
+      // );
+
+      const updatePromises = [];
+
+      updatePromises.push(updatedBlock1({ ...offer, order: selectedOrder }));
+
+      if (aboutToSwap) {
+        updatePromises.push(
+          updateAboutUs({ ...aboutToSwap, order: offer.order })
+        );
+      }
+
+      if (valueToSwap) {
+        updatePromises.push(
+          updateOurValues({ ...valueToSwap, order: offer.order })
+        );
+      }
+
+      if (offerServiceToSwap) {
+        updatePromises.push(
+          updateOfferServices({ ...offerServiceToSwap, order: offer.order })
+        );
+      }
+
+      if (missionToSwap) {
+        updatePromises.push(
+          updateOurMission({
+            _id: missionToSwap.parentId,
+            missions: filtredOurMissionsData.map((mission) =>
+              mission.order === selectedOrder
+                ? { ...mission, order: offer.order }
+                : mission
+            ),
+          })
+        );
+      }
+
+      await Promise.all(updatePromises);
+    } catch (error) {
+      console.error("Error updating orders:", error);
+    }
+  };
+
   return (
     <React.Fragment>
-      <div className="page-content">
-        <Container fluid>
-          <Breadcrumb title="Services Block 1" pageTitle="Web Site Settings" />
-          <Card>
-            <Card.Header className="p-3">
-              <Row className="p-3">
-                <Col lg={1}>
-                  <Form.Label>Pages:</Form.Label>
-                </Col>
-                <Col lg={4}>
-                  <select className="form-select" onChange={handleSelectPage}>
-                    <option value="">Select page</option>
-                    {AllPages.map((page) => (
-                      <option value={page.link} key={page?._id!}>
-                        {page.label}
-                      </option>
-                    ))}
-                  </select>
-                </Col>
-              </Row>
-            </Card.Header>
-            <Card.Body>
-              {filtredOurValuesData.length !== 0 ? (
-                filtredOurValuesData.map((value) => (
-                  <>
-                    <Row className="d-flex justify-content-center">
-                      <div className="vstack gap-2">
-                        <div className="hstack gap-2 justify-content-center">
-                          <input
-                            type="checkbox"
-                            checked={value.littleTitle?.display === "1"}
-                            onChange={(e) =>
-                              handleCheckboxChange(
-                                value,
-                                "littleTitle",
-                                e.target.checked
-                              )
-                            }
-                          />
-                          {editingField.id === value._id &&
-                          editingField.field === "littleTitle" ? (
-                            <input
-                              type="text"
-                              className="form-control"
-                              value={editedValue}
-                              autoFocus
-                              onChange={(e) => setEditedValue(e.target.value)}
-                              onBlur={() =>
-                                handleEditSaveField(
-                                  value,
-                                  "littleTitle",
-                                  editedValue
-                                )
-                              }
-                            />
-                          ) : (
-                            <span
-                              style={{
-                                textTransform: "uppercase",
-                                fontSize: "13px",
-                                fontWeight: 600,
-                                color: "#CD2528",
-                              }}
-                            >
-                              {value.littleTitle.name}
-                            </span>
-                          )}
-                          <i
-                            className="bi bi-pencil"
-                            style={{ cursor: "pointer", marginLeft: "8px" }}
-                            onClick={() =>
-                              handleEditStart(
-                                value._id as string,
-                                "littleTitle",
-                                value.littleTitle.name
-                              )
-                            }
-                          ></i>
-                        </div>
-                        <div className="hstack gap-2 justify-content-center">
-                          <input
-                            type="checkbox"
-                            checked={value.bigTitle.display === "1"}
-                            onChange={(e) =>
-                              handleCheckboxChange(
-                                value,
-                                "bigTitle",
-                                e.target.checked
-                              )
-                            }
-                          />
-                          {editingField.id === value._id &&
-                          editingField.field === "bigTitle" ? (
-                            <input
-                              type="text"
-                              className="form-control mb-3"
-                              value={editedValue}
-                              autoFocus
-                              onChange={(e) => setEditedValue(e.target.value)}
-                              onBlur={() =>
-                                handleEditSaveField(
-                                  value,
-                                  "bigTitle",
-                                  editedValue
-                                )
-                              }
-                            />
-                          ) : (
-                            <h2 className="h2-with-after">
-                              {value.bigTitle.name}
-                            </h2>
-                          )}
-                          <i
-                            className="bi bi-pencil"
-                            style={{ cursor: "pointer", marginLeft: "8px" }}
-                            onClick={() =>
-                              handleEditStart(
-                                value._id as string,
-                                "bigTitle",
-                                value.bigTitle.name
-                              )
-                            }
-                          ></i>
-                        </div>
-                      </div>
-                    </Row>
-                    <Row>
-                      <div
+      <Row className="border-bottom p-4">
+        <Col lg={1}>
+          <input
+            type="checkbox"
+            checked={filtredBlock1Data[0]?.display === "1"}
+            onChange={(e) =>
+              updatedBlock1({
+                ...filtredBlock1Data[0],
+                display: e.target.checked ? "1" : "0",
+              })
+            }
+          />
+        </Col>
+        <Col lg={10}>
+          {filtredBlock1Data.map((value) => (
+            <>
+              <Row className="d-flex justify-content-center">
+                <div className="vstack gap-2">
+                  <div className="hstack gap-2 justify-content-center">
+                    <input
+                      type="checkbox"
+                      checked={value.littleTitle?.display === "1"}
+                      onChange={(e) =>
+                        handleCheckboxChange(
+                          value,
+                          "littleTitle",
+                          e.target.checked
+                        )
+                      }
+                    />
+                    {editingField.id === value._id &&
+                    editingField.field === "littleTitle" ? (
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editedValue}
+                        autoFocus
+                        onChange={(e) => setEditedValue(e.target.value)}
+                        onBlur={() =>
+                          handleEditSaveField(value, "littleTitle", editedValue)
+                        }
+                      />
+                    ) : (
+                      <span
                         style={{
-                          backgroundImage: `url(${aboutus})`,
-                          backgroundSize: "cover",
-                          backgroundPosition: "center",
-                          backgroundRepeat: "no-repeat",
+                          textTransform: "uppercase",
+                          fontSize: "13px",
+                          fontWeight: 600,
+                          color: "#CD2528",
                         }}
-                        className="p-3"
                       >
-                        <Card className="w-75">
-                          <Card.Header className="bg-transparent border-0">
-                            <div className="hstack gap-3">
-                              <input
-                                type="checkbox"
-                                checked={value.subTitle.display === "1"}
-                                onChange={(e) =>
-                                  handleCheckboxChange(
-                                    value,
-                                    "subTitle",
-                                    e.target.checked
-                                  )
-                                }
-                              />
-                              {editingField.field === "subTitle" ? (
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  value={editedValue}
-                                  autoFocus
-                                  onChange={(e) =>
-                                    setEditedValue(e.target.value)
-                                  }
-                                  onBlur={() =>
-                                    handleEditSaveField(
-                                      value,
-                                      "subTitle",
-                                      editedValue
-                                    )
-                                  }
-                                />
-                              ) : (
-                                <h4>{value.subTitle.name}</h4>
-                              )}
-                              <i
-                                className="bi bi-pencil"
-                                style={{ cursor: "pointer", marginLeft: "8px" }}
-                                onClick={() =>
-                                  handleEditStart(
-                                    value._id as string,
-                                    "subTitle",
-                                    value.subTitle.name
-                                  )
-                                }
-                              ></i>
-                            </div>
-                          </Card.Header>
-                          <Card.Body>
-                            <table>
-                              <tbody>
-                                {/* First row with the first 3 tabs */}
-                                <tr>
-                                  {value.tabs.map((tab, index) => (
-                                    <td
-                                      key={index}
-                                      //   className="w-25 border-bottom border-end p-3"
-                                      className="border-bottom border-end"
-                                    >
-                                      <div className="vstack gap-2">
-                                        {/* <i className="flaticon-stopwatch"></i> */}
-                                        {editingField.id === value._id &&
-                                        editingField.field ===
-                                          `title-${index}` ? (
-                                          <input
-                                            type="text"
-                                            className="form-control"
-                                            value={editedValue}
-                                            onChange={(e) =>
-                                              setEditedValue(e.target.value)
-                                            }
-                                            onBlur={() =>
-                                              handleEditSave(
-                                                value,
-                                                "tabs",
-                                                index,
-                                                "title",
-                                                editedValue
-                                              )
-                                            }
-                                            autoFocus
-                                          />
-                                        ) : (
-                                          <div className="hstack gap-2">
-                                            <h6>{tab.title}</h6>
-                                            <button
-                                              className="btn btn-link p-0 ms-2"
-                                              onClick={() =>
-                                                handleEditStart(
-                                                  value?._id!,
-                                                  `title-${index}`,
-                                                  tab.title
-                                                )
-                                              }
-                                            >
-                                              <i className="bi bi-pencil"></i>
-                                            </button>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </td>
-                                  ))}
-                                </tr>
+                        {value.littleTitle.name}
+                      </span>
+                    )}
+                    <i
+                      className="bi bi-pencil"
+                      style={{ cursor: "pointer", marginLeft: "8px" }}
+                      onClick={() =>
+                        handleEditStart(
+                          value._id as string,
+                          "littleTitle",
+                          value.littleTitle.name
+                        )
+                      }
+                    ></i>
+                  </div>
+                  <div className="hstack gap-2 justify-content-center">
+                    <input
+                      type="checkbox"
+                      checked={value.bigTitle.display === "1"}
+                      onChange={(e) =>
+                        handleCheckboxChange(
+                          value,
+                          "bigTitle",
+                          e.target.checked
+                        )
+                      }
+                    />
+                    {editingField.id === value._id &&
+                    editingField.field === "bigTitle" ? (
+                      <input
+                        type="text"
+                        className="form-control mb-3"
+                        value={editedValue}
+                        autoFocus
+                        onChange={(e) => setEditedValue(e.target.value)}
+                        onBlur={() =>
+                          handleEditSaveField(value, "bigTitle", editedValue)
+                        }
+                      />
+                    ) : (
+                      <h2 className="h2-with-after">{value.bigTitle.name}</h2>
+                    )}
+                    <i
+                      className="bi bi-pencil"
+                      style={{ cursor: "pointer", marginLeft: "8px" }}
+                      onClick={() =>
+                        handleEditStart(
+                          value._id as string,
+                          "bigTitle",
+                          value.bigTitle.name
+                        )
+                      }
+                    ></i>
+                  </div>
+                </div>
+              </Row>
+              <Row>
+                <div className="p-3">
+                  <Card
+                    className="w-75"
+                    style={{
+                      backgroundImage: `url(${
+                        process.env.REACT_APP_BASE_URL
+                      }/inThePressFiles/${value?.image?.path!})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                    }}
+                  >
+                    <Card.Header className="bg-transparent border-0">
+                      <div className="hstack gap-3">
+                        <input
+                          type="checkbox"
+                          checked={value.subTitle.display === "1"}
+                          onChange={(e) =>
+                            handleCheckboxChange(
+                              value,
+                              "subTitle",
+                              e.target.checked
+                            )
+                          }
+                        />
+                        {editingField.field === "subTitle" ? (
+                          <input
+                            type="text"
+                            className="form-control"
+                            value={editedValue}
+                            autoFocus
+                            onChange={(e) => setEditedValue(e.target.value)}
+                            onBlur={() =>
+                              handleEditSaveField(
+                                value,
+                                "subTitle",
+                                editedValue
+                              )
+                            }
+                          />
+                        ) : (
+                          <h4>{value.subTitle.name}</h4>
+                        )}
+                        <i
+                          className="bi bi-pencil"
+                          style={{ cursor: "pointer", marginLeft: "8px" }}
+                          onClick={() =>
+                            handleEditStart(
+                              value._id as string,
+                              "subTitle",
+                              value.subTitle.name
+                            )
+                          }
+                        ></i>
+                      </div>
+                    </Card.Header>
+                    <Card.Body>
+                      <table>
+                        <tbody>
+                          {/* First row with the first 3 tabs */}
+                          <tr>
+                            {value.tabs.map((tab, index) => (
+                              <td
+                                key={index}
+                                //   className="w-25 border-bottom border-end p-3"
+                                className="border-bottom border-end"
+                              >
+                                <div className="vstack gap-2">
+                                  {/* <i className="flaticon-stopwatch"></i> */}
+                                  {editingField.id === value._id &&
+                                  editingField.field === `title-${index}` ? (
+                                    <input
+                                      type="text"
+                                      className="form-control"
+                                      value={editedValue}
+                                      onChange={(e) =>
+                                        setEditedValue(e.target.value)
+                                      }
+                                      onBlur={() =>
+                                        handleEditSave(
+                                          value,
+                                          "tabs",
+                                          index,
+                                          "title",
+                                          editedValue
+                                        )
+                                      }
+                                      autoFocus
+                                    />
+                                  ) : (
+                                    <div className="hstack gap-2">
+                                      <h6>{tab.title}</h6>
+                                      <button
+                                        className="btn btn-link p-0 ms-2"
+                                        onClick={() =>
+                                          handleEditStart(
+                                            value?._id!,
+                                            `title-${index}`,
+                                            tab.title
+                                          )
+                                        }
+                                      >
+                                        <i className="bi bi-pencil"></i>
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                            ))}
+                          </tr>
 
-                                {/* Second row with the next 3 tabs */}
-                                {/* <tr>
+                          {/* Second row with the next 3 tabs */}
+                          {/* <tr>
                                   {value.tabs.slice(3, 6).map((tab, index) => (
                                     <td
                                       key={index}
@@ -630,23 +728,67 @@ const ServicesBlock1 = () => {
                                     </td>
                                   ))}
                                 </tr> */}
-                              </tbody>
-                            </table>
-                          </Card.Body>
-                        </Card>
-                      </div>
-                    </Row>
-                  </>
-                ))
-              ) : (
-                <h4 className="m-5 d-flex justify-content-center">
-                  Please Select a page with Our Values Section to update it !!
-                </h4>
-              )}
-            </Card.Body>
-          </Card>
-        </Container>
-      </div>
+                        </tbody>
+                      </table>
+                    </Card.Body>
+                  </Card>
+                </div>
+              </Row>
+            </>
+          ))}
+        </Col>
+        <Col lg={1}>
+          <div className="position-relative">
+            <div className="position-absolute rounded-5 top-0 end-0">
+              <Dropdown
+                className="topbar-head-dropdown ms-1 header-item"
+                id="notificationDropdown"
+              >
+                <Dropdown.Toggle
+                  id="notification"
+                  type="button"
+                  className="btn btn-icon btn-topbar btn-ghost-light rounded-circle arrow-none btn-sm"
+                >
+                  <span className="position-absolute topbar-badge fs-10 translate-middle badge rounded-pill bg-info">
+                    <span className="notification-badge">
+                      {filtredBlock1Data[0]?.order!}
+                    </span>
+                    <span className="visually-hidden">unread messages</span>
+                  </span>
+                </Dropdown.Toggle>
+                <Dropdown.Menu
+                  className="dropdown-menu-xs dropdown-menu-end p-0"
+                  aria-labelledby="page-header-notifications-dropdown"
+                >
+                  <div className="py-2 ps-2" id="notificationItemsTabContent">
+                    {isLoading ? (
+                      <span>Loading ...</span>
+                    ) : (
+                      <ul className="list-unstyled">
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num) => (
+                          <li key={num}>
+                            <button
+                              className="dropdown-item"
+                              onClick={() =>
+                                handleUpdateOrder(
+                                  filtredBlock1Data[0],
+                                  num.toString()
+                                )
+                              }
+                            >
+                              {num}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </Dropdown.Menu>
+              </Dropdown>
+            </div>
+          </div>
+        </Col>
+      </Row>
     </React.Fragment>
   );
 };

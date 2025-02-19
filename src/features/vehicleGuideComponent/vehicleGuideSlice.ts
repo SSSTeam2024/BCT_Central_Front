@@ -4,6 +4,9 @@ export interface VehicleGuideModel {
   _id?: string;
   page: string;
   paragraph: string,
+  display?: string,
+  order?: string,
+  typeComponent?: string,
   vehicleType: {
     title: string,
     content: string,
@@ -34,8 +37,18 @@ export const vehicleGuideSlice = createApi({
               }),
               invalidatesTags: ["VehicleGuideModel"],
             }),
+            addVehicleGuide: builder.mutation<void, VehicleGuideModel>({
+                          query(payload) {
+                            return {
+                              url: "/createVehicleGuide",
+                              method: "POST",
+                              body: payload,
+                            };
+                          },
+                          invalidatesTags: ["VehicleGuideModel"],
+                        }),
     };
   },
 });
 
-export const { useGetVehicleGuidesQuery, useUpdateVehicleGuideMutation } = vehicleGuideSlice;
+export const { useGetVehicleGuidesQuery, useUpdateVehicleGuideMutation, useAddVehicleGuideMutation } = vehicleGuideSlice;

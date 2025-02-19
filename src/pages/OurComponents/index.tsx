@@ -1,14 +1,5 @@
-import React, { useState, useEffect } from "react";
-import {
-  Card,
-  Col,
-  Container,
-  Form,
-  Image,
-  Nav,
-  Row,
-  Tab,
-} from "react-bootstrap";
+import React, { useState } from "react";
+import { Card, Col, Container, Image, Nav, Row, Tab } from "react-bootstrap";
 import BreadCrumb from "Common/BreadCrumb";
 import SimpleBar from "simplebar-react";
 import { useGetOurValueQuery } from "features/OurValuesComponent/ourValuesSlice";
@@ -17,22 +8,19 @@ import { useGetAboutUsComponentsQuery } from "features/AboutUsComponent/aboutUsS
 import { useGetOfferServiceQuery } from "features/OffreServicesComponent/offreServicesSlice";
 import { useGetVehicleGuidesQuery } from "features/vehicleGuideComponent/vehicleGuideSlice";
 import { useGetVehicleClassQuery } from "features/VehicleClassComponent/vehicleClassSlice";
-import { Link } from "react-router-dom";
 import { useGetAllInThePressQuery } from "features/InThePressComponent/inThePressSlice";
 import { useGetBlock1sQuery } from "features/block1Component/block1Slice";
 import Masonry from "react-responsive-masonry";
-import img1 from "assets/images/02.jpg";
-import img2 from "assets/images/clients.jpg";
-import img3 from "assets/images/test-2.jpg";
-import img4 from "assets/images/test1.jpg";
-import img5 from "assets/images/a-YhuJeQ-min.jpeg";
-import img6 from "assets/images/about-us.jpg";
+import img1 from "assets/images/news-details-img.jpg";
+import img2 from "assets/images/fun-facts-img.jpg";
+import img3 from "assets/images/began-main-bg.jpg";
+import img4 from "assets/images/began-bg.jpg";
 
 import { useGetAllFleetQuery } from "features/FleetComponent/fleetSlice";
 import { useGetTermsConditionsQuery } from "features/TermsConditionsComponent/termsCoditionSlice";
 
 const OurComponents = () => {
-  document.title = "Web Site Our Components | Coach Hire Network";
+  document.title = "WebSite Components | Coach Hire Network";
 
   const { data = [] } = useGetOurValueQuery();
   const { data: AllOurMissions = [] } = useGetAllOurMissionsQuery();
@@ -51,7 +39,7 @@ const OurComponents = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          <BreadCrumb title="Our Components" pageTitle="Web Site Settings" />
+          <BreadCrumb title="WebSite Components" pageTitle="WebSite Settings" />
           <Card className="p-3">
             <Row>
               <Col lg={3}>
@@ -661,16 +649,13 @@ const OurComponents = () => {
                         {AllVehicleClasses[0].vehicleTypes.map((vt, index) => (
                           <Col lg={3} key={index}>
                             <Card className="border-danger">
-                              <Link
-                                to={`${vt.link}`}
-                                className="d-flex justify-content-center p-2 text-danger"
-                              >
+                              <div className="d-flex justify-content-center p-2 text-danger">
                                 <div className="hstack gap-2 align-middle">
                                   <i className={`${vt.icon} fs-18`}></i>
 
                                   <span>{vt.title}</span>
                                 </div>
-                              </Link>
+                              </div>
                             </Card>
                           </Col>
                         ))}
@@ -737,12 +722,12 @@ const OurComponents = () => {
                                 color: "#CD2528",
                               }}
                             >
-                              {AllServicesBlock1[0].littleTitle.name}
+                              {AllServicesBlock1[0]?.littleTitle?.name!}
                             </span>
                           </div>
                           <div className="hstack gap-2 justify-content-center">
                             <h2 className="h2-with-after">
-                              {AllServicesBlock1[0].bigTitle.name}
+                              {AllServicesBlock1[0]?.bigTitle?.name!}
                             </h2>
                           </div>
                         </div>
@@ -752,7 +737,7 @@ const OurComponents = () => {
                           <Card className="w-75">
                             <Card.Header className="bg-transparent border-0">
                               <div className="hstack gap-3">
-                                <h4>{AllServicesBlock1[0].subTitle.name}</h4>
+                                <h4>{AllServicesBlock1[0]?.subTitle?.name!}</h4>
                               </div>
                             </Card.Header>
                             <Card.Body
@@ -839,22 +824,24 @@ const OurComponents = () => {
                   )}
                   {selectedSection === "fleet" && (
                     <Masonry className="my-masonry-grid_column me-3">
-                      {AllFleet.map((fleet: any) => (
-                        <Col className="p-2">
-                          <div>
-                            <img
-                              src={`${process.env.REACT_APP_BASE_URL}/fleetFiles/${fleet.grids[0]?.image}`}
-                              className="card-img-top w-50 p-2"
-                              alt="..."
-                            />
+                      {AllFleet.map((fleet: any) =>
+                        fleet.grids.map((grid: any) => (
+                          <Col className="p-2">
                             <div>
-                              <h5 className="card-title mb-1">
-                                {fleet.grids[0]?.title}
-                              </h5>
+                              <img
+                                src={`${process.env.REACT_APP_BASE_URL}/fleetFiles/${grid?.image}`}
+                                className="card-img-top w-50 p-2"
+                                alt="..."
+                              />
+                              <div>
+                                <h5 className="card-title mb-1">
+                                  {grid?.title}
+                                </h5>
+                              </div>
                             </div>
-                          </div>
-                        </Col>
-                      ))}
+                          </Col>
+                        ))
+                      )}
                     </Masonry>
                   )}
                   {selectedSection === "on_the_road" && (
@@ -869,7 +856,7 @@ const OurComponents = () => {
                         </Col>
                         <Col>
                           <img
-                            src={img2}
+                            src={img1}
                             className="card-img-top w-75 p-2"
                             alt="..."
                           />
@@ -885,21 +872,21 @@ const OurComponents = () => {
                       <Row>
                         <Col>
                           <img
+                            src={img2}
+                            className="card-img-top w-75 p-2"
+                            alt="..."
+                          />
+                        </Col>
+                        <Col>
+                          <img
+                            src={img2}
+                            className="card-img-top w-75 p-2"
+                            alt="..."
+                          />
+                        </Col>
+                        <Col>
+                          <img
                             src={img4}
-                            className="card-img-top w-75 p-2"
-                            alt="..."
-                          />
-                        </Col>
-                        <Col>
-                          <img
-                            src={img5}
-                            className="card-img-top w-75 p-2"
-                            alt="..."
-                          />
-                        </Col>
-                        <Col>
-                          <img
-                            src={img6}
                             className="card-img-top w-100 p-2"
                             alt="..."
                           />

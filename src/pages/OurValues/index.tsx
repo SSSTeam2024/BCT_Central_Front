@@ -8,6 +8,14 @@ import {
   useUpdateOurValuesMutation,
 } from "features/OurValuesComponent/ourValuesSlice";
 import { useGetAllPagesQuery } from "features/pageCollection/pageSlice";
+import {
+  useGetAllOurMissionsQuery,
+  useUpdateOurMissionMutation,
+} from "features/OurMissionsComponent/ourMissionsSlice";
+import {
+  useGetAboutUsComponentsQuery,
+  useUpdateAboutUsMutation,
+} from "features/AboutUsComponent/aboutUsSlice";
 
 interface OurValuesModelInterface {
   image: {
@@ -61,11 +69,28 @@ interface OurValuesProps {
 
 const OurValues: React.FC<OurValuesProps> = ({ selectedPage }) => {
   const { data = [] } = useGetOurValueQuery();
-  const [updateOurValue] = useUpdateOurValuesMutation();
+  const [updateOurValue, { isLoading }] = useUpdateOurValuesMutation();
+  const [updateOurMission] = useUpdateOurMissionMutation();
+  const [updateAboutUs] = useUpdateAboutUsMutation();
   const { data: AllPages = [] } = useGetAllPagesQuery();
+  const { data: AllOurMissions = [] } = useGetAllOurMissionsQuery();
+  const { data: aboutUsData = [] } = useGetAboutUsComponentsQuery();
 
   const filtredOurValuesData = data.filter(
     (ourValue) => ourValue.page === selectedPage
+  );
+
+  const filtredAboutUsData = aboutUsData.filter(
+    (aboutUs) => aboutUs.page === selectedPage
+  );
+
+  const filtredOurMissionsData = AllOurMissions.flatMap((missionCollection) =>
+    missionCollection.missions
+      .filter((mission) => mission.page === selectedPage)
+      .map((mission) => ({
+        ...mission,
+        parentId: missionCollection._id,
+      }))
   );
 
   const [localDisplay, setLocalDisplay] = useState<string | undefined>(
@@ -319,6 +344,54 @@ const OurValues: React.FC<OurValuesProps> = ({ selectedPage }) => {
     }
   };
 
+  const handleUpdateOrder = async (
+    ourValue: OurValuesModel,
+    selectedOrder: string
+  ) => {
+    if (!ourValue?._id) return;
+
+    try {
+      const aboutToSwap = filtredAboutUsData.find(
+        (item) => item.order === selectedOrder
+      );
+      const valueToSwap = filtredOurValuesData.find(
+        (item) => item.order === selectedOrder
+      );
+      const missionToSwap: any = filtredOurMissionsData.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const updatePromises = [];
+
+      updatePromises.push(
+        updateOurValue({ ...ourValue, order: selectedOrder })
+      );
+
+      if (aboutToSwap) {
+        updatePromises.push(
+          updateAboutUs({ ...aboutToSwap, order: ourValue.order })
+        );
+      }
+
+      if (missionToSwap) {
+        updatePromises.push(
+          updateOurMission({
+            _id: missionToSwap.parentId,
+            missions: filtredOurMissionsData.map((mission) =>
+              mission.order === selectedOrder
+                ? { ...mission, order: ourValue.order }
+                : mission
+            ),
+          })
+        );
+      }
+
+      await Promise.all(updatePromises);
+    } catch (error) {
+      console.error("Error updating orders:", error);
+    }
+  };
+
   return (
     <React.Fragment>
       {filtredOurValuesData.map((value) => (
@@ -336,46 +409,53 @@ const OurValues: React.FC<OurValuesProps> = ({ selectedPage }) => {
             />
           </Col>
           <Col lg={11}>
-            <Row className="d-flex justify-content-center p-4">
-              <div className="position-relative">
-                <div className="position-absolute rounded-5 top-0 end-0">
-                  <Dropdown
-                    className="topbar-head-dropdown ms-1 header-item"
-                    id="notificationDropdown"
+            <div className="position-relative">
+              <div className="position-absolute rounded-5 top-0 end-0">
+                <Dropdown
+                  className="topbar-head-dropdown ms-1 header-item"
+                  id="notificationDropdown"
+                >
+                  <Dropdown.Toggle
+                    id="notification"
+                    type="button"
+                    className="btn btn-icon btn-topbar btn-ghost-light rounded-circle arrow-none btn-sm"
                   >
-                    <Dropdown.Toggle
-                      id="notification"
-                      type="button"
-                      className="btn btn-icon btn-topbar btn-ghost-light rounded-circle arrow-none btn-sm"
-                    >
-                      <span className="position-absolute topbar-badge fs-10 translate-middle badge rounded-pill bg-info">
-                        <span className="notification-badge">
-                          {value?.order!}
-                        </span>
-                        <span className="visually-hidden">unread messages</span>
+                    <span className="position-absolute topbar-badge fs-10 translate-middle badge rounded-pill bg-info">
+                      <span className="notification-badge">
+                        {value?.order!}
                       </span>
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu
-                      className="dropdown-menu-xs dropdown-menu-end p-0"
-                      aria-labelledby="page-header-notifications-dropdown"
-                    >
-                      <div
-                        className="py-2 ps-2"
-                        id="notificationItemsTabContent"
-                      >
+                      <span className="visually-hidden">unread messages</span>
+                    </span>
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu
+                    className="dropdown-menu-xs dropdown-menu-end p-0"
+                    aria-labelledby="page-header-notifications-dropdown"
+                  >
+                    <div className="py-2 ps-2" id="notificationItemsTabContent">
+                      {isLoading ? (
+                        <span>Loading ...</span>
+                      ) : (
                         <ul className="list-unstyled">
-                          <li>1</li>
-                          <li>2</li>
-                          <li>3</li>
-                          <li>4</li>
-                          <li>5</li>
-                          <li>6</li>
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num) => (
+                            <li key={num}>
+                              <button
+                                className="dropdown-item"
+                                onClick={() =>
+                                  handleUpdateOrder(value, num.toString())
+                                }
+                              >
+                                {num}
+                              </button>
+                            </li>
+                          ))}
                         </ul>
-                      </div>
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </div>
+                      )}
+                    </div>
+                  </Dropdown.Menu>
+                </Dropdown>
               </div>
+            </div>
+            <Row className="d-flex justify-content-center p-4">
               <div className="vstack gap-2">
                 <div className="hstack gap-2 justify-content-center">
                   <input

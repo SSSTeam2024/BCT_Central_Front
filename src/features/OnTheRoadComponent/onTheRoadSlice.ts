@@ -3,17 +3,21 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export interface OnTheRoadModel {
     _id?: string;
     page: string;
-    bigTitle: string;
-    paragraph: string;
+    bigTitle?: string;
+    paragraph?: string;
     grids: {
         date: string;
         category: string;
         image: string;
         title: string;
         details: string;
-        image_base64: string;
-  image_extension: string;
-    }[]
+        image_base64?: string;
+  image_extension?: string;
+  newImage?: string;
+    }[];
+    display?: string,
+  order?: string,
+  typeComponent?: string,
   }
   
 export const onTheRoadSlice = createApi({
@@ -30,6 +34,16 @@ export const onTheRoadSlice = createApi({
         },
         providesTags: ["OnTheRoadModel"],
       }),
+      addOnTheRoad: builder.mutation<void, OnTheRoadModel>({
+                    query(payload) {
+                      return {
+                        url: "/createOnTheRoad",
+                        method: "POST",
+                        body: payload,
+                      };
+                    },
+                    invalidatesTags: ["OnTheRoadModel"],
+                  }),
       updateOnTheRoad: builder.mutation<void, OnTheRoadModel>({
         query: ({ _id, ...rest }) => ({
           url: `/updateOnTheRoad/${_id}`,
@@ -44,5 +58,6 @@ export const onTheRoadSlice = createApi({
 
 export const {
   useGetAllOnTheRoadQuery,
-  useUpdateOnTheRoadMutation
+  useUpdateOnTheRoadMutation,
+  useAddOnTheRoadMutation
 } = onTheRoadSlice;

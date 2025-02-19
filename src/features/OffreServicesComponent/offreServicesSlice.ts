@@ -22,6 +22,7 @@ export interface OffreServiceModel {
   }[];
   associatedPage: string;
   display?: string
+  order?: string
 }
 
 export interface CardOffer {

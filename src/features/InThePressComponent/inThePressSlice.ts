@@ -12,7 +12,11 @@ export interface InThePressModel {
     content: string,
     image: string,
     display: string
-  }[]
+  }[];
+  display?: string;
+  order?: string;
+  typeComponent?:string;
+  newImage?: string
 }
 
 export const inThePressSlice = createApi({
@@ -29,20 +33,30 @@ export const inThePressSlice = createApi({
         },
         providesTags: ["InThePressModel"],
       }),
-    //   addNewIcon: builder.mutation<void, IconModel>({
-    //     query(payload) {
-    //       return {
-    //         url: "/createIcon",
-    //         method: "POST",
-    //         body: payload,
-    //       };
-    //     },
-    //     invalidatesTags: ["IconModel"],
-    //   }),
+      addNewInThePress: builder.mutation<void, InThePressModel>({
+        query(payload) {
+          return {
+            url: "/newInThePress",
+            method: "POST",
+            body: payload,
+          };
+        },
+        invalidatesTags: ["InThePressModel"],
+      }),
+      updateInThePress: builder.mutation<void, InThePressModel>({
+              query: ({ _id, ...rest }) => ({
+                url: `/updateInThePress/${_id}`,
+                method: "PATCH",
+                body: rest,
+              }),
+              invalidatesTags: ["InThePressModel"],
+            }),
     };
   },
 });
 
 export const {
   useGetAllInThePressQuery,
+  useAddNewInThePressMutation,
+  useUpdateInThePressMutation
 } = inThePressSlice;

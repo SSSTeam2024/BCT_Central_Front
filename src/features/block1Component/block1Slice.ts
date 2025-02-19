@@ -7,8 +7,8 @@ export interface Block1Model {
     display: string;
   };
   page: string;
-  image_base64: string;
-  image_extension: string;
+  image_base64?: string;
+  image_extension?: string;
   littleTitle: {
     name: string;
     display: string;
@@ -26,6 +26,10 @@ export interface Block1Model {
     icon: string;
     content: string;
   }[];
+  order?: string
+  typeComponent?: string
+  display?: string,
+  newImage?: string,
 }
 
 export const block1Slice = createApi({
@@ -49,10 +53,20 @@ export const block1Slice = createApi({
           body: rest,
         }),
         invalidatesTags: ["Block1Model"],
-      }),      
+      }),    
+      addNewBlock1Component: builder.mutation<void, Block1Model>({
+                    query(payload) {
+                      return {
+                        url: "/createBlock1",
+                        method: "POST",
+                        body: payload,
+                      };
+                    },
+                    invalidatesTags: ["Block1Model"],
+                  }),  
     };
   },
 });
 
-export const { useGetBlock1sQuery, useUpdateBlock1Mutation } =
+export const { useGetBlock1sQuery, useUpdateBlock1Mutation, useAddNewBlock1ComponentMutation } =
 block1Slice;

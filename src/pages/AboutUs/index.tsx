@@ -317,7 +317,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ selectedPage }) => {
                           <span>Loading ...</span>
                         ) : (
                           <ul className="list-unstyled">
-                            {[1, 2, 3, 4, 5, 6].map((num) => (
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num) => (
                               <li key={num}>
                                 <button
                                   className="dropdown-item"
