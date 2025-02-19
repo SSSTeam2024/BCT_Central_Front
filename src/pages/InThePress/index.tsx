@@ -33,6 +33,10 @@ import {
   useGetOurValueQuery,
   useUpdateOurValuesMutation,
 } from "features/OurValuesComponent/ourValuesSlice";
+import {
+  useGetAllFleetQuery,
+  useUpdateFleetMutation,
+} from "features/FleetComponent/fleetSlice";
 
 interface FleetProps {
   selectedPage: string;
@@ -45,12 +49,16 @@ const InThePress: React.FC<FleetProps> = ({ selectedPage }) => {
   const { data: aboutUsData = [] } = useGetAboutUsComponentsQuery();
   const { data: AllOurMissions = [] } = useGetAllOurMissionsQuery();
   const { data: AllValues = [] } = useGetOurValueQuery();
+  const { data: AllFleet = [] } = useGetAllFleetQuery();
 
   const [updatedInThePress, { isLoading }] = useUpdateInThePressMutation();
   const [updateOfferServices] = useUpdateOfferServiceMutation();
   const [updateAboutUs] = useUpdateAboutUsMutation();
   const [updateOurValues] = useUpdateOurValuesMutation();
   const [updateOurMission] = useUpdateOurMissionMutation();
+  const [updateFleetComponent] = useUpdateFleetMutation();
+
+  const filtredFleet = AllFleet.filter((fleet) => fleet.page === selectedPage);
 
   const filtredInThePressData = AllInThePress.filter(
     (inThePress) => inThePress.page === selectedPage
@@ -102,16 +110,18 @@ const InThePress: React.FC<FleetProps> = ({ selectedPage }) => {
       // const offerServiceToSwap: any = filteredServices.find(
       //   (item) => item.order === selectedOrder
       // );
-
+      const fleetToSwap: any = filtredFleet.find(
+        (item) => item.order === selectedOrder
+      );
       const updatePromises = [];
 
       updatePromises.push(
         updatedInThePress({ ...offer, order: selectedOrder })
       );
 
-      if (valueToSwap) {
+      if (aboutToSwap) {
         updatePromises.push(
-          updateOurValues({ ...valueToSwap, order: offer.order })
+          updateAboutUs({ ...aboutToSwap, order: offer.order })
         );
       }
 
@@ -126,7 +136,11 @@ const InThePress: React.FC<FleetProps> = ({ selectedPage }) => {
           updateOfferServices({ ...offerServiceToSwap, order: offer.order })
         );
       }
-
+      if (fleetToSwap) {
+        updatePromises.push(
+          updateFleetComponent({ ...fleetToSwap, order: offer.order })
+        );
+      }
       if (missionToSwap) {
         updatePromises.push(
           updateOurMission({

@@ -1,11 +1,51 @@
 import React, { useState } from "react";
-import { Container, Row, Card, Col, Dropdown } from "react-bootstrap";
-import Breadcrumb from "Common/BreadCrumb";
+import { Row, Col, Dropdown } from "react-bootstrap";
+
 import {
+  OurMissionCollection,
   useGetAllOurMissionsQuery,
   useUpdateOurMissionMutation,
 } from "features/OurMissionsComponent/ourMissionsSlice";
-import { useGetAllPagesQuery } from "features/pageCollection/pageSlice";
+import {
+  useGetAboutUsComponentsQuery,
+  useUpdateAboutUsMutation,
+} from "features/AboutUsComponent/aboutUsSlice";
+import {
+  useGetOurValueQuery,
+  useUpdateOurValuesMutation,
+} from "features/OurValuesComponent/ourValuesSlice";
+import {
+  useGetAllFleetQuery,
+  useUpdateFleetMutation,
+} from "features/FleetComponent/fleetSlice";
+import {
+  useGetAllInThePressQuery,
+  useUpdateInThePressMutation,
+} from "features/InThePressComponent/inThePressSlice";
+import {
+  useGetOfferServiceQuery,
+  useUpdateOfferServiceMutation,
+} from "features/OffreServicesComponent/offreServicesSlice";
+import {
+  useGetVehicleGuidesQuery,
+  useUpdateVehicleGuideMutation,
+} from "features/vehicleGuideComponent/vehicleGuideSlice";
+import {
+  useGetVehicleClassQuery,
+  useUpdateVehicleClassMutation,
+} from "features/VehicleClassComponent/vehicleClassSlice";
+import {
+  useGetTermsConditionsQuery,
+  useUpdateTermConditionMutation,
+} from "features/TermsConditionsComponent/termsCoditionSlice";
+import {
+  useGetAllOnTheRoadQuery,
+  useUpdateOnTheRoadMutation,
+} from "features/OnTheRoadComponent/onTheRoadSlice";
+import {
+  useGetBlock1sQuery,
+  useUpdateBlock1Mutation,
+} from "features/block1Component/block1Slice";
 
 type MissionField = { name: string; display: string };
 
@@ -29,9 +69,67 @@ const OurMissions: React.FC<OurMissionsProps> = ({
   filtredOurMissionsData,
   selectedPage,
 }) => {
+  const { data: aboutUsData = [] } = useGetAboutUsComponentsQuery();
   const { data: AllOurMissions = [] } = useGetAllOurMissionsQuery();
+  const { data: AllValues = [] } = useGetOurValueQuery();
+  const { data: AllFleet = [] } = useGetAllFleetQuery();
+  const { data: AllInThePress = [] } = useGetAllInThePressQuery();
+  const { data: AllOfferServices = [] } = useGetOfferServiceQuery();
+  const { data: AllVehicleGuide = [] } = useGetVehicleGuidesQuery();
+  const { data: AllVehicleClasse = [] } = useGetVehicleClassQuery();
+  const { data: AllTermsConditions = [] } = useGetTermsConditionsQuery();
+  const { data: AllOnTheRoad = [] } = useGetAllOnTheRoadQuery();
+  const { data: AllBlock1 = [] } = useGetBlock1sQuery();
+
   const [updateOurMissionMutation, { isLoading }] =
     useUpdateOurMissionMutation();
+
+  const [updateAboutUs] = useUpdateAboutUsMutation();
+  const [updateOurValues] = useUpdateOurValuesMutation();
+  const [updateFleetComponent] = useUpdateFleetMutation();
+  const [updatedInThePress] = useUpdateInThePressMutation();
+  const [updateOfferServices] = useUpdateOfferServiceMutation();
+  const [updateVehicleGuide] = useUpdateVehicleGuideMutation();
+  const [updateVehicleClasse] = useUpdateVehicleClassMutation();
+  const [updateTermCondition] = useUpdateTermConditionMutation();
+  const [updateOnTheRoad] = useUpdateOnTheRoadMutation();
+  const [updatedBlock1] = useUpdateBlock1Mutation();
+
+  const filtredAboutUsData = aboutUsData.filter(
+    (aboutUs) => aboutUs.page === selectedPage
+  );
+  const filtredOurValuesData = AllValues.filter(
+    (ourValue) => ourValue.page === selectedPage
+  );
+
+  const filtredBlock1Data = AllBlock1.filter(
+    (block1) => block1.page === selectedPage
+  );
+
+  const filtredTermsConditionData = AllTermsConditions.filter(
+    (term) => term.page === selectedPage
+  );
+
+  const filtredVehicleClassesData = AllVehicleClasse.filter(
+    (vehicleClasse) => vehicleClasse.page === selectedPage
+  );
+
+  const filtredOnTheRoad = AllOnTheRoad.filter(
+    (onTheRoad) => onTheRoad.page === selectedPage
+  );
+
+  const filtredFleet = AllFleet.filter((fleet) => fleet.page === selectedPage);
+
+  const filtredInThePressData = AllInThePress.filter(
+    (inThePress) => inThePress.page === selectedPage
+  );
+  const filtredVehicleGuideData = AllVehicleGuide.filter(
+    (vehicleGuide) => vehicleGuide.page.toLowerCase() === selectedPage
+  );
+
+  const filteredServices = AllOfferServices.filter(
+    (service) => service.associatedPage === selectedPage
+  );
 
   const [isEditing, setIsEditing] = useState<{
     [pageLink: string]: {
@@ -201,6 +299,111 @@ const OurMissions: React.FC<OurMissionsProps> = ({
     }));
   };
 
+  const handleUpdateOrder = async (about: any, selectedOrder: string) => {
+    if (!about?._id) return;
+
+    try {
+      const aboutToSwap = filtredAboutUsData.find(
+        (item) => item.order === selectedOrder
+      );
+      const valueToSwap = filtredOurValuesData.find(
+        (item) => item.order === selectedOrder
+      );
+      const fleetToSwap: any = filtredFleet.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const offerServiceToSwap: any = filteredServices.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const inThePressToSwap: any = filtredInThePressData.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const vehicleGuideToSwap: any = filtredVehicleGuideData.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const vehicleClasseToSwap: any = filtredVehicleClassesData.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const termsToSwap: any = filtredTermsConditionData.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const onTheRoadToSwap: any = filtredOnTheRoad.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const block1ToSwap: any = filtredBlock1Data.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const updatePromises = [];
+
+      updatePromises.push(
+        updateOurMissionMutation({ ...about, order: selectedOrder })
+      );
+
+      if (aboutToSwap) {
+        updatePromises.push(
+          updateAboutUs({ ...aboutToSwap, order: about.order })
+        );
+      }
+      if (valueToSwap) {
+        updatePromises.push(
+          updateOurValues({ ...valueToSwap, order: about.order })
+        );
+      }
+      if (block1ToSwap) {
+        updatePromises.push(
+          updatedBlock1({ ...block1ToSwap, order: about.order })
+        );
+      }
+      if (termsToSwap) {
+        updatePromises.push(
+          updateTermCondition({ ...termsToSwap, order: about.order })
+        );
+      }
+      if (onTheRoadToSwap) {
+        updatePromises.push(
+          updateOnTheRoad({ ...onTheRoadToSwap, order: about.order })
+        );
+      }
+      if (fleetToSwap) {
+        updatePromises.push(
+          updateFleetComponent({ ...fleetToSwap, order: about.order })
+        );
+      }
+      if (vehicleClasseToSwap) {
+        updatePromises.push(
+          updateVehicleClasse({ ...vehicleClasseToSwap, order: about.order })
+        );
+      }
+      if (vehicleGuideToSwap) {
+        updatePromises.push(
+          updateVehicleGuide({ ...vehicleGuideToSwap, order: about.order })
+        );
+      }
+      if (inThePressToSwap) {
+        updatePromises.push(
+          updatedInThePress({ ...inThePressToSwap, order: about.order })
+        );
+      }
+      if (offerServiceToSwap) {
+        updatePromises.push(
+          updateOfferServices({ ...offerServiceToSwap, order: about.order })
+        );
+      }
+
+      await Promise.all(updatePromises);
+    } catch (error) {
+      console.error("Error updating orders:", error);
+    }
+  };
+
   return (
     <React.Fragment>
       <Row className="border-bottom p-4">
@@ -290,9 +493,12 @@ const OurMissions: React.FC<OurMissionsProps> = ({
                                   <li key={num}>
                                     <button
                                       className="dropdown-item"
-                                      // onClick={() =>
-                                      //   handleUpdateOrder(about, num.toString())
-                                      // }
+                                      onClick={() =>
+                                        handleUpdateOrder(
+                                          mission,
+                                          num.toString()
+                                        )
+                                      }
                                     >
                                       {num}
                                     </button>

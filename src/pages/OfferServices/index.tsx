@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Container, Row, Card, Col, Image, Dropdown } from "react-bootstrap";
-import Breadcrumb from "Common/BreadCrumb";
+import { Row, Card, Col, Image, Dropdown } from "react-bootstrap";
+
 import {
   OffreServiceModel,
   useAddCardToOfferServiceMutation,
@@ -22,6 +22,34 @@ import {
   useGetOurValueQuery,
   useUpdateOurValuesMutation,
 } from "features/OurValuesComponent/ourValuesSlice";
+import {
+  useGetVehicleGuidesQuery,
+  useUpdateVehicleGuideMutation,
+} from "features/vehicleGuideComponent/vehicleGuideSlice";
+import {
+  useGetVehicleClassQuery,
+  useUpdateVehicleClassMutation,
+} from "features/VehicleClassComponent/vehicleClassSlice";
+import {
+  useGetTermsConditionsQuery,
+  useUpdateTermConditionMutation,
+} from "features/TermsConditionsComponent/termsCoditionSlice";
+import {
+  useGetAllOnTheRoadQuery,
+  useUpdateOnTheRoadMutation,
+} from "features/OnTheRoadComponent/onTheRoadSlice";
+import {
+  useGetBlock1sQuery,
+  useUpdateBlock1Mutation,
+} from "features/block1Component/block1Slice";
+import {
+  useGetAllFleetQuery,
+  useUpdateFleetMutation,
+} from "features/FleetComponent/fleetSlice";
+import {
+  useGetAllInThePressQuery,
+  useUpdateInThePressMutation,
+} from "features/InThePressComponent/inThePressSlice";
 
 interface OffreServiceModelInterface {
   littleTitle: {
@@ -71,11 +99,27 @@ const OfferServices: React.FC<OfferServicesProps> = ({ selectedPage }) => {
   const [updateAboutUs] = useUpdateAboutUsMutation();
   const [updateOurValues] = useUpdateOurValuesMutation();
   const [updateOurMission] = useUpdateOurMissionMutation();
+  const [updateFleetComponent] = useUpdateFleetMutation();
+  const [updatedInThePress] = useUpdateInThePressMutation();
+  const [updateVehicleGuide] = useUpdateVehicleGuideMutation();
+  const [updateVehicleClasse] = useUpdateVehicleClassMutation();
+  const [updateTermCondition] = useUpdateTermConditionMutation();
+  const [updateOnTheRoad] = useUpdateOnTheRoadMutation();
+  const [updatedBlock1] = useUpdateBlock1Mutation();
+
   const { data: AllIcons = [] } = useGetAllIconsQuery();
   const { data: AllPages = [] } = useGetAllPagesQuery();
   const { data: aboutUsData = [] } = useGetAboutUsComponentsQuery();
   const { data: AllOurMissions = [] } = useGetAllOurMissionsQuery();
   const { data: AllValues = [] } = useGetOurValueQuery();
+  const { data: AllVehicleGuide = [] } = useGetVehicleGuidesQuery();
+  const { data: AllVehicleClasse = [] } = useGetVehicleClassQuery();
+  const { data: AllTermsConditions = [] } = useGetTermsConditionsQuery();
+  const { data: AllOnTheRoad = [] } = useGetAllOnTheRoadQuery();
+  const { data: AllBlock1 = [] } = useGetBlock1sQuery();
+  const { data: AllFleet = [] } = useGetAllFleetQuery();
+  const { data: AllInThePress = [] } = useGetAllInThePressQuery();
+
   const [addNewCardForm, setAddNewCardForm] = useState<boolean>(false);
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
 
@@ -98,6 +142,31 @@ const OfferServices: React.FC<OfferServicesProps> = ({ selectedPage }) => {
 
   const filtredOurValuesData = AllValues.filter(
     (ourValue) => ourValue.page === selectedPage
+  );
+
+  const filtredBlock1Data = AllBlock1.filter(
+    (block1) => block1.page === selectedPage
+  );
+
+  const filtredTermsConditionData = AllTermsConditions.filter(
+    (term) => term.page === selectedPage
+  );
+
+  const filtredVehicleClassesData = AllVehicleClasse.filter(
+    (vehicleClasse) => vehicleClasse.page === selectedPage
+  );
+
+  const filtredOnTheRoad = AllOnTheRoad.filter(
+    (onTheRoad) => onTheRoad.page === selectedPage
+  );
+
+  const filtredFleet = AllFleet.filter((fleet) => fleet.page === selectedPage);
+
+  const filtredInThePressData = AllInThePress.filter(
+    (inThePress) => inThePress.page === selectedPage
+  );
+  const filtredVehicleGuideData = AllVehicleGuide.filter(
+    (vehicleGuide) => vehicleGuide.page.toLowerCase() === selectedPage
   );
 
   const [editingField, setEditingField] = useState<{
@@ -375,24 +444,89 @@ const OfferServices: React.FC<OfferServicesProps> = ({ selectedPage }) => {
         (item) => item.order === selectedOrder
       );
 
+      const fleetToSwap: any = filtredFleet.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const offerServiceToSwap: any = filteredServices.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const inThePressToSwap: any = filtredInThePressData.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const vehicleGuideToSwap: any = filtredVehicleGuideData.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const vehicleClasseToSwap: any = filtredVehicleClassesData.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const termsToSwap: any = filtredTermsConditionData.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const onTheRoadToSwap: any = filtredOnTheRoad.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const block1ToSwap: any = filtredBlock1Data.find(
+        (item) => item.order === selectedOrder
+      );
+
       const updatePromises = [];
 
       updatePromises.push(
         updateOfferServices({ ...offer, order: selectedOrder })
       );
 
-      if (valueToSwap) {
-        updatePromises.push(
-          updateOurValues({ ...valueToSwap, order: offer.order })
-        );
-      }
-
       if (aboutToSwap) {
         updatePromises.push(
           updateAboutUs({ ...aboutToSwap, order: offer.order })
         );
       }
-
+      if (valueToSwap) {
+        updatePromises.push(
+          updateOurValues({ ...valueToSwap, order: offer.order })
+        );
+      }
+      if (block1ToSwap) {
+        updatePromises.push(
+          updatedBlock1({ ...block1ToSwap, order: offer.order })
+        );
+      }
+      if (termsToSwap) {
+        updatePromises.push(
+          updateTermCondition({ ...termsToSwap, order: offer.order })
+        );
+      }
+      if (onTheRoadToSwap) {
+        updatePromises.push(
+          updateOnTheRoad({ ...onTheRoadToSwap, order: offer.order })
+        );
+      }
+      if (fleetToSwap) {
+        updatePromises.push(
+          updateFleetComponent({ ...fleetToSwap, order: offer.order })
+        );
+      }
+      if (vehicleClasseToSwap) {
+        updatePromises.push(
+          updateVehicleClasse({ ...vehicleClasseToSwap, order: offer.order })
+        );
+      }
+      if (vehicleGuideToSwap) {
+        updatePromises.push(
+          updateVehicleGuide({ ...vehicleGuideToSwap, order: offer.order })
+        );
+      }
+      if (inThePressToSwap) {
+        updatePromises.push(
+          updatedInThePress({ ...inThePressToSwap, order: offer.order })
+        );
+      }
       if (missionToSwap) {
         updatePromises.push(
           updateOurMission({
