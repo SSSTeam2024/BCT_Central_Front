@@ -1,36 +1,22 @@
 import React, { useEffect, useState } from "react";
+import { Row, Card, Col, Dropdown } from "react-bootstrap";
+import { useLocation } from "react-router-dom";
 import {
-  Container,
-  Row,
-  Card,
-  Col,
-  Image,
-  Tab,
-  Nav,
-  Form,
-  Dropdown,
-} from "react-bootstrap";
-import Breadcrumb from "Common/BreadCrumb";
-import { Link, useLocation } from "react-router-dom";
-import {
-  useAddTabToOurValueMutation,
   useGetOurValueQuery,
   useUpdateOurValuesMutation,
 } from "features/OurValuesComponent/ourValuesSlice";
 import { useGetAllPagesQuery } from "features/pageCollection/pageSlice";
-import {
-  useAddTabToBestOfferMutation,
-  useGetBestOffersQuery,
-  useUpdateBestOfferMutation,
-} from "features/bestOfferComponent/bestOfferSlice";
+import { useAddTabToBestOfferMutation } from "features/bestOfferComponent/bestOfferSlice";
 import {
   Block1Model,
   useGetBlock1sQuery,
   useUpdateBlock1Mutation,
 } from "features/block1Component/block1Slice";
-import aboutus from "assets/images/about-us.jpg";
-import avatar2 from "assets/images/users/avatar-2.jpg";
-import { useGetVehicleGuidesQuery } from "features/vehicleGuideComponent/vehicleGuideSlice";
+
+import {
+  useGetVehicleGuidesQuery,
+  useUpdateVehicleGuideMutation,
+} from "features/vehicleGuideComponent/vehicleGuideSlice";
 import {
   useGetOfferServiceQuery,
   useUpdateOfferServiceMutation,
@@ -47,6 +33,22 @@ import {
   useGetAllInThePressQuery,
   useUpdateInThePressMutation,
 } from "features/InThePressComponent/inThePressSlice";
+import {
+  useGetAllFleetQuery,
+  useUpdateFleetMutation,
+} from "features/FleetComponent/fleetSlice";
+import {
+  useGetVehicleClassQuery,
+  useUpdateVehicleClassMutation,
+} from "features/VehicleClassComponent/vehicleClassSlice";
+import {
+  useGetTermsConditionsQuery,
+  useUpdateTermConditionMutation,
+} from "features/TermsConditionsComponent/termsCoditionSlice";
+import {
+  useGetAllOnTheRoadQuery,
+  useUpdateOnTheRoadMutation,
+} from "features/OnTheRoadComponent/onTheRoadSlice";
 
 interface Block1ModelInterface {
   image: {
@@ -95,30 +97,33 @@ interface Block1Props {
 }
 
 const ServicesBlock1: React.FC<Block1Props> = ({ selectedPage }) => {
-  const { data = [] } = useGetBlock1sQuery();
-  const [updatedBlock1, { isLoading }] = useUpdateBlock1Mutation();
-  const { data: AllPages = [] } = useGetAllPagesQuery();
-  const { data: AllVehicleGuides = [] } = useGetVehicleGuidesQuery();
-  const { data: AllOfferServices = [] } = useGetOfferServiceQuery();
   const { data: aboutUsData = [] } = useGetAboutUsComponentsQuery();
   const { data: AllOurMissions = [] } = useGetAllOurMissionsQuery();
   const { data: AllValues = [] } = useGetOurValueQuery();
+  const { data: AllVehicleGuide = [] } = useGetVehicleGuidesQuery();
+  const { data: AllVehicleClasse = [] } = useGetVehicleClassQuery();
+  const { data: AllTermsConditions = [] } = useGetTermsConditionsQuery();
+  const { data: AllOnTheRoad = [] } = useGetAllOnTheRoadQuery();
+  const { data: AllFleet = [] } = useGetAllFleetQuery();
   const { data: AllInThePress = [] } = useGetAllInThePressQuery();
-  const [updatedInThePress] = useUpdateInThePressMutation();
+  const { data: AllOfferServices = [] } = useGetOfferServiceQuery();
+  const { data: AllPages = [] } = useGetAllPagesQuery();
+  const { data = [] } = useGetBlock1sQuery();
+
+  const [updatedBlock1, { isLoading }] = useUpdateBlock1Mutation();
   const [updateOfferServices] = useUpdateOfferServiceMutation();
   const [updateAboutUs] = useUpdateAboutUsMutation();
   const [updateOurValues] = useUpdateOurValuesMutation();
   const [updateOurMission] = useUpdateOurMissionMutation();
+  const [updateFleetComponent] = useUpdateFleetMutation();
+  const [updatedInThePress] = useUpdateInThePressMutation();
+  const [updateVehicleGuide] = useUpdateVehicleGuideMutation();
+  const [updateVehicleClasse] = useUpdateVehicleClassMutation();
+  const [updateTermCondition] = useUpdateTermConditionMutation();
+  const [updateOnTheRoad] = useUpdateOnTheRoadMutation();
 
   const filtredBlock1Data = data.filter(
     (block1) => block1.page === selectedPage
-  );
-
-  const filtredInThePressData = AllInThePress.filter(
-    (inThePress) => inThePress.page === selectedPage
-  );
-  const filtredVehicleGuideData = AllVehicleGuides.filter(
-    (ourValue) => ourValue.page.toLowerCase() === selectedPage
   );
 
   const filteredServices = AllOfferServices.filter(
@@ -140,6 +145,27 @@ const ServicesBlock1: React.FC<Block1Props> = ({ selectedPage }) => {
 
   const filtredOurValuesData = AllValues.filter(
     (ourValue) => ourValue.page === selectedPage
+  );
+
+  const filtredTermsConditionData = AllTermsConditions.filter(
+    (term) => term.page === selectedPage
+  );
+
+  const filtredVehicleClassesData = AllVehicleClasse.filter(
+    (vehicleClasse) => vehicleClasse.page === selectedPage
+  );
+
+  const filtredOnTheRoad = AllOnTheRoad.filter(
+    (onTheRoad) => onTheRoad.page === selectedPage
+  );
+
+  const filtredFleet = AllFleet.filter((fleet) => fleet.page === selectedPage);
+
+  const filtredInThePressData = AllInThePress.filter(
+    (inThePress) => inThePress.page === selectedPage
+  );
+  const filtredVehicleGuideData = AllVehicleGuide.filter(
+    (vehicleGuide) => vehicleGuide.page.toLowerCase() === selectedPage
   );
 
   const [localDisplay, setLocalDisplay] = useState<string | undefined>(
@@ -409,12 +435,38 @@ const ServicesBlock1: React.FC<Block1Props> = ({ selectedPage }) => {
       const missionToSwap: any = filtredOurMissionsData.find(
         (item) => item.order === selectedOrder
       );
+
+      const fleetToSwap: any = filtredFleet.find(
+        (item) => item.order === selectedOrder
+      );
+
       const offerServiceToSwap: any = filteredServices.find(
         (item) => item.order === selectedOrder
       );
-      // const offerServiceToSwap: any = filteredServices.find(
-      //   (item) => item.order === selectedOrder
-      // );
+
+      const inThePressToSwap: any = filtredInThePressData.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const vehicleGuideToSwap: any = filtredVehicleGuideData.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const vehicleClasseToSwap: any = filtredVehicleClassesData.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const termsToSwap: any = filtredTermsConditionData.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const onTheRoadToSwap: any = filtredOnTheRoad.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const block1ToSwap: any = filtredBlock1Data.find(
+        (item) => item.order === selectedOrder
+      );
 
       const updatePromises = [];
 
@@ -425,19 +477,51 @@ const ServicesBlock1: React.FC<Block1Props> = ({ selectedPage }) => {
           updateAboutUs({ ...aboutToSwap, order: offer.order })
         );
       }
-
-      if (valueToSwap) {
-        updatePromises.push(
-          updateOurValues({ ...valueToSwap, order: offer.order })
-        );
-      }
-
       if (offerServiceToSwap) {
         updatePromises.push(
           updateOfferServices({ ...offerServiceToSwap, order: offer.order })
         );
       }
-
+      if (valueToSwap) {
+        updatePromises.push(
+          updateOurValues({ ...valueToSwap, order: offer.order })
+        );
+      }
+      if (block1ToSwap) {
+        updatePromises.push(
+          updatedBlock1({ ...block1ToSwap, order: offer.order })
+        );
+      }
+      if (termsToSwap) {
+        updatePromises.push(
+          updateTermCondition({ ...termsToSwap, order: offer.order })
+        );
+      }
+      if (onTheRoadToSwap) {
+        updatePromises.push(
+          updateOnTheRoad({ ...onTheRoadToSwap, order: offer.order })
+        );
+      }
+      if (fleetToSwap) {
+        updatePromises.push(
+          updateFleetComponent({ ...fleetToSwap, order: offer.order })
+        );
+      }
+      if (vehicleClasseToSwap) {
+        updatePromises.push(
+          updateVehicleClasse({ ...vehicleClasseToSwap, order: offer.order })
+        );
+      }
+      if (vehicleGuideToSwap) {
+        updatePromises.push(
+          updateVehicleGuide({ ...vehicleGuideToSwap, order: offer.order })
+        );
+      }
+      if (inThePressToSwap) {
+        updatePromises.push(
+          updatedInThePress({ ...inThePressToSwap, order: offer.order })
+        );
+      }
       if (missionToSwap) {
         updatePromises.push(
           updateOurMission({

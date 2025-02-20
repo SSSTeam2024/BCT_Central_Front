@@ -16,6 +16,38 @@ import {
   useGetAboutUsComponentsQuery,
   useUpdateAboutUsMutation,
 } from "features/AboutUsComponent/aboutUsSlice";
+import {
+  useGetAllFleetQuery,
+  useUpdateFleetMutation,
+} from "features/FleetComponent/fleetSlice";
+import {
+  useGetAllInThePressQuery,
+  useUpdateInThePressMutation,
+} from "features/InThePressComponent/inThePressSlice";
+import {
+  useGetOfferServiceQuery,
+  useUpdateOfferServiceMutation,
+} from "features/OffreServicesComponent/offreServicesSlice";
+import {
+  useGetVehicleGuidesQuery,
+  useUpdateVehicleGuideMutation,
+} from "features/vehicleGuideComponent/vehicleGuideSlice";
+import {
+  useGetVehicleClassQuery,
+  useUpdateVehicleClassMutation,
+} from "features/VehicleClassComponent/vehicleClassSlice";
+import {
+  useGetTermsConditionsQuery,
+  useUpdateTermConditionMutation,
+} from "features/TermsConditionsComponent/termsCoditionSlice";
+import {
+  useGetAllOnTheRoadQuery,
+  useUpdateOnTheRoadMutation,
+} from "features/OnTheRoadComponent/onTheRoadSlice";
+import {
+  useGetBlock1sQuery,
+  useUpdateBlock1Mutation,
+} from "features/block1Component/block1Slice";
 
 interface OurValuesModelInterface {
   image: {
@@ -68,15 +100,32 @@ interface OurValuesProps {
 }
 
 const OurValues: React.FC<OurValuesProps> = ({ selectedPage }) => {
-  const { data = [] } = useGetOurValueQuery();
   const [updateOurValue, { isLoading }] = useUpdateOurValuesMutation();
   const [updateOurMission] = useUpdateOurMissionMutation();
   const [updateAboutUs] = useUpdateAboutUsMutation();
-  const { data: AllPages = [] } = useGetAllPagesQuery();
-  const { data: AllOurMissions = [] } = useGetAllOurMissionsQuery();
+  const [updateFleetComponent] = useUpdateFleetMutation();
+  const [updatedInThePress] = useUpdateInThePressMutation();
+  const [updateOfferServices] = useUpdateOfferServiceMutation();
+  const [updateVehicleGuide] = useUpdateVehicleGuideMutation();
+  const [updateVehicleClasse] = useUpdateVehicleClassMutation();
+  const [updateTermCondition] = useUpdateTermConditionMutation();
+  const [updateOnTheRoad] = useUpdateOnTheRoadMutation();
+  const [updatedBlock1] = useUpdateBlock1Mutation();
   const { data: aboutUsData = [] } = useGetAboutUsComponentsQuery();
+  const { data: AllOurMissions = [] } = useGetAllOurMissionsQuery();
+  const { data: AllValues = [] } = useGetOurValueQuery();
 
-  const filtredOurValuesData = data.filter(
+  const { data: allPages = [] } = useGetAllPagesQuery();
+  const { data: AllFleet = [] } = useGetAllFleetQuery();
+  const { data: AllInThePress = [] } = useGetAllInThePressQuery();
+  const { data: AllOfferServices = [] } = useGetOfferServiceQuery();
+  const { data: AllVehicleGuide = [] } = useGetVehicleGuidesQuery();
+  const { data: AllVehicleClasse = [] } = useGetVehicleClassQuery();
+  const { data: AllTermsConditions = [] } = useGetTermsConditionsQuery();
+  const { data: AllOnTheRoad = [] } = useGetAllOnTheRoadQuery();
+  const { data: AllBlock1 = [] } = useGetBlock1sQuery();
+
+  const filtredOurValuesData = AllValues.filter(
     (ourValue) => ourValue.page === selectedPage
   );
 
@@ -93,15 +142,44 @@ const OurValues: React.FC<OurValuesProps> = ({ selectedPage }) => {
       }))
   );
 
+  const filtredBlock1Data = AllBlock1.filter(
+    (block1) => block1.page === selectedPage
+  );
+
+  const filtredTermsConditionData = AllTermsConditions.filter(
+    (term) => term.page === selectedPage
+  );
+
+  const filtredVehicleClassesData = AllVehicleClasse.filter(
+    (vehicleClasse) => vehicleClasse.page === selectedPage
+  );
+
+  const filtredOnTheRoad = AllOnTheRoad.filter(
+    (onTheRoad) => onTheRoad.page === selectedPage
+  );
+
+  const filtredFleet = AllFleet.filter((fleet) => fleet.page === selectedPage);
+
+  const filtredInThePressData = AllInThePress.filter(
+    (inThePress) => inThePress.page === selectedPage
+  );
+  const filtredVehicleGuideData = AllVehicleGuide.filter(
+    (vehicleGuide) => vehicleGuide.page.toLowerCase() === selectedPage
+  );
+
+  const filteredServices = AllOfferServices.filter(
+    (service) => service.associatedPage === selectedPage
+  );
+
   const [localDisplay, setLocalDisplay] = useState<string | undefined>(
     undefined
   );
   const [addNewTabForm, setAddNewTabForm] = useState<boolean>(false);
   useEffect(() => {
-    if (data[0]?.image?.display) {
-      setLocalDisplay(data[0].image.display);
+    if (AllValues[0]?.image?.display) {
+      setLocalDisplay(AllValues[0].image.display);
     }
-  }, [data]);
+  }, [AllValues]);
 
   const [editingField, setEditingField] = useState<{
     id: string;
@@ -231,7 +309,7 @@ const OurValues: React.FC<OurValuesProps> = ({ selectedPage }) => {
     index: number,
     selectedLink: string
   ) => {
-    const selectedPage = AllPages.find((page) => page.link === selectedLink);
+    const selectedPage = allPages.find((page) => page.link === selectedLink);
 
     if (selectedPage) {
       const updatedTabs = about.tabs.map((tab, i) =>
@@ -354,10 +432,38 @@ const OurValues: React.FC<OurValuesProps> = ({ selectedPage }) => {
       const aboutToSwap = filtredAboutUsData.find(
         (item) => item.order === selectedOrder
       );
-      const valueToSwap = filtredOurValuesData.find(
+      const missionToSwap: any = filtredOurMissionsData.find(
         (item) => item.order === selectedOrder
       );
-      const missionToSwap: any = filtredOurMissionsData.find(
+      const fleetToSwap: any = filtredFleet.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const offerServiceToSwap: any = filteredServices.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const inThePressToSwap: any = filtredInThePressData.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const vehicleGuideToSwap: any = filtredVehicleGuideData.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const vehicleClasseToSwap: any = filtredVehicleClassesData.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const termsToSwap: any = filtredTermsConditionData.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const onTheRoadToSwap: any = filtredOnTheRoad.find(
+        (item) => item.order === selectedOrder
+      );
+
+      const block1ToSwap: any = filtredBlock1Data.find(
         (item) => item.order === selectedOrder
       );
 
@@ -372,7 +478,46 @@ const OurValues: React.FC<OurValuesProps> = ({ selectedPage }) => {
           updateAboutUs({ ...aboutToSwap, order: ourValue.order })
         );
       }
-
+      if (block1ToSwap) {
+        updatePromises.push(
+          updatedBlock1({ ...block1ToSwap, order: ourValue.order })
+        );
+      }
+      if (termsToSwap) {
+        updatePromises.push(
+          updateTermCondition({ ...termsToSwap, order: ourValue.order })
+        );
+      }
+      if (onTheRoadToSwap) {
+        updatePromises.push(
+          updateOnTheRoad({ ...onTheRoadToSwap, order: ourValue.order })
+        );
+      }
+      if (fleetToSwap) {
+        updatePromises.push(
+          updateFleetComponent({ ...fleetToSwap, order: ourValue.order })
+        );
+      }
+      if (vehicleClasseToSwap) {
+        updatePromises.push(
+          updateVehicleClasse({ ...vehicleClasseToSwap, order: ourValue.order })
+        );
+      }
+      if (vehicleGuideToSwap) {
+        updatePromises.push(
+          updateVehicleGuide({ ...vehicleGuideToSwap, order: ourValue.order })
+        );
+      }
+      if (inThePressToSwap) {
+        updatePromises.push(
+          updatedInThePress({ ...inThePressToSwap, order: ourValue.order })
+        );
+      }
+      if (offerServiceToSwap) {
+        updatePromises.push(
+          updateOfferServices({ ...offerServiceToSwap, order: ourValue.order })
+        );
+      }
       if (missionToSwap) {
         updatePromises.push(
           updateOurMission({
@@ -771,7 +916,7 @@ const OurValues: React.FC<OurValuesProps> = ({ selectedPage }) => {
                                             })
                                           }
                                         >
-                                          {AllPages.map((page) => (
+                                          {allPages.map((page) => (
                                             <option
                                               key={page.link}
                                               value={page.link}
@@ -912,7 +1057,7 @@ const OurValues: React.FC<OurValuesProps> = ({ selectedPage }) => {
                             name="buttonLabel"
                             className="form-control mt-2"
                             onChange={(e) => {
-                              const selectedPage = AllPages.find(
+                              const selectedPage = allPages.find(
                                 (page) => page.label === e.target.value
                               );
                               if (selectedPage) {
@@ -926,7 +1071,7 @@ const OurValues: React.FC<OurValuesProps> = ({ selectedPage }) => {
                             }}
                           >
                             <option value="">Select a Page</option>
-                            {AllPages.map((page) => (
+                            {allPages.map((page) => (
                               <option key={page.label} value={page.label}>
                                 {page.label}
                               </option>
@@ -950,7 +1095,7 @@ const OurValues: React.FC<OurValuesProps> = ({ selectedPage }) => {
                               placeholder="Button Link"
                               value={formData.buttonLink}
                               onChange={handleChange}
-                              onBlur={handleBlur} // Trigger validation and formatting on blur
+                              onBlur={handleBlur}
                             />
                             {errorMessage && (
                               <p

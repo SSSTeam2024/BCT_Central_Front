@@ -28,7 +28,7 @@ function convertToBase64(
 }
 
 const Header = () => {
-  document.title = "Web Site Header | Coach Hire Network";
+  document.title = "WebSite Header | Coach Hire Network";
   const [hovered, setHovered] = useState<string>("");
   const { data = [] } = useGetAllHeadersQuery();
   const navigate = useNavigate();
@@ -194,10 +194,10 @@ const Header = () => {
     color: "",
     address_label: "",
     address_value: "",
-    phone_display: "0",
-    email_display: "0",
-    button_display: "0",
-    address_display: "0",
+    phone_display: "",
+    email_display: "",
+    button_display: "",
+    address_display: "",
   };
 
   const [updateHeader, setUpdateHeader] = useState<HeaderModel>({
@@ -247,6 +247,16 @@ const Header = () => {
       phone_display: newCheckedState ? "1" : "0",
     }));
   };
+
+  useEffect(() => {
+    setIsEmailChecked(data[0]?.email_display === "1");
+    setIsPhoneChecked(data[0]?.phone_display === "1");
+    setIsButtonChecked(data[0]?.button_display === "1");
+    setUpdateHeader((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  }, [data]);
 
   const handleButtonCheckboxChange = () => {
     const newCheckedState = !isButtonChecked;
@@ -308,20 +318,20 @@ const Header = () => {
       updateHeader["address_value"] = addressValue;
       updateHeader["button_text"] = buttonText;
 
-      if (isAddressChecked) {
-        updateHeader["address_display"] = "1";
+      if (isButtonChecked) {
+        updateHeader["button_display"] = "1";
       } else {
-        updateHeader["address_display"] = data[0].address_display;
+        updateHeader["button_display"] = "0";
       }
       if (isEmailChecked) {
         updateHeader["email_display"] = "1";
       } else {
-        updateHeader["email_display"] = data[0].email_display;
+        updateHeader["email_display"] = "0";
       }
       if (isPhoneChecked) {
         updateHeader["phone_display"] = "1";
       } else {
-        updateHeader["phone_display"] = data[0].phone_display;
+        updateHeader["phone_display"] = "0";
       }
       if (!updateHeader.logo_base64) {
         updateHeader["logo"] = data[0]?.logo!;
@@ -330,7 +340,6 @@ const Header = () => {
       }
 
       await updateHeaderMutation(updateHeader);
-      navigate("/website-settings");
       notifySuccess();
     } catch (error) {
       notifyError(error);
@@ -522,7 +531,7 @@ const Header = () => {
                         />
                       </div>
                     </Col>
-                    <Col>
+                    {/* <Col>
                       <div className="hstack gap-1">
                         <span className=" badge badge-outline-light text-danger fs-20 rounded-pill ">
                           <i className="ph ph-map-pin"></i>
@@ -587,7 +596,7 @@ const Header = () => {
                           onChange={handleAddressCheckboxChange}
                         />
                       </div>
-                    </Col>
+                    </Col> */}
                     <Col>
                       <div className="hstack gap-4">
                         <div

@@ -299,8 +299,15 @@ const OurMissions: React.FC<OurMissionsProps> = ({
     }));
   };
 
-  const handleUpdateOrder = async (about: any, selectedOrder: string) => {
-    if (!about?._id) return;
+  const handleUpdateOrder = async (
+    about: any,
+    selectedOrder: string,
+    parentId: string
+  ) => {
+    if (!about?._id || !parentId) {
+      console.error("About object, its _id, or parentId is undefined");
+      return;
+    }
 
     try {
       const aboutToSwap = filtredAboutUsData.find(
@@ -312,40 +319,50 @@ const OurMissions: React.FC<OurMissionsProps> = ({
       const fleetToSwap: any = filtredFleet.find(
         (item) => item.order === selectedOrder
       );
-
       const offerServiceToSwap: any = filteredServices.find(
         (item) => item.order === selectedOrder
       );
-
       const inThePressToSwap: any = filtredInThePressData.find(
         (item) => item.order === selectedOrder
       );
-
       const vehicleGuideToSwap: any = filtredVehicleGuideData.find(
         (item) => item.order === selectedOrder
       );
-
       const vehicleClasseToSwap: any = filtredVehicleClassesData.find(
         (item) => item.order === selectedOrder
       );
-
       const termsToSwap: any = filtredTermsConditionData.find(
         (item) => item.order === selectedOrder
       );
-
       const onTheRoadToSwap: any = filtredOnTheRoad.find(
         (item) => item.order === selectedOrder
       );
-
       const block1ToSwap: any = filtredBlock1Data.find(
         (item) => item.order === selectedOrder
       );
 
       const updatePromises = [];
+      let about_ref = { ...about };
+      about_ref.order = selectedOrder;
 
       updatePromises.push(
-        updateOurMissionMutation({ ...about, order: selectedOrder })
+        updateOurMissionMutation({
+          _id: parentId,
+          missions: [about_ref] /* filtredOurMissionsData.map((mission) =>
+            mission.order === selectedOrder
+              ? { ...mission, order: about.order }
+              : mission
+          ) */,
+        })
       );
+
+      // console.log("about_ref", about_ref);
+      // // let missions = filtredOurMissionsData.map((mission) =>
+      // //   mission.order === selectedOrder
+      // //     ? { ...mission, order: selectedOrder }
+      // //     : mission
+      // // );
+      // console.log("about", about);
 
       if (aboutToSwap) {
         updatePromises.push(
@@ -496,7 +513,8 @@ const OurMissions: React.FC<OurMissionsProps> = ({
                                       onClick={() =>
                                         handleUpdateOrder(
                                           mission,
-                                          num.toString()
+                                          num.toString(),
+                                          AllOurMissions[allMissionsIndex]?._id!
                                         )
                                       }
                                     >

@@ -56,6 +56,7 @@ export interface Quote {
   return_date?:string;
   return_time?: string;
   pickup_time?: string;
+  PaymentStatus?: string;
   mid_stations: {
     id: string;
     address: string;

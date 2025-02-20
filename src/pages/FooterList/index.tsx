@@ -13,7 +13,7 @@ import { useGetAllPagesQuery } from "features/pageCollection/pageSlice";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 const FooterList = () => {
-  document.title = "Web Site Footer List | Coach Hire Network";
+  document.title = "WebSite Footer List | Coach Hire Network";
 
   const notifyFooterList = () => {
     Swal.fire({
@@ -197,20 +197,17 @@ const FooterList = () => {
     if (footerToUpdate) {
       const updatedItems = [...footerToUpdate.items];
 
-      // Only update the name if it is provided (i.e., when editing the name)
       updatedItems[itemIndex] = {
         ...updatedItems[itemIndex],
-        name: newName !== undefined ? newName : updatedItems[itemIndex].name, // Update name only if newName is passed
-        display: newDisplay, // Always update display
+        name: newName !== undefined ? newName : updatedItems[itemIndex].name,
+        display: newDisplay,
       };
 
-      // Now pass the updated items to the mutation
       updateFooterList({
         ...footerToUpdate,
         items: updatedItems,
       });
 
-      // Reset edit state
       setEditItemId(null);
       setUpdatedName("");
     }
@@ -248,46 +245,31 @@ const FooterList = () => {
   const onDragEnd = (result: any) => {
     const { source, destination } = result;
 
-    // If dropped outside a valid destination, exit
     if (!destination) return;
 
-    console.log("Source:", source.index, "Destination:", destination.index);
-
-    // Create a shallow copy of the current state
     const reorderedData = [...dataFooter];
 
-    // Find the item to move using the source index
     const movedFooter = reorderedData[source.index];
 
-    // Check if movedFooter exists
     if (!movedFooter) {
       console.error("Moved footer is undefined. Check your indices.");
       return;
     }
 
-    // Remove the item from its original position
     reorderedData.splice(source.index, 1);
 
-    // Insert the item at the new position
     reorderedData.splice(destination.index, 0, movedFooter);
 
-    // Update the order of each item based on its new index
     const updatedData = reorderedData.map((footer, index) => ({
       ...footer,
-      order: (index + 1).toString(), // Ensure the order is a string
+      order: (index + 1).toString(),
     }));
 
-    // Debug reordered and updated data
-    console.log("Reordered Data:", reorderedData);
-    console.log("Updated Data:", updatedData);
-
-    // Update the state
     setDataFooter(updatedData);
 
-    // Update the backend for each footer
     updatedData.forEach((footer) => {
       if (footer._id) {
-        updateFooterList(footer); // Make sure to update only valid footers
+        updateFooterList(footer);
       } else {
         console.error("Footer ID is undefined:", footer);
       }

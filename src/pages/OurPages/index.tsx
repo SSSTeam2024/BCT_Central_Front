@@ -307,6 +307,8 @@ const OurPages = () => {
         buttonDisplay: "",
       },
     ],
+    order: "",
+    typeComponent: "",
   };
 
   const [ourValueComponent, setOurValueComponent] = useState(initialOurValue);
@@ -354,6 +356,8 @@ const OurPages = () => {
         buttonLink: tab.buttonLink || "",
         buttonDisplay: "1",
       })),
+      order: selectedOrder,
+      typeComponent: "ourValues",
     };
 
     try {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Container, Row, Card, Col, Form } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import {
@@ -10,7 +10,7 @@ import {
 import { useLocation } from "react-router-dom";
 
 const MenuSite = () => {
-  document.title = "Web Site Menu | Coach Hire Network";
+  document.title = "WebSite Menu | Coach Hire Network";
 
   const { data: AllMenu = [] } = useGetMenusQuery();
   const [updateMenuMutation] = useUpdateMenuMutation();
@@ -162,7 +162,6 @@ const MenuSite = () => {
         },
       });
 
-      // Reset states after successful submission
       setAddingSubItem(null);
       setNewSubItem({
         label: "",
@@ -186,7 +185,6 @@ const MenuSite = () => {
               {AllMenu.map((menu) =>
                 menu.items.map((item: any) => (
                   <Row key={item.label} className="border-bottom">
-                    {/* First column: Item display */}
                     <Col className="mt-2 mb-3">
                       <input
                         type="checkbox"
@@ -223,7 +221,6 @@ const MenuSite = () => {
                       )}
                     </Col>
 
-                    {/* Second column: Subitem list and Add functionality */}
                     <Col lg={10} className="mt-2 mb-3">
                       <ul>
                         {item.subItems.map((subItem: any) => (
