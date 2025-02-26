@@ -159,6 +159,8 @@ const OurPages = () => {
   const initialAboutUs = {
     page: "",
     display: "",
+    order: "",
+    typeComponent: "",
     newImage: "",
     image: {
       path: "",
@@ -186,12 +188,22 @@ const OurPages = () => {
 
   const [aboutUsComponent, setAboutUsComponent] = useState(initialAboutUs);
 
-  const { page, image, littleTitle, bigTitle, paragraph, button } =
-    aboutUsComponent;
+  const {
+    page,
+    image,
+    littleTitle,
+    bigTitle,
+    paragraph,
+    button,
+    order,
+    typeComponent,
+  } = aboutUsComponent;
 
   const onSubmitAboutUs = (e: any) => {
     aboutUsComponent["page"] = selectedPage;
     aboutUsComponent["display"] = "1";
+    aboutUsComponent["order"] = selectedOrder;
+    aboutUsComponent["typeComponent"] = "aboutUs";
     aboutUsComponent["newImage"] = "no";
     aboutUsComponent["image"].display = "1";
     aboutUsComponent["image"].path = aboutUsData[0].image.path;
@@ -472,7 +484,7 @@ const OurPages = () => {
       AllTermsConditions[0].bigTitle.content;
     termConditionComponent["bigTitle"].display = "1";
     termConditionComponent["paragraph"].content =
-      aboutUsData[0].paragraph.content;
+      AllTermsConditions[0].paragraph.content;
     termConditionComponent["paragraph"].display = "1";
     e.preventDefault();
     try {

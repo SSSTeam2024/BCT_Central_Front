@@ -8,11 +8,13 @@ import {
   useUpdateMenuMutation,
 } from "features/menu/menuSlice";
 import { useLocation } from "react-router-dom";
+import { useGetAllPagesQuery } from "features/pageCollection/pageSlice";
 
 const MenuSite = () => {
   document.title = "WebSite Menu | Coach Hire Network";
 
   const { data: AllMenu = [] } = useGetMenusQuery();
+  const { data: AllPages = [] } = useGetAllPagesQuery();
   const [updateMenuMutation] = useUpdateMenuMutation();
   const [addNewItemMutation] = useAddNewItemMutation();
   const [addingSubItem, setAddingSubItem] = React.useState<{
@@ -150,6 +152,7 @@ const MenuSite = () => {
     const { menuId, itemId } = addingSubItem;
 
     try {
+      // console.log("new sub item", newSubItem);
       await addSubItemMutation({
         menuId,
         itemId,
@@ -290,7 +293,7 @@ const MenuSite = () => {
                         >
                           <Row>
                             <Col>
-                              <Form.Control
+                              {/* <Form.Control
                                 type="text"
                                 placeholder="Subitem label"
                                 value={newSubItem.label}
@@ -300,7 +303,34 @@ const MenuSite = () => {
                                     label: e.target.value,
                                   })
                                 }
-                              />
+                              /> */}
+                              <Form.Select
+                                id="name"
+                                className="form-select-sm"
+                                // value={newItems[index]?.name || ""}
+                                onChange={(e) => {
+                                  const selectedPage = AllPages.find(
+                                    (page) => page.label === e.target.value
+                                  );
+                                  // console.log("selectedPage", selectedPage);
+                                  if (selectedPage) {
+                                    setNewSubItem({
+                                      ...newSubItem,
+                                      label: selectedPage.label,
+                                      link: selectedPage.link,
+                                    });
+                                  }
+                                }}
+                              >
+                                <option value="" disabled>
+                                  Select
+                                </option>
+                                {AllPages.map((page) => (
+                                  <option key={page.label} value={page.label}>
+                                    {page.label}
+                                  </option>
+                                ))}
+                              </Form.Select>
                             </Col>
                             <Col>
                               <Form.Control

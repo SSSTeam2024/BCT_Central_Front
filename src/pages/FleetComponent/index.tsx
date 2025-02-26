@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, Col, Dropdown, Row } from "react-bootstrap";
 import {
   FleetModel,
@@ -114,7 +114,7 @@ const FleetComponent: React.FC<FleetProps> = ({ selectedPage }) => {
     (inThePress) => inThePress.page === selectedPage
   );
   const filtredVehicleGuideData = AllVehicleGuide.filter(
-    (vehicleGuide) => vehicleGuide.page.toLowerCase() === selectedPage
+    (vehicleGuide) => vehicleGuide?.page!.toLowerCase() === selectedPage
   );
 
   const filteredServices = AllOfferServices.filter(
@@ -266,19 +266,12 @@ const FleetComponent: React.FC<FleetProps> = ({ selectedPage }) => {
                       <Card.Body>
                         <div className="hstack gap-2">
                           <h5 className="card-title">{grid.title}</h5>
-                          <i className="ri-pencil-line align-middle fs-17"></i>
+
+                          <i
+                            className="ri-pencil-line align-middle fs-17"
+                            style={{ cursor: "pointer" }}
+                          ></i>
                         </div>
-                        {/* <div className="hstack gap-2">
-                        <p className="card-text">{grid.details}</p>
-                        <i className="ri-pencil-line align-middle fs-17"></i>
-                      </div> */}
-                        {/* <Link
-                        to="/website-fleet"
-                        className="link-danger fw-medium text-center"
-                      >
-                        Read More{" "}
-                        <i className="ri-arrow-right-circle-line align-middle fs-18"></i>
-                      </Link> */}
                       </Card.Body>
                     </Card>
                   </Col>

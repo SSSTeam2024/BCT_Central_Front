@@ -64,7 +64,7 @@ const InThePress: React.FC<FleetProps> = ({ selectedPage }) => {
     (inThePress) => inThePress.page === selectedPage
   );
   const filtredVehicleGuideData = data.filter(
-    (ourValue) => ourValue.page.toLowerCase() === selectedPage
+    (vehicleGuide) => vehicleGuide?.page!.toLowerCase() === selectedPage
   );
 
   const filteredServices = AllOfferServices.filter(

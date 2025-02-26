@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Card, Col, Form, Dropdown } from "react-bootstrap";
 import {
   useGetVehicleClassQuery,
@@ -84,10 +84,18 @@ const VehiclesClassComponent: React.FC<VehicleClasseProps> = ({
 
   const [updatedParagraph, setUpdatedParagraph] = useState<string>("");
   const [updatedBigTitle, setUpdatedBigTitle] = useState<string>("");
-  const [vehicleTypes, setVehicleTypes] = useState<any>(null);
+  const [vehicleTypes, setVehicleTypes] = useState<
+    {
+      title: string;
+      link: string;
+      icon: string;
+      display: string;
+      editing?: boolean;
+    }[]
+  >([]);
 
   const filtredVehicleGuideData = AllVehicleGuide.filter(
-    (ourValue) => ourValue.page.toLowerCase() === selectedPage
+    (vehicleGuide) => vehicleGuide?.page!.toLowerCase() === selectedPage
   );
 
   const filtredBlock1Data = AllBlock1.filter(
@@ -133,10 +141,29 @@ const VehiclesClassComponent: React.FC<VehicleClasseProps> = ({
     (inThePress) => inThePress.page === selectedPage
   );
 
-  const handleCheckboxChange = (index: number, checked: boolean) => {
+  const handleCheckboxChange = async (index: number, checked: boolean) => {
     const updatedVehicleTypes = [...vehicleTypes];
-    updatedVehicleTypes[index].display = checked ? "1" : "0";
+    updatedVehicleTypes[index] = {
+      ...updatedVehicleTypes[index],
+      display: checked ? "1" : "0",
+    };
     setVehicleTypes(updatedVehicleTypes);
+
+    const vehicleClass = filtredVehicleClassesData.find((vc) =>
+      vc.vehicleTypes.some((_, idx) => idx === index)
+    );
+
+    if (vehicleClass) {
+      try {
+        await updateVehicleClasse({
+          _id: vehicleClass._id,
+          vehicleTypes: updatedVehicleTypes,
+        }).unwrap();
+        console.log("Vehicle class updated successfully");
+      } catch (error) {
+        console.error("Error updating vehicle class:", error);
+      }
+    }
   };
 
   const handleEditClick = (id: string, paragraph: string) => {
@@ -185,22 +212,47 @@ const VehiclesClassComponent: React.FC<VehicleClasseProps> = ({
     setEditingParargraphId(null);
   };
 
-  const handleEditTitleClick = (index: number) => {
+  const handleEditTitleClick = (typeIndex: number) => {
     const updatedVehicleTypes = [...vehicleTypes];
-    updatedVehicleTypes[index].editing = true;
+    updatedVehicleTypes[typeIndex] = {
+      ...updatedVehicleTypes[typeIndex],
+      editing: true,
+    };
     setVehicleTypes(updatedVehicleTypes);
   };
 
-  const handleTitleChange = (index: number, newTitle: string) => {
+  const handleTitleChange = (vehicleClassIndex: number, newTitle: string) => {
     const updatedVehicleTypes = [...vehicleTypes];
-    updatedVehicleTypes[index].title = newTitle;
+    updatedVehicleTypes[vehicleClassIndex] = {
+      ...updatedVehicleTypes[vehicleClassIndex],
+      title: newTitle,
+    };
     setVehicleTypes(updatedVehicleTypes);
   };
 
-  const handleTitleBlur = (index: number) => {
+  const handleTitleBlur = async (vehicleClassIndex: number) => {
     const updatedVehicleTypes = [...vehicleTypes];
-    updatedVehicleTypes[index].editing = false;
+    updatedVehicleTypes[vehicleClassIndex] = {
+      ...updatedVehicleTypes[vehicleClassIndex],
+      editing: false,
+    };
     setVehicleTypes(updatedVehicleTypes);
+
+    const vehicleClass = filtredVehicleClassesData.find((vc) =>
+      vc.vehicleTypes.some((_, index) => index === vehicleClassIndex)
+    );
+
+    if (vehicleClass) {
+      try {
+        await updateVehicleClasse({
+          _id: vehicleClass._id,
+          vehicleTypes: updatedVehicleTypes,
+        }).unwrap();
+        console.log("Vehicle class updated successfully");
+      } catch (error) {
+        console.error("Error updating vehicle class:", error);
+      }
+    }
   };
 
   const handleUpdateOrder = async (
@@ -319,6 +371,17 @@ const VehiclesClassComponent: React.FC<VehicleClasseProps> = ({
     }
   };
 
+  useEffect(() => {
+    if (filtredVehicleClassesData.length > 0 && vehicleTypes.length === 0) {
+      setVehicleTypes(
+        filtredVehicleClassesData[0].vehicleTypes.map((vt) => ({
+          ...vt,
+          editing: false,
+        }))
+      );
+    }
+  }, [filtredVehicleClassesData]);
+
   return (
     <React.Fragment>
       <Row className="border-bottom">
@@ -347,8 +410,8 @@ const VehiclesClassComponent: React.FC<VehicleClasseProps> = ({
                       onChange={handleBigTitleChange}
                       onBlur={() =>
                         handleBigTitleBlur(
-                          vehicleClasse._id!,
-                          vehicleClasse.paragraph
+                          vehicleClasse?._id!,
+                          vehicleClasse?.paragraph!
                         )
                       }
                       autoFocus
@@ -364,8 +427,8 @@ const VehiclesClassComponent: React.FC<VehicleClasseProps> = ({
                         className="ri-pencil-line fs-18"
                         onClick={() =>
                           handleEditBigTitle(
-                            vehicleClasse._id!,
-                            vehicleClasse.bigTitle
+                            vehicleClasse?._id!,
+                            vehicleClasse?.bigTitle!
                           )
                         }
                       ></i>
@@ -379,7 +442,7 @@ const VehiclesClassComponent: React.FC<VehicleClasseProps> = ({
                       value={updatedParagraph}
                       onChange={handleParagraphChange}
                       onBlur={() =>
-                        handleBlur(vehicleClasse._id!, vehicleClasse.bigTitle)
+                        handleBlur(vehicleClasse._id!, vehicleClasse?.bigTitle!)
                       }
                       autoFocus
                       className="form-control"
@@ -395,7 +458,7 @@ const VehiclesClassComponent: React.FC<VehicleClasseProps> = ({
                         onClick={() =>
                           handleEditClick(
                             vehicleClasse._id!,
-                            vehicleClasse.paragraph
+                            vehicleClasse?.paragraph!
                           )
                         }
                       ></i>
@@ -404,46 +467,49 @@ const VehiclesClassComponent: React.FC<VehicleClasseProps> = ({
                 </div>
               </Row>
               <Row>
-                {vehicleClasse.vehicleTypes.map((vt, index) => (
-                  <Col lg={3} key={index}>
-                    <Card className="border-danger">
-                      <Form.Check
-                        type="checkbox"
-                        className="m-2"
-                        checked={vt.display === "1"}
-                        onChange={(e) =>
-                          handleCheckboxChange(index, e.target.checked)
-                        }
-                      />
-                      <div className="d-flex justify-content-center p-2 text-danger">
-                        <div className="hstack gap-2 align-middle">
-                          <i className={`${vt.icon} fs-18`}></i>
-                          {vehicleTypes?.editing! ? (
-                            <input
-                              type="text"
-                              value={vt.title}
-                              onChange={(e) =>
-                                handleTitleChange(index, e.target.value)
-                              }
-                              onBlur={() => handleTitleBlur(index)}
-                              className="form-control"
-                              style={{ width: "auto" }}
-                            />
-                          ) : (
-                            <>
-                              <span>{vt.title}</span>
-                              <i
-                                className="bi bi-pencil-fill ms-2 text-dark"
-                                style={{ cursor: "pointer" }}
-                                onClick={() => handleEditTitleClick(index)}
-                              ></i>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </Card>
-                  </Col>
-                ))}
+                <div className="d-flex justify-content-center p-2 text-danger">
+                  <div className="hstack gap-1 align-middle">
+                    {vehicleTypes.map((vt, index) => (
+                      <Col lg={3} key={index}>
+                        <Card className="border-danger">
+                          <Form.Check
+                            type="checkbox"
+                            className="m-2"
+                            checked={vt.display === "1"}
+                            onChange={(e) =>
+                              handleCheckboxChange(index, e.target.checked)
+                            }
+                          />
+                          <div className="d-flex justify-content-center p-2 text-danger">
+                            <div className="hstack gap-1 align-middle">
+                              {vt.editing ? (
+                                <input
+                                  type="text"
+                                  value={vt.title}
+                                  onChange={(e) =>
+                                    handleTitleChange(index, e.target.value)
+                                  }
+                                  onBlur={() => handleTitleBlur(index)}
+                                  className="form-control"
+                                  style={{ width: "auto" }}
+                                />
+                              ) : (
+                                <>
+                                  <span>{vt.title}</span>
+                                  <i
+                                    className="bi bi-pencil-fill ms-2 text-dark"
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() => handleEditTitleClick(index)}
+                                  ></i>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </Card>
+                      </Col>
+                    ))}
+                  </div>
+                </div>
               </Row>
             </>
           ))}

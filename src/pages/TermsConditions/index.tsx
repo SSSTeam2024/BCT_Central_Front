@@ -131,7 +131,7 @@ const TermsConditions: React.FC<TermsConditionProps> = ({ selectedPage }) => {
     (inThePress) => inThePress.page === selectedPage
   );
   const filtredVehicleGuideData = AllVehicleGuide.filter(
-    (vehicleGuide) => vehicleGuide.page.toLowerCase() === selectedPage
+    (vehicleGuide) => vehicleGuide?.page!.toLowerCase() === selectedPage
   );
 
   const [editingField, setEditingField] = useState<{

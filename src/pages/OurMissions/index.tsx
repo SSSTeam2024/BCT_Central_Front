@@ -124,7 +124,7 @@ const OurMissions: React.FC<OurMissionsProps> = ({
     (inThePress) => inThePress.page === selectedPage
   );
   const filtredVehicleGuideData = AllVehicleGuide.filter(
-    (vehicleGuide) => vehicleGuide.page.toLowerCase() === selectedPage
+    (vehicleGuide) => vehicleGuide?.page!.toLowerCase() === selectedPage
   );
 
   const filteredServices = AllOfferServices.filter(

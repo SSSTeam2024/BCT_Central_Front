@@ -355,7 +355,7 @@ const Header = () => {
           <Card>
             <Card.Header>
               <Row className="p-3">
-                <Col lg={2}>
+                <Col lg={2} className="border-end">
                   {updateHeader.logo && updateHeader.logo_base64 ? (
                     <Image
                       src={`data:image/jpeg;base64, ${updateHeader.logo_base64}`}
@@ -399,8 +399,15 @@ const Header = () => {
                 </Col>
                 <Col lg={10}>
                   <div className="hstack gap-4">
-                    <Col>
+                    <Col className="border-end p-2">
                       <div className="hstack gap-1">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="formCheck1"
+                          checked={isPhoneChecked}
+                          onChange={handlePhoneCheckboxChange}
+                        />
                         <span className=" badge badge-outline-light text-danger fs-20 rounded-pill ">
                           <i className="ph ph-phone-call"></i>
                         </span>
@@ -456,16 +463,9 @@ const Header = () => {
                             )}
                           </span>
                         </div>
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          id="formCheck1"
-                          checked={isPhoneChecked}
-                          onChange={handlePhoneCheckboxChange}
-                        />
                       </div>
                     </Col>
-                    <Col>
+                    <Col className="border-end p-2">
                       <div className="hstack gap-1">
                         <span className=" badge badge-outline-light text-danger fs-20 rounded-pill ">
                           <i className="ph ph-envelope"></i>

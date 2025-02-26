@@ -10,6 +10,14 @@ export interface htmlPageModel {
   aboutUs: string;
   ourValues: string;
   offerServices: string;
+  ourMissions: string;
+  terms: string;
+  vehicleGuide: string;
+  vehicleClasse: string;
+  inThePress: string;
+  serviceBlock1: string;
+  fleet: string;
+  onTheRoad: string;
   footerList: string[];
   socialMedia: string
 }

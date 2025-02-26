@@ -2,9 +2,9 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export interface VehiclesClassModel {
   _id?: string;
-  page: string;
-  bigTitle: string,
-  paragraph: string,
+  page?: string;
+  bigTitle?: string,
+  paragraph?: string,
   vehicleTypes: {
     title: string,
     link: string,

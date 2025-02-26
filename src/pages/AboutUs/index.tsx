@@ -163,7 +163,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ selectedPage }) => {
     (inThePress) => inThePress.page === selectedPage
   );
   const filtredVehicleGuideData = AllVehicleGuide.filter(
-    (vehicleGuide) => vehicleGuide.page.toLowerCase() === selectedPage
+    (vehicleGuide) => vehicleGuide?.page!.toLowerCase() === selectedPage
   );
 
   const filteredServices = AllOfferServices.filter(

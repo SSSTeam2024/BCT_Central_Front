@@ -470,7 +470,7 @@ const Navdata = () => {
           id: "OurPages",
           label: "Our Pages",
           link: "/website-pages",
-          icon: "mdi mdi-view-grid-plus-outline",
+          icon: "mdi mdi-view-gallery-outline",
           parentId: "WebSite",
         },
         {
@@ -478,6 +478,13 @@ const Navdata = () => {
           label: "Components",
           link: "/website-components",
           icon: "mdi mdi-view-compact-outline",
+          parentId: "WebSite",
+        },
+        {
+          id: "NewPage",
+          label: "New Page",
+          link: "/website-new-page",
+          icon: "mdi mdi-view-grid-plus-outline",
           parentId: "WebSite",
         },
       ],

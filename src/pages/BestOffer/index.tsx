@@ -125,7 +125,7 @@ const BestOffer: React.FC<BestOfferProps> = ({ selectedPage }) => {
     (inThePress) => inThePress.page === selectedPage
   );
   const filtredVehicleGuideData = AllVehicleGuides.filter(
-    (ourValue) => ourValue.page.toLowerCase() === selectedPage
+    (vehicleGuide) => vehicleGuide?.page!.toLowerCase() === selectedPage
   );
 
   const filteredServices = AllOfferServices.filter(

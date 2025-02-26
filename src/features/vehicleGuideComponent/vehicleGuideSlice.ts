@@ -2,12 +2,13 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export interface VehicleGuideModel {
   _id?: string;
-  page: string;
-  paragraph: string,
+  page?: string;
+  paragraph?: string,
   display?: string,
   order?: string,
   typeComponent?: string,
   vehicleType: {
+    _id?: string;
     title: string,
     content: string,
     image: string,
@@ -29,14 +30,31 @@ export const vehicleGuideSlice = createApi({
         },
         providesTags: ["VehicleGuideModel"],
       }),
+      // updateVehicleGuide: builder.mutation<void, VehicleGuideModel>({
+      //         query: ({ _id, ...rest }) => ({
+      //           url: `/updateVehicle/${_id}`,
+      //           method: "PATCH",
+      //           body: rest,
+      //         }),
+      //         invalidatesTags: ["VehicleGuideModel"],
+      //       }),
       updateVehicleGuide: builder.mutation<void, VehicleGuideModel>({
-              query: ({ _id, ...rest }) => ({
-                url: `/updateVehicle/${_id}`,
-                method: "PATCH",
-                body: rest,
-              }),
-              invalidatesTags: ["VehicleGuideModel"],
-            }),
+        query: ({ _id, ...rest }) => ({
+          url: `/updateVehicle/${_id}`,
+          method: "PATCH",
+          body: {
+            ...rest,
+            vehicleType: rest.vehicleType.map((vt) => ({
+              title: vt.title,
+              content: vt.content,
+              image: vt.image,
+              display: vt.display,
+            })),
+          },
+        }),
+        invalidatesTags: ["VehicleGuideModel"],
+      }),
+      
             addVehicleGuide: builder.mutation<void, VehicleGuideModel>({
                           query(payload) {
                             return {

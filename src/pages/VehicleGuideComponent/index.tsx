@@ -49,6 +49,25 @@ import {
 interface VehicleGuideProps {
   selectedPage: string;
 }
+
+function convertToBase64(
+  file: File
+): Promise<{ base64Data: string; extension: string }> {
+  return new Promise((resolve, reject) => {
+    const fileReader = new FileReader();
+    fileReader.onload = () => {
+      const base64String = fileReader.result as string;
+      const [, base64Data] = base64String.split(",");
+      const extension = file.name.split(".").pop() ?? "";
+      resolve({ base64Data, extension });
+    };
+    fileReader.onerror = (error) => {
+      reject(error);
+    };
+    fileReader.readAsDataURL(file);
+  });
+}
+
 const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
   selectedPage,
 }) => {
@@ -76,6 +95,7 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
   const [updateTermCondition] = useUpdateTermConditionMutation();
   const [updateOnTheRoad] = useUpdateOnTheRoadMutation();
 
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [updatedParagraph, setUpdatedParagraph] = useState<string>("");
   const [editingVehicle, setEditingVehicle] = useState<{
@@ -85,7 +105,7 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
   } | null>(null);
 
   const filtredVehicleGuideData = data.filter(
-    (ourValue) => ourValue.page.toLowerCase() === selectedPage
+    (ourValue) => ourValue?.page!.toLowerCase() === selectedPage
   );
 
   const filtredBlock1Data = AllBlock1.filter(
@@ -147,9 +167,9 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
       _id: id,
       paragraph: updatedParagraph,
       page: selectedPage,
-      vehicleType: [], // Update as needed
+      vehicleType: [],
     });
-    setEditingId(null); // Exit editing mode
+    setEditingId(null);
   };
 
   const handleCheckboxChange = (
@@ -176,6 +196,7 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
     );
 
     if (updatedVehicleGuide) {
+      console.log("Updating display:", updatedVehicleGuide); // Debugging
       updateVehicleGuide(updatedVehicleGuide);
     }
   };
@@ -195,7 +216,7 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
           return {
             ...item,
             vehicleType: item.vehicleType.map((vt) =>
-              vt.title === editingVehicle.id
+              vt?._id! === editingVehicle.id
                 ? { ...vt, [editingVehicle.field]: editingVehicle.value }
                 : vt
             ),
@@ -203,12 +224,16 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
         }
         return item;
       });
-
+      console.log("updatedData", updatedData);
       const updatedVehicleGuide = updatedData.find(
         (item) => item._id === parentId
       );
 
       if (updatedVehicleGuide) {
+        console.log(
+          "Final payload before update:",
+          JSON.stringify(updatedVehicleGuide, null, 2)
+        );
         updateVehicleGuide(updatedVehicleGuide);
       }
 
@@ -332,6 +357,31 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
     }
   };
 
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    about: VehicleGuideModel,
+    index: number
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const { base64Data, extension } = await convertToBase64(file);
+
+      const updatedVehicleType = [...about.vehicleType];
+      updatedVehicleType[index] = {
+        ...updatedVehicleType[index],
+        image: `${base64Data}.${extension}`,
+      };
+
+      const updatedData = {
+        ...about,
+        vehicleType: updatedVehicleType,
+      };
+
+      setPreviewImage(`data:image/${extension};base64,${base64Data}`);
+      updateVehicleGuide(updatedData);
+    }
+  };
+
   return (
     <React.Fragment>
       <Row className="p-4 border-bottom">
@@ -416,7 +466,7 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
                         />
                       ) : (
                         <>
-                          <p>{value.paragraph}</p>
+                          <p>{value?.paragraph!}</p>
                           <i
                             className="bi bi-pencil"
                             style={{
@@ -424,7 +474,7 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
                               marginLeft: "8px",
                             }}
                             onClick={() =>
-                              handleEditClick(value._id!, value.paragraph)
+                              handleEditClick(value?._id!, value?.paragraph!)
                             }
                           ></i>
                         </>
@@ -459,14 +509,14 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
                                 checked={vt.display === "true"}
                                 onChange={(e) =>
                                   handleCheckboxChange(
-                                    vt.title,
+                                    vt?._id!,
                                     e.target.checked,
                                     value._id!
                                   )
                                 }
                                 className="me-2"
                               />
-                              {editingVehicle?.id === vt.title &&
+                              {editingVehicle?.id === vt?._id! &&
                               editingVehicle?.field === "title" ? (
                                 <input
                                   value={editingVehicle.value}
@@ -488,7 +538,7 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
                                     style={{ cursor: "pointer" }}
                                     onClick={() =>
                                       handleVehicleEdit(
-                                        vt.title,
+                                        vt?._id!,
                                         "title",
                                         vt.title
                                       )
@@ -514,7 +564,7 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
                               .toLowerCase()}`}
                           >
                             <div className="hstack gap-2 mb-3">
-                              {editingVehicle?.id === vt.title &&
+                              {editingVehicle?.id === vt?._id! &&
                               editingVehicle?.field === "content" ? (
                                 <textarea
                                   value={editingVehicle.value}
@@ -536,7 +586,7 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
                                     style={{ cursor: "pointer" }}
                                     onClick={() =>
                                       handleVehicleEdit(
-                                        vt.title,
+                                        vt?._id!,
                                         "content",
                                         vt.content
                                       )
@@ -547,17 +597,47 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
                             </div>
                             <div className="d-flex mb-2">
                               <div className="flex-shrink-0">
-                                <Image
-                                  src={`${process.env.REACT_APP_BASE_URL}/VehicleGuide/${vt?.image}`}
-                                  alt=""
-                                  width="150"
-                                  className="rounded"
+                                {previewImage ? (
+                                  <Image
+                                    src={previewImage}
+                                    alt="Preview"
+                                    className="rounded"
+                                    width="320"
+                                  />
+                                ) : (
+                                  <Image
+                                    src={`${process.env.REACT_APP_BASE_URL}/VehicleGuide/${vt?.image}`}
+                                    alt=""
+                                    width="150"
+                                    className="rounded"
+                                  />
+                                )}
+                              </div>
+                              <div className="d-flex justify-content-center mt-n2">
+                                <label
+                                  htmlFor={`image_${vt?.image}`}
+                                  className="mb-0"
+                                  data-bs-toggle="tooltip"
+                                  data-bs-placement="right"
+                                  title="Select image"
+                                >
+                                  <span className="avatar-xs d-inline-block">
+                                    <span className="avatar-title bg-light border rounded-circle text-muted cursor-pointer">
+                                      <i className="bi bi-upload"></i>
+                                    </span>
+                                  </span>
+                                </label>
+                                <input
+                                  className="form-control d-none"
+                                  type="file"
+                                  name={`image_${vt?.image!}`}
+                                  id={`image_${vt?.image!}`}
+                                  accept="image/*"
+                                  onChange={(e) =>
+                                    handleFileUpload(e, value, index)
+                                  }
+                                  style={{ width: "210px", height: "120px" }}
                                 />
-                                <i
-                                  className="bi bi-upload ms-2 mt-1"
-                                  style={{ cursor: "pointer" }}
-                                  title="Change Image"
-                                ></i>
                               </div>
                             </div>
                           </Tab.Pane>

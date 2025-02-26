@@ -166,7 +166,7 @@ const OfferServices: React.FC<OfferServicesProps> = ({ selectedPage }) => {
     (inThePress) => inThePress.page === selectedPage
   );
   const filtredVehicleGuideData = AllVehicleGuide.filter(
-    (vehicleGuide) => vehicleGuide.page.toLowerCase() === selectedPage
+    (vehicleGuide) => vehicleGuide?.page!.toLowerCase() === selectedPage
   );
 
   const [editingField, setEditingField] = useState<{
@@ -857,7 +857,7 @@ const OfferServices: React.FC<OfferServicesProps> = ({ selectedPage }) => {
                         )}
                         <div className="mt-n3" style={{ marginLeft: "-250px" }}>
                           <label
-                            htmlFor={`image-${card.title}`}
+                            htmlFor={`image-${card.title}_${index}`}
                             className="mb-0"
                             data-bs-toggle="tooltip"
                             data-bs-placement="right"
@@ -872,8 +872,8 @@ const OfferServices: React.FC<OfferServicesProps> = ({ selectedPage }) => {
                           <input
                             className="form-control d-none"
                             type="file"
-                            name="image"
-                            id={`image-${card.title}`}
+                            name={`image-${card.title}_${index}`}
+                            id={`image-${card.title}_${index}`}
                             accept="image/*"
                             onChange={(e) =>
                               handleFileUpload(e, card, offer._id!)

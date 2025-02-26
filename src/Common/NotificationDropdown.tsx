@@ -88,7 +88,9 @@ const NotificationDropdown = () => {
         >
           <i className="mdi mdi-bell-outline fs-22"></i>
           <span className="position-absolute topbar-badge fs-10 translate-middle badge rounded-pill bg-danger">
-            <span className="notification-badge">{notifications.length}</span>
+            <span className="notification-badge">
+              {filtredNotifications.length}
+            </span>
             <span className="visually-hidden">unread messages</span>
           </span>
         </Dropdown.Toggle>

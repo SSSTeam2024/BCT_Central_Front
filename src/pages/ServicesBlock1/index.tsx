@@ -165,7 +165,7 @@ const ServicesBlock1: React.FC<Block1Props> = ({ selectedPage }) => {
     (inThePress) => inThePress.page === selectedPage
   );
   const filtredVehicleGuideData = AllVehicleGuide.filter(
-    (vehicleGuide) => vehicleGuide.page.toLowerCase() === selectedPage
+    (vehicleGuide) => vehicleGuide?.page!.toLowerCase() === selectedPage
   );
 
   const [localDisplay, setLocalDisplay] = useState<string | undefined>(

@@ -1,21 +1,21 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export interface FleetModel {
-    _id?: string;
-    page: string;
-    grids: {
-        image: string;
-        title: string;
-        details: string;
-        image_base64?: string;
-  image_extension?: string;
-    }[],
-    display?: string,
-      order?: string,
-      typeComponent?: string,
-      newImage?: string,
-  }
-  
+  _id?: string;
+  page: string;
+  grids: {
+    image?: string;
+    title: string;
+    details?: string;
+    image_base64?: string;
+    image_extension?: string;
+  }[];
+  display?: string;
+  order?: string;
+  typeComponent?: string;
+  newImage?: string;
+}
+
 export const fleetSlice = createApi({
   reducerPath: "fleet",
   baseQuery: fetchBaseQuery({
@@ -24,7 +24,7 @@ export const fleetSlice = createApi({
   tagTypes: ["FleetModel"],
   endpoints(builder) {
     return {
-        getAllFleet: builder.query<FleetModel[], number | void>({
+      getAllFleet: builder.query<FleetModel[], number | void>({
         query() {
           return "/get-all-fleets";
         },
@@ -39,15 +39,15 @@ export const fleetSlice = createApi({
         invalidatesTags: ["FleetModel"],
       }),
       addNewFleetComponent: builder.mutation<void, FleetModel>({
-              query(payload) {
-                return {
-                  url: "/create-fleet",
-                  method: "POST",
-                  body: payload,
-                };
-              },
-              invalidatesTags: ["FleetModel"],
-            }),
+        query(payload) {
+          return {
+            url: "/create-fleet",
+            method: "POST",
+            body: payload,
+          };
+        },
+        invalidatesTags: ["FleetModel"],
+      }),
     };
   },
 });
@@ -55,5 +55,5 @@ export const fleetSlice = createApi({
 export const {
   useGetAllFleetQuery,
   useUpdateFleetMutation,
-  useAddNewFleetComponentMutation
+  useAddNewFleetComponentMutation,
 } = fleetSlice;
