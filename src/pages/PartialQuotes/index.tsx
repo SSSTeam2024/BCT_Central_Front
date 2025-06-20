@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Container, Row, Card, Col } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import Breadcrumb from "Common/BreadCrumb";
@@ -148,25 +148,21 @@ const PartialQuotes = () => {
     setSearchTerm(event.target.value);
   };
 
-  const getFilteredJobs = () => {
-    let filteredJobs = filteredVisitor;
+  const filteredJobs = useMemo(() => {
+    return data
+      .filter((visitor) => visitor.status === "new")
+      .filter((job: any) => {
+        if (!searchTerm) return true;
 
-    if (searchTerm) {
-      filteredJobs = filteredJobs.filter(
-        (job: any) =>
-          job.start_point.placeName
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          job.destination_point.placeName
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          job.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          job.email.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    return filteredJobs;
-  };
+        const term = searchTerm.toLowerCase();
+        return (
+          job.start_point.placeName.toLowerCase().includes(term) ||
+          job.destination_point.placeName.toLowerCase().includes(term) ||
+          job.name.toLowerCase().includes(term) ||
+          job.email.toLowerCase().includes(term)
+        );
+      });
+  }, [data, searchTerm]);
 
   return (
     <React.Fragment>
@@ -194,7 +190,7 @@ const PartialQuotes = () => {
               <Card.Body>
                 <DataTable
                   columns={columns}
-                  data={getFilteredJobs().reverse()}
+                  data={filteredJobs.reverse()}
                   pagination
                   customStyles={customTableStyles}
                 />

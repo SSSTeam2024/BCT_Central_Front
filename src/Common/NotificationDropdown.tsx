@@ -43,7 +43,8 @@ const getTimeAgo = (createdAt: any) => {
 const NotificationDropdown = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const { data: AllNotifications = [] } = useGetAllNotificationsQuery();
+  const { data: AllNotifications = [], refetch } =
+    useGetAllNotificationsQuery();
   const [updateNotification] = useUpdateNotificationMutation();
 
   useEffect(() => {
@@ -74,6 +75,16 @@ const NotificationDropdown = () => {
       _id: id,
       lu: readed,
     });
+    refetch();
+  };
+
+  const handleMarkAllAsRead = async () => {
+    await Promise.all(
+      filtredNotifications.map((notif) =>
+        updateNotification({ _id: notif?._id!, lu: "1" })
+      )
+    );
+    refetch();
   };
   return (
     <React.Fragment>
@@ -144,9 +155,18 @@ const NotificationDropdown = () => {
           </div>
 
           <div className="py-2 ps-2" id="notificationItemsTabContent">
+            <button
+              className="btn btn-sm btn-primary mb-2"
+              onClick={handleMarkAllAsRead}
+            >
+              Mark all as read
+            </button>
             <SimpleBar style={{ maxHeight: "300px" }} className="pe-2">
               {filtredNotifications.map((notif) => (
-                <div className="text-reset notification-item d-block dropdown-item position-relative unread-message">
+                <div
+                  key={notif?._id!}
+                  className="text-reset notification-item d-block dropdown-item position-relative unread-message"
+                >
                   <div className="d-flex">
                     <div className="avatar-xs me-3 flex-shrink-0">
                       <span className="avatar-title bg-info-subtle text-info rounded-circle fs-16">
@@ -172,14 +192,14 @@ const NotificationDropdown = () => {
                           className="form-check-input"
                           type="checkbox"
                           value=""
-                          id="all-notification-check01"
+                          id={`notification-check-${notif._id}`}
                           onClick={() =>
                             handleUpdateNotification(notif?._id!, "1")
                           }
                         />
                         <label
                           className="form-check-label"
-                          htmlFor="all-notification-check01"
+                          htmlFor={`notification-check-${notif._id}`}
                         ></label>
                       </div>
                     </div>

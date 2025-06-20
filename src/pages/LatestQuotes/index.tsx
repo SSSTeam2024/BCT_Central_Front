@@ -333,20 +333,16 @@ const LatestQuotes = () => {
     { value: "Account Name", label: "Account Name" },
   ];
 
-  // State to store the selected option values
   const [selectedColumnValues, setSelectedColumnValues] = useState<any[]>([]);
 
-  // Event handler to handle changes in selected options
   const handleSelectValueColumnChange = (selectedOption: any) => {
-    // Extract values from selected options and update state
     const values = selectedOption.map((option: any) => option.value);
     setSelectedColumnValues(values);
   };
 
-  // Filter out columns based on selected options
   const filteredColumns = columns.filter(
     (column: Column) =>
-      !selectedColumnValues.includes(column.name.props.children) // Ensure props.children is string
+      !selectedColumnValues.includes(column.name.props.children)
   );
 
   const swalWithBootstrapButtons = Swal.mixin({
@@ -380,10 +376,7 @@ const LatestQuotes = () => {
             "Quote is deleted.",
             "success"
           );
-        } else if (
-          /* Read more about handling dismissals below */
-          result.dismiss === Swal.DismissReason.cancel
-        ) {
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
           swalWithBootstrapButtons.fire("Canceled", "Quote is safe :)", "info");
         }
       });
@@ -427,13 +420,10 @@ const LatestQuotes = () => {
     label: affiliate.name,
   }));
 
-  // State to store the selected option values
   const [selectedValues, setSelectedValues] = useState<any[]>([]);
-  // Event handler to handle changes in selected options
   const handleSelectValueChange = (selectedOption: any) => {
     let whiteList: any[] = [];
 
-    // Extract values from selected options and update state
     const values = selectedOption.map((option: any) =>
       whiteList.push({
         id: option.value,
@@ -480,7 +470,7 @@ const LatestQuotes = () => {
   };
 
   const [selectedPeriod, setSelectedPeriod] = useState<string>("");
-  // This function is triggered when the select Period
+
   const handleSelectPeriod = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     setSelectedPeriod(value);
@@ -550,43 +540,6 @@ const LatestQuotes = () => {
 
     return filteredJobs;
   };
-
-  // const columnsPdf = filteredColumns;
-  // const data = getFilteredJobs().reverse();
-
-  // const exportPDF = () => {
-  //   const doc = new jsPDF();
-  //   const tableColumn = columnsPdf.map((col) => col.name.props.children);
-  //   const tableRows = data.map((row) =>
-  //     columnsPdf.map((col) => {
-  //       const value = col.selector(row);
-  //       if (React.isValidElement(value)) {
-  //         // Type assertion to React.ReactElement to access props
-  //         const element = value as React.ReactElement;
-  //         return element.props.children || "";
-  //       }
-  //       return value !== null && value !== undefined ? value.toString() : "";
-  //     })
-  //   );
-
-  //   doc.autoTable({
-  //     head: [tableColumn],
-  //     body: tableRows,
-  //   });
-
-  //   doc.save("table.pdf");
-  // };
-
-  // const exportExcel = () => {
-  //   const worksheet = XLSX.utils.json_to_sheet(data);
-  //   const workbook = XLSX.utils.book_new();
-  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-  //   XLSX.writeFile(workbook, "Latest Quotes.xlsx");
-  // };
-
-  // const printTable = () => {
-  //   window.print();
-  // };
 
   return (
     <React.Fragment>
@@ -668,33 +621,6 @@ const LatestQuotes = () => {
                       <i className="ri-search-line search-icon"></i>
                     </div>
                   </Col>
-                  {/* <Col lg={1}>
-                    <button
-                      type="button"
-                      className="btn btn-danger btn-sm"
-                      onClick={exportPDF}
-                    >
-                      <i className="bi bi-filetype-pdf fs-20"></i>
-                    </button>
-                  </Col>
-                  <Col lg={1}>
-                    <button
-                      type="button"
-                      className="btn btn-darken-success btn-sm"
-                      onClick={exportExcel}
-                    >
-                      <i className="bi bi-file-earmark-excel fs-20"></i>
-                    </button>
-                  </Col>
-                  <Col lg={1}>
-                    <button
-                      type="button"
-                      className="btn btn-info btn-sm"
-                      onClick={printTable}
-                    >
-                      <i className="bi bi-printer fs-20"></i>
-                    </button>
-                  </Col> */}
                 </Row>
               </Card.Header>
               <Card.Body>

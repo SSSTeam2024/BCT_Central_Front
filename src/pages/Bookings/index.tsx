@@ -279,17 +279,27 @@ const Bookings = () => {
         <span className="mdi mdi-account-tie-hat font-weight-bold fs-24"></span>
       ),
       selector: (row: any) =>
-        row?.id_driver?.firstname! === undefined ? (
-          <Link
-            to="#"
-            onClick={() => AlertConfirm(handleAssignDriverHideSelect)}
-            state={row}
-          >
-            No Driver
-          </Link>
+        row?.id_driver?.firstname === undefined ? (
+          row?.payment_type === undefined ? (
+            <Link
+              to="#"
+              onClick={() => AlertConfirm(handleAssignDriverHideSelect)}
+              state={row}
+            >
+              No Driver
+            </Link>
+          ) : (
+            <Link
+              to="#"
+              onClick={() => handleAssignDriverHideSelect()}
+              state={row}
+            >
+              No Driver
+            </Link>
+          )
         ) : (
           <span>
-            {row?.id_driver?.firstname!} {row?.id_driver?.surname!}
+            {row?.id_driver?.firstname} {row?.id_driver?.surname}
           </span>
         ),
       sortable: true,
@@ -305,13 +315,23 @@ const Bookings = () => {
       name: <span className="mdi mdi-car font-weight-bold fs-24"></span>,
       selector: (row: any) =>
         row.id_vehicle?.registration_number! === undefined ? (
-          <Link
-            to="#"
-            onClick={() => AlertConfirm(handleAssignVehicleHideSelect)}
-            state={row}
-          >
-            No Vehicle
-          </Link>
+          row?.payment_type === undefined ? (
+            <Link
+              to="#"
+              onClick={() => AlertConfirm(handleAssignVehicleHideSelect)}
+              state={row}
+            >
+              No Vehicle
+            </Link>
+          ) : (
+            <Link
+              to="#"
+              onClick={() => handleAssignVehicleHideSelect()}
+              state={row}
+            >
+              No Vehicle
+            </Link>
+          )
         ) : (
           <span>{row.id_vehicle?.registration_number!}</span>
         ),
@@ -484,7 +504,11 @@ const Bookings = () => {
       name: <span className="font-weight-bold fs-13">Payment Status</span>,
       sortable: true,
       selector: (cell: any) => {
-        return <span className="badge bg-danger"> Not Paid </span>;
+        return cell.payment_type === undefined ? (
+          <span className="badge bg-danger"> Not Paid </span>
+        ) : (
+          <span className="badge bg-success"> Paid </span>
+        );
       },
     },
 
@@ -989,7 +1013,6 @@ const Bookings = () => {
   const handleAssignVehicleHideSelect = () => {
     setSelectAssignVehicleHide(true);
   };
-
   return (
     <React.Fragment>
       <div className="page-content">
@@ -1102,17 +1125,31 @@ const Bookings = () => {
                   <Col lg={8} className="d-flex justify-content-start">
                     {isChecked ? (
                       <ul className="hstack gap-2 list-unstyled mb-0">
-                        <li>
-                          <Link
-                            to="#"
-                            className="badge badge-soft-info remove-item-btn fs-16"
-                            state={selectedRow}
-                            onClick={() => AlertConfirm(handleHideSelect)}
-                          >
-                            <i className="bi bi-plus-square-dotted fs-18"></i>{" "}
-                            Assign Vehicle/Driver
-                          </Link>
-                        </li>
+                        {selectedRow[0]?.payment_type === undefined ? (
+                          <li>
+                            <Link
+                              to="#"
+                              className="badge badge-soft-info remove-item-btn fs-16"
+                              state={selectedRow}
+                              onClick={() => AlertConfirm(handleHideSelect)}
+                            >
+                              <i className="bi bi-plus-square-dotted fs-18"></i>{" "}
+                              Assign Vehicle/Driver
+                            </Link>
+                          </li>
+                        ) : (
+                          <li>
+                            <Link
+                              to="#"
+                              className="badge badge-soft-info remove-item-btn fs-16"
+                              state={selectedRow}
+                              onClick={() => handleHideSelect()}
+                            >
+                              <i className="bi bi-plus-square-dotted fs-18"></i>{" "}
+                              Assign Vehicle/Driver
+                            </Link>
+                          </li>
+                        )}
                         <li>
                           <Link
                             to="#"

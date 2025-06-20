@@ -38,6 +38,8 @@ export interface Quote {
   notes: string;
   createdAt?: Date;
   luggage_details: string;
+  payment_type?: string;
+  payment_method?: string;
   manual_cost: string;
   status: string;
   progress: string;
@@ -305,7 +307,7 @@ export const quoteSlice = createApi({
             },
           };
         },
-        invalidatesTags: ["BookEmail"],
+        invalidatesTags: ["Quote"],
       }),
       addAssignDriver: builder.mutation<void, AssignDriver>({
         query({ quote_id, manual_cost, id_visitor, id_vehicle, id_driver }) {

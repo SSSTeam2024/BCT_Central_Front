@@ -111,7 +111,7 @@ const MenuSite = () => {
     menuId: "",
     label: "",
     link: "",
-    order: 0,
+    order: 8,
     target: "_self",
     display: true,
   });
@@ -119,7 +119,7 @@ const MenuSite = () => {
   const handleAddNewItem = async () => {
     try {
       await addNewItemMutation({
-        menuId: menu?._id!,
+        menuId: AllMenu[0]?._id!,
         newItem: {
           label: newItem.label,
           link: newItem.link,
@@ -152,7 +152,6 @@ const MenuSite = () => {
     const { menuId, itemId } = addingSubItem;
 
     try {
-      // console.log("new sub item", newSubItem);
       await addSubItemMutation({
         menuId,
         itemId,
@@ -386,25 +385,33 @@ const MenuSite = () => {
               {displayForm && (
                 <Row>
                   <Col>
-                    <Form.Control
-                      type="text"
-                      placeholder="Label"
-                      value={newItem.label}
-                      onChange={(e) =>
-                        setNewItem({ ...newItem, label: e.target.value })
-                      }
-                    />
+                    <Form.Select
+                      id="name"
+                      className="form-select-sm"
+                      onChange={(e) => {
+                        const selectedPage = AllPages.find(
+                          (page) => page.label === e.target.value
+                        );
+                        if (selectedPage) {
+                          setNewItem({
+                            ...newItem,
+                            label: selectedPage.label,
+                            link: selectedPage.link,
+                          });
+                        }
+                      }}
+                    >
+                      <option value="" disabled>
+                        Select
+                      </option>
+                      {AllPages.map((page) => (
+                        <option key={page.label} value={page.label}>
+                          {page.label}
+                        </option>
+                      ))}
+                    </Form.Select>
                   </Col>
-                  <Col>
-                    <Form.Control
-                      type="number"
-                      placeholder="Order"
-                      value={newItem.order}
-                      onChange={(e) =>
-                        setNewItem({ ...newItem, order: +e.target.value })
-                      }
-                    />
-                  </Col>
+
                   <Col>
                     <input
                       type="checkbox"

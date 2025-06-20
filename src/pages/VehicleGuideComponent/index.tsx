@@ -104,8 +104,9 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
     value: string;
   } | null>(null);
 
+  console.log("data", data);
   const filtredVehicleGuideData = data.filter(
-    (ourValue) => ourValue?.page!.toLowerCase() === selectedPage
+    (ourValue) => ourValue?.page! === selectedPage
   );
 
   const filtredBlock1Data = AllBlock1.filter(
@@ -381,7 +382,7 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
       updateVehicleGuide(updatedData);
     }
   };
-
+  console.log("filtredVehicleGuideData", filtredVehicleGuideData);
   return (
     <React.Fragment>
       <Row className="p-4 border-bottom">
@@ -398,104 +399,106 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
           />
         </Col>
         <Col lg={11}>
-          {filtredVehicleGuideData.map((value) => (
-            <>
-              <div className="position-relative">
-                <div className="position-absolute rounded-5 top-0 end-0">
-                  <Dropdown
-                    className="topbar-head-dropdown ms-1 header-item"
-                    id="notificationDropdown"
+          <>
+            <div className="position-relative">
+              <div className="position-absolute rounded-5 top-0 end-0">
+                <Dropdown
+                  className="topbar-head-dropdown ms-1 header-item"
+                  id="notificationDropdown"
+                >
+                  <Dropdown.Toggle
+                    id="notification"
+                    type="button"
+                    className="btn btn-icon btn-topbar btn-ghost-light rounded-circle arrow-none btn-sm"
                   >
-                    <Dropdown.Toggle
-                      id="notification"
-                      type="button"
-                      className="btn btn-icon btn-topbar btn-ghost-light rounded-circle arrow-none btn-sm"
-                    >
-                      <span className="position-absolute topbar-badge fs-10 translate-middle badge rounded-pill bg-info">
-                        <span className="notification-badge">
-                          {filtredVehicleGuideData[0]?.order!}
-                        </span>
-                        <span className="visually-hidden">unread messages</span>
+                    <span className="position-absolute topbar-badge fs-10 translate-middle badge rounded-pill bg-info">
+                      <span className="notification-badge">
+                        {filtredVehicleGuideData[0]?.order!}
                       </span>
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu
-                      className="dropdown-menu-xs dropdown-menu-end p-0"
-                      aria-labelledby="page-header-notifications-dropdown"
-                    >
-                      <div
-                        className="py-2 ps-2"
-                        id="notificationItemsTabContent"
-                      >
-                        {isLoading ? (
-                          <span>Loading ...</span>
-                        ) : (
-                          <ul className="list-unstyled">
-                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num) => (
-                              <li key={num}>
-                                <button
-                                  className="dropdown-item"
-                                  onClick={() =>
-                                    handleUpdateOrder(
-                                      filtredVehicleGuideData[0],
-                                      num.toString()
-                                    )
-                                  }
-                                >
-                                  {num}
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </div>
-              </div>
-              <div key={value._id}>
-                <Row className="mb-3">
-                  <div className="vstack gap-2">
-                    <div className="hstack gap-2">
-                      {editingId === value._id ? (
-                        <textarea
-                          value={updatedParagraph}
-                          onChange={handleParagraphChange}
-                          onBlur={() => handleBlur(value._id!)}
-                          autoFocus
-                          className="form-control"
-                        />
+                      <span className="visually-hidden">unread messages</span>
+                    </span>
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu
+                    className="dropdown-menu-xs dropdown-menu-end p-0"
+                    aria-labelledby="page-header-notifications-dropdown"
+                  >
+                    <div className="py-2 ps-2" id="notificationItemsTabContent">
+                      {isLoading ? (
+                        <span>Loading ...</span>
                       ) : (
-                        <>
-                          <p>{value?.paragraph!}</p>
-                          <i
-                            className="bi bi-pencil"
-                            style={{
-                              cursor: "pointer",
-                              marginLeft: "8px",
-                            }}
-                            onClick={() =>
-                              handleEditClick(value?._id!, value?.paragraph!)
-                            }
-                          ></i>
-                        </>
+                        <ul className="list-unstyled">
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num) => (
+                            <li key={num}>
+                              <button
+                                className="dropdown-item"
+                                onClick={() =>
+                                  handleUpdateOrder(
+                                    filtredVehicleGuideData[0],
+                                    num.toString()
+                                  )
+                                }
+                              >
+                                {num}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
                       )}
                     </div>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </div>
+            </div>
+            <div key={filtredVehicleGuideData[0]?._id!}>
+              <Row className="mb-3">
+                <div className="vstack gap-2">
+                  <div className="hstack gap-2">
+                    {editingId === filtredVehicleGuideData[0]?._id! ? (
+                      <textarea
+                        value={updatedParagraph}
+                        onChange={handleParagraphChange}
+                        onBlur={() =>
+                          handleBlur(filtredVehicleGuideData[0]?._id!)
+                        }
+                        autoFocus
+                        className="form-control"
+                      />
+                    ) : (
+                      <>
+                        <p>{filtredVehicleGuideData[0]?.paragraph!}</p>
+                        <i
+                          className="bi bi-pencil"
+                          style={{
+                            cursor: "pointer",
+                            marginLeft: "8px",
+                          }}
+                          onClick={() =>
+                            handleEditClick(
+                              filtredVehicleGuideData[0]?._id!,
+                              filtredVehicleGuideData[0]?.paragraph!
+                            )
+                          }
+                        ></i>
+                      </>
+                    )}
                   </div>
-                </Row>
-                <Tab.Container
-                  defaultActiveKey={`v-pills-${value.vehicleType[0]?.title
-                    .replace(/\s+/g, "-")
-                    .toLowerCase()}`}
-                >
-                  <Row>
-                    <Col md={3}>
-                      <Nav
-                        variant="pills"
-                        className="flex-column text-center"
-                        id="v-pills-tab"
-                        aria-orientation="vertical"
-                      >
-                        {value.vehicleType.map((vt: any, index: any) => (
+                </div>
+              </Row>
+              <Tab.Container
+                defaultActiveKey={`v-pills-${filtredVehicleGuideData[0]?.vehicleType[0]
+                  ?.title!.replace(/\s+/g, "-")
+                  .toLowerCase()}`}
+              >
+                <Row>
+                  <Col md={3}>
+                    <Nav
+                      variant="pills"
+                      className="flex-column text-center"
+                      id="v-pills-tab"
+                      aria-orientation="vertical"
+                    >
+                      {filtredVehicleGuideData[0]?.vehicleType.map(
+                        (vt: any, index: any) => (
                           <Nav.Link
                             key={index}
                             eventKey={`v-pills-${vt.title
@@ -511,7 +514,7 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
                                   handleCheckboxChange(
                                     vt?._id!,
                                     e.target.checked,
-                                    value._id!
+                                    filtredVehicleGuideData[0]?._id!
                                   )
                                 }
                                 className="me-2"
@@ -526,7 +529,11 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
                                       value: e.target.value,
                                     }))
                                   }
-                                  onBlur={() => handleVehicleBlur(value._id!)}
+                                  onBlur={() =>
+                                    handleVehicleBlur(
+                                      filtredVehicleGuideData[0]._id!
+                                    )
+                                  }
                                   autoFocus
                                   className="form-control"
                                 />
@@ -548,15 +555,17 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
                               )}
                             </div>
                           </Nav.Link>
-                        ))}
-                      </Nav>
-                    </Col>
-                    <Col md={9}>
-                      <Tab.Content
-                        className="text-muted mt-4 mt-md-0"
-                        id="v-pills-tabContent"
-                      >
-                        {value.vehicleType.map((vt, index) => (
+                        )
+                      )}
+                    </Nav>
+                  </Col>
+                  <Col md={9}>
+                    <Tab.Content
+                      className="text-muted mt-4 mt-md-0"
+                      id="v-pills-tabContent"
+                    >
+                      {filtredVehicleGuideData[0]?.vehicleType!.map(
+                        (vt, index) => (
                           <Tab.Pane
                             key={index}
                             eventKey={`v-pills-${vt.title
@@ -574,7 +583,11 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
                                       value: e.target.value,
                                     }))
                                   }
-                                  onBlur={() => handleVehicleBlur(value._id!)}
+                                  onBlur={() =>
+                                    handleVehicleBlur(
+                                      filtredVehicleGuideData[0]?._id!
+                                    )
+                                  }
                                   autoFocus
                                   className="form-control"
                                 />
@@ -634,21 +647,25 @@ const VehicleGuideComponent: React.FC<VehicleGuideProps> = ({
                                   id={`image_${vt?.image!}`}
                                   accept="image/*"
                                   onChange={(e) =>
-                                    handleFileUpload(e, value, index)
+                                    handleFileUpload(
+                                      e,
+                                      filtredVehicleGuideData[0]!,
+                                      index
+                                    )
                                   }
                                   style={{ width: "210px", height: "120px" }}
                                 />
                               </div>
                             </div>
                           </Tab.Pane>
-                        ))}
-                      </Tab.Content>
-                    </Col>
-                  </Row>
-                </Tab.Container>
-              </div>
-            </>
-          ))}
+                        )
+                      )}
+                    </Tab.Content>
+                  </Col>
+                </Row>
+              </Tab.Container>
+            </div>
+          </>
         </Col>
       </Row>
     </React.Fragment>

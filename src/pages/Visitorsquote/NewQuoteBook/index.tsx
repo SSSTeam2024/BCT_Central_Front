@@ -1253,10 +1253,11 @@ const NewQuoteBook = () => {
                         </div>
                         <div className="flex-grow-1 hstack gap-2">
                           <h5 className="card-title mb-1">Price</h5>
-                          <span className="badge bg-danger">
-                            {/* {quoteLocation.state.status} */}
-                            Unpaid
-                          </span>
+                          {quoteLocation?.state?.payment_type! === undefined ? (
+                            <span className="badge bg-danger">Unpaid</span>
+                          ) : (
+                            <span className="badge bg-success">Paid</span>
+                          )}
                         </div>
                       </div>
                       <Row>
@@ -1323,8 +1324,7 @@ const NewQuoteBook = () => {
                         </Col>
                       </Row>
                     </Card.Header>
-                    {quoteLocation.state.deposit_amount <
-                    quoteLocation.state.total_price ? (
+                    {quoteLocation.state.payment_type === undefined ? (
                       <Row className="d-flex justify-content-center mt-2">
                         <Col lg={6}>
                           <div
