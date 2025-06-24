@@ -133,7 +133,7 @@ const ProgramExtra: React.FC<ProgramExtraProps> = ({ setActiveTab }) => {
       ],
     },
   });
-
+  console.log("selectedJourney", selectedJourney);
   const saveProgress = async (tabNumber: string, data: typeof programmData) => {
     data["programDetails"]["programName"] = extraLocation.programName;
     data["programDetails"]["destination_point"] =
@@ -173,7 +173,7 @@ const ProgramExtra: React.FC<ProgramExtraProps> = ({ setActiveTab }) => {
     data["programDetails"]["_id"] = extraLocation._id!;
     data["programDetails"]["within_payment_days"] = programm_paymentDays;
     data["programDetails"]["invoiceFrequency"] = selectedInvoiceFrequency;
-
+    data["programDetails"]["journeyType"] = selectedJourney;
     data["programDetails"]["notes"] = programm_notes;
     const filteredExtra = selected_extra.filter((item) => item !== "");
     data["programDetails"]["extra"] = filteredExtra;

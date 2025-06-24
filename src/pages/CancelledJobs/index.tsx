@@ -1,27 +1,10 @@
-import React, { useEffect, useState } from "react";
-import {
-  Container,
-  Row,
-  Card,
-  Col,
-  Modal,
-  Form,
-  Button,
-  Offcanvas,
-} from "react-bootstrap";
+import React, { useState } from "react";
+import { Container, Row, Card, Col } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import Breadcrumb from "Common/BreadCrumb";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import {
-  Quote,
-  useDeleteQuoteMutation,
-  useGetAllQuoteQuery,
-  useSurveyAffilaitesMutation,
-} from "features/Quotes/quoteSlice";
-import Swal from "sweetalert2";
-import { useGetAllAffiliatesQuery } from "features/Affiliate/affiliateSlice";
+import { Quote, useGetAllQuoteQuery } from "features/Quotes/quoteSlice";
 import Select from "react-select";
-import SimpleBar from "simplebar-react";
+import { vehicleTypeMap } from "Common/data/vehicle_type_map";
 
 interface Column {
   name: JSX.Element;
@@ -31,9 +14,7 @@ interface Column {
 }
 
 const CancelledJobs = () => {
-  document.title = "Cancelled Jobs| Coach Hire Network";
-
-  const whiteListLocation = useLocation();
+  document.title = "Cancelled Jobs | Coach Hire Network";
 
   const customTableStyles = {
     rows: {
@@ -128,7 +109,8 @@ const CancelledJobs = () => {
     },
     {
       name: <span className="font-weight-bold fs-13">Vehicle Type</span>,
-      selector: (row: any) => row.vehicle_type,
+      selector: (row: any) =>
+        vehicleTypeMap[row?.vehicle_type] ?? row?.vehicle_type,
       sortable: true,
       // width: "160px",
     },
@@ -323,29 +305,23 @@ const CancelledJobs = () => {
     { value: "Price", label: "Price" },
   ];
 
-  // State to store the selected option values
   const [selectedColumnValues, setSelectedColumnValues] = useState<any[]>([]);
 
-  // Event handler to handle changes in selected options
   const handleSelectValueColumnChange = (selectedOption: any) => {
-    // Extract values from selected options and update state
     const values = selectedOption.map((option: any) => option.value);
     setSelectedColumnValues(values);
   };
 
-  // Filter out columns based on selected options
   const filteredColumns = columns.filter(
     (column: Column) =>
-      !selectedColumnValues.includes(column.name.props.children) // Ensure props.children is string
+      !selectedColumnValues.includes(column.name.props.children)
   );
 
-  // This function is triggered when the select Period
   const handleSelectPeriod = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     setSelectedPeriod(value);
   };
 
-  // This function is triggered when the select Status
   const handleSelectStatus = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     setSelectedStatus(value);
@@ -556,23 +532,6 @@ const CancelledJobs = () => {
                       <i className="ri-search-line search-icon"></i>
                     </div>
                   </Col>
-                  {/* <Col lg={4} className="d-flex justify-content-end">
-                    <div
-                      className="btn-group btn-group-sm mt-2"
-                      role="group"
-                      aria-label="Basic example"
-                    >
-                      <button type="button" className="btn btn-outline-dark">
-                        Excel
-                      </button>
-                      <button type="button" className="btn btn-outline-dark">
-                        PDF
-                      </button>
-                      <button type="button" className="btn btn-outline-dark">
-                        Print
-                      </button>
-                    </div>
-                  </Col> */}
                 </Row>
               </Card.Header>
               <Card.Body>

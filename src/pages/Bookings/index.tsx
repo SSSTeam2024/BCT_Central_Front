@@ -36,6 +36,7 @@ import { RootState } from "../../app/store";
 import { selectCurrentUser } from "../../features/Account/authSlice";
 import { useSelector } from "react-redux";
 import SimpleBar from "simplebar-react";
+import { vehicleTypeMap } from "Common/data/vehicle_type_map";
 
 interface Column {
   name: JSX.Element;
@@ -307,7 +308,8 @@ const Bookings = () => {
     },
     {
       name: <span className="font-weight-bold fs-13">Vehicle Type</span>,
-      selector: (row: any) => row?.vehicle_type!,
+      selector: (row: any) =>
+        vehicleTypeMap[row?.vehicle_type] ?? row?.vehicle_type,
       sortable: true,
       width: "160px",
     },

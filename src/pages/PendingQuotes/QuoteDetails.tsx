@@ -13,8 +13,8 @@ import Swal from "sweetalert2";
 import { useGetAllPricingCalendarsQuery } from "features/PricingCalendar/pricingCalendar";
 import { useGetAllModePricesQuery } from "features/modePrice/modePriceSlice";
 
-const Newquote = () => {
-  document.title = "Add Price To Quote | Coach Hire Network";
+const QuoteDetails = () => {
+  document.title = "Quote Details | Coach Hire Network";
   const quoteLocation = useLocation();
 
   const { data: AllPricingCalendar = [] } = useGetAllPricingCalendarsQuery();
@@ -464,115 +464,61 @@ const Newquote = () => {
                               </div>
                             </div>
                             <Row>
-                              {/* Vehicle Price  == Done */}
+                              <Col lg={3}>
+                                <Form.Label htmlFor="price">
+                                  Vehicle Price
+                                </Form.Label>
+                              </Col>
+                              <Col lg={3}>
+                                <Form.Label
+                                  htmlFor="total_price"
+                                  className="form-label"
+                                >
+                                  Total Price
+                                </Form.Label>
+                              </Col>
+                              <Col lg={2}>
+                                <Form.Label htmlFor="deposit_percentage">
+                                  Deposit%
+                                </Form.Label>
+                              </Col>
+                              <Col lg={4} className="text-end">
+                                <Form.Label htmlFor="deposit_amount">
+                                  Deposit Amount
+                                </Form.Label>
+                              </Col>
+                            </Row>
+                            <Row>
                               <Col lg={3}>
                                 <div className="mb-3">
-                                  <Form.Label htmlFor="price">
-                                    Vehicle Price
-                                  </Form.Label>
-                                  <Form.Control
-                                    type="number"
-                                    id="price"
-                                    name="price"
-                                    placeholder="00.00"
-                                    value={vehiclePrice}
-                                    onChange={onChangeVehiclePrice}
-                                  />
+                                  <span className="fs-16 fw-medium">
+                                    £ {quoteLocation.state.manual_cost}
+                                  </span>
                                 </div>
                               </Col>
-                              {/* Suggested Price  == Done */}
-                              {allModes[0]?.type! === "0" ? (
-                                ""
-                              ) : (
-                                <Col lg={3}>
-                                  <div className="mb-3">
-                                    <Form.Label htmlFor="automatic_cost">
-                                      Suggested Price
-                                    </Form.Label>
-                                    <Form.Control
-                                      type="number"
-                                      id="automatic_cost"
-                                      name="automatic_cost"
-                                      placeholder="00.00"
-                                      value={quoteById?.manual_cost!}
-                                      readOnly
-                                    />
-                                  </div>
-                                </Col>
-                              )}
-                              {/* Total Price == Done */}
-                              <Col lg={2}>
-                                <div className="mb-3">
-                                  <Form.Label
-                                    htmlFor="total_price"
-                                    className="form-label"
-                                  >
-                                    Total Price
-                                  </Form.Label>
-                                  <Form.Control
-                                    type="text"
-                                    id="total_price"
-                                    name="total_price"
-                                    placeholder="00.00"
-                                    onChange={onChangeBookEmail}
-                                    value={totalPrice}
-                                  />
-                                </div>
-                              </Col>
-                              {/* Deposit %  == Done */}
-                              <Col lg={2}>
-                                <div className="mb-3">
-                                  <Form.Label htmlFor="deposit_percentage">
-                                    Deposit %
-                                  </Form.Label>
-                                  <Form.Control
-                                    type="number"
-                                    id="deposit_percentage"
-                                    name="deposit_percentage"
-                                    placeholder="%"
-                                    value={depositPourcentage}
-                                    onChange={onChangeDeposit}
-                                  />
-                                </div>
-                              </Col>
-                              {/* Deposit Amount  == Done */}
                               <Col lg={3}>
                                 <div className="mb-3">
-                                  <Form.Label htmlFor="deposit_amount">
-                                    Deposit Amount
-                                  </Form.Label>
-                                  <Form.Control
-                                    type="number"
-                                    id="deposit_amount"
-                                    name="deposit_amount"
-                                    placeholder="00.00"
-                                    readOnly
-                                    value={depositAmount?.toFixed(2)}
-                                  />
+                                  <span className="fs-16 fw-medium">
+                                    £ {quoteLocation.state.total_price}
+                                  </span>
+                                </div>
+                              </Col>
+                              <Col lg={2}>
+                                <div className="mb-3">
+                                  <span className="fs-16 fw-medium">
+                                    {quoteLocation.state.deposit_percentage} %
+                                  </span>
+                                </div>
+                              </Col>
+                              <Col lg={4} className="text-end">
+                                <div className="mb-3">
+                                  <span className="fs-16 fw-medium">
+                                    £ {quoteLocation.state.deposit_amount}
+                                  </span>
                                 </div>
                               </Col>
                             </Row>
                           </Card.Header>
-                          <Col lg={12} className="mt-2">
-                            <div className="hstack gap-2 justify-content-end">
-                              <Button
-                                variant="success"
-                                id="add-btn"
-                                className="btn-sm"
-                                type="submit"
-                              >
-                                Save & Send
-                              </Button>
-                              {/* <Button
-                                variant="info"
-                                id="add-btn"
-                                className="btn-sm"
-                                type="submit"
-                              >
-                                Quick Save
-                              </Button> */}
-                            </div>
-                          </Col>
                         </Row>
                       </div>
                     </Card.Body>
@@ -678,4 +624,4 @@ const Newquote = () => {
   );
 };
 
-export default Newquote;
+export default QuoteDetails;

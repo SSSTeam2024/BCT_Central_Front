@@ -101,7 +101,7 @@ const PendingQuotes = () => {
       selector: (cell: Quote) => {
         return (
           <span>
-            <Link to={`/new-quote/${cell?._id!}`} state={cell}>
+            <Link to={`/quote-details/${cell?.quote_ref!}`} state={cell}>
               <span className="text-info">
                 <u>{cell?.quote_ref!}</u>
               </span>

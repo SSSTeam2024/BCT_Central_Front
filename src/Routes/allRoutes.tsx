@@ -113,6 +113,7 @@ import OnTheRoadComponent from "pages/OnTheRoadComponent";
 import InThePress from "pages/InThePress";
 import OurPages from "pages/OurPages";
 import OurComponents from "pages/OurComponents";
+import QuoteDetails from "pages/PendingQuotes/QuoteDetails";
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: <Dashboard /> },
@@ -143,6 +144,7 @@ const authProtectedRoutes = [
 
   //? Visitors Quote
   { path: "/new-quote/:name", component: <Newquote /> },
+  { path: "/quote-details/:name", component: <QuoteDetails /> },
   { path: "/new-quote", component: <ReallyNewQuote /> },
   { path: "/assign-quote/:name", component: <NewQuoteBook /> },
   { path: "/quote-request", component: <Quotesrequest /> },

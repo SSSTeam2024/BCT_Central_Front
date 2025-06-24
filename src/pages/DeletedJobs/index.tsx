@@ -10,6 +10,7 @@ import {
 } from "features/Quotes/quoteSlice";
 import Swal from "sweetalert2";
 import Select from "react-select";
+import { vehicleTypeMap } from "Common/data/vehicle_type_map";
 
 interface Column {
   name: JSX.Element;
@@ -150,7 +151,8 @@ const DeletedJobs = () => {
     },
     {
       name: <span className="font-weight-bold fs-13">Vehicle Type</span>,
-      selector: (row: any) => row.vehicle_type,
+      selector: (row: any) =>
+        vehicleTypeMap[row?.vehicle_type] ?? row?.vehicle_type,
       sortable: true,
       // width: "160px",
     },
