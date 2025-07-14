@@ -1,210 +1,232 @@
 import React, { useState } from "react";
+import { Form, Row, Col } from "react-bootstrap";
 import {
-  Container,
-  Dropdown,
-  Form,
-  Row,
-  Card,
-  Col,
-  Button,
-  Image,
-  ListGroup,
-  Modal,
-} from "react-bootstrap";
-import DataTable from "react-data-table-component";
-import Breadcrumb from "Common/BreadCrumb";
-import Flatpickr from "react-flatpickr";
-import img1 from "assets/images/brands/img-1.png";
-import img2 from "assets/images/brands/img-2.png";
-import img3 from "assets/images/brands/img-3.png";
-import img4 from "assets/images/brands/img-4.png";
-import img5 from "assets/images/brands/img-5.png";
-import img6 from "assets/images/brands/img-6.png";
-import img7 from "assets/images/brands/img-7.png";
-import img8 from "assets/images/brands/img-8.png";
-import img9 from "assets/images/brands/img-9.png";
-import img10 from "assets/images/brands/img-10.png";
-import img11 from "assets/images/brands/img-11.png";
-import img12 from "assets/images/brands/img-12.png";
-import img13 from "assets/images/brands/img-13.png";
-import img14 from "assets/images/brands/img-14.png";
-import { Link } from "react-router-dom";
-import SimpleBar from "simplebar-react";
+  GeneralSet,
+  useUpdateAppMutation,
+} from "features/generalSettings/generalSettingsSlice";
 
-const CompanyName = () => {
+interface companyNameProps {
+  app: GeneralSet;
+}
+
+const CompanyName: React.FC<companyNameProps> = ({ app }) => {
+  const [tradingName, setTradingName] = useState(app.trading_name);
+  const [registredName, setRegistredName] = useState(app.registred_name);
+  const [companyNumber, setCompanyNumber] = useState(app.company_number);
+  const [taxNumber, setTaxNumber] = useState(app.tax_number);
+  const [driverAppCode, setDriverAppCode] = useState(app.driver_app_code);
+  const [billingProfile, setBillingProfile] = useState(app.billing_profile);
+  const [companyPrefix, setCompanyPrefix] = useState(app.prefix);
+  const [updateApp] = useUpdateAppMutation();
+
+  const handleBlur = () => {
+    if (
+      tradingName !== app.trading_name ||
+      registredName !== app.registred_name ||
+      companyNumber !== app.company_number ||
+      taxNumber !== app.tax_number ||
+      driverAppCode !== app.driver_app_code ||
+      billingProfile !== app.billing_profile ||
+      companyPrefix !== app.prefix
+    ) {
+      updateApp({
+        _id: app?._id!,
+        trading_name: tradingName,
+        registred_name: registredName,
+        company_number: companyNumber,
+        tax_number: taxNumber,
+        driver_app_code: driverAppCode,
+        billing_profile: billingProfile,
+        prefix: companyPrefix,
+        copy_customer_details: app.copy_customer_details,
+        address: app.address,
+        tel: app.tel,
+        mobile: app.mobile,
+        sales_email: app.sales_email,
+        op_email: app.op_email,
+        color: app.color,
+        currency_symbol: app.currency_symbol,
+        symbol_position: app.symbol_position,
+        balance_due: app.balance_due,
+        default_deposit_type: app.default_deposit_type,
+        default_deposit_amount: app.default_deposit_amount,
+        auto_pricing_type: app.auto_pricing_type,
+        auto_pricing_amount: app.auto_pricing_amount,
+        enquiry_email: app.enquiry_email,
+        booking_email: app.booking_email,
+        regular_email: app.regular_email,
+        mobile_sms: app.mobile_sms,
+        bcc_email: app.bcc_email,
+        logo: app.logo,
+        show_journey_price: app.show_journey_price,
+        show_journey: app.show_journey,
+      });
+    }
+  };
+
   return (
     <React.Fragment>
-      <Col lg={12}>
-        <form
-          id="createproduct-form"
-          autoComplete="off"
-          className="needs-validation"
-          noValidate
-        >
-          <Row>
-            <Col lg={12}>
-              <div className="mb-3">
-                <Form className="tablelist-form">
-                  <input type="hidden" id="id-field" />
-
-                  <Row>
-                    <table>
-                      <tr>
-                        <td>
-                          <Form.Label htmlFor="customerName-field">
-                            Company Trading name
-                          </Form.Label>
-                        </td>
-                        <td>
-                          <Form.Control
-                            type="text"
-                            id="customerName-field"
-                            defaultValue="Coach Hire Network"
-                            required
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <Form.Label htmlFor="customerName-field">
-                            Registered Company Name
-                          </Form.Label>
-                        </td>
-                        <td>
-                          <Form.Control
-                            type="text"
-                            id="customerName-field"
-                            defaultValue="Bouden Travel ltd"
-                            required
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <Form.Label htmlFor="customerName-field">
-                            Registered Company Number
-                          </Form.Label>
-                        </td>
-                        <td>
-                          <Form.Control
-                            type="text"
-                            id="customerName-field"
-                            defaultValue="08406680"
-                            required
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <Form.Label htmlFor="customerName-field">
-                            Registered Tax Number
-                          </Form.Label>
-                        </td>
-                        <td>
-                          <Form.Control
-                            type="text"
-                            id="customerName-field"
-                            defaultValue="156841980"
-                            required
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <Form.Label htmlFor="customerName-field">
-                            Driver App
-                          </Form.Label>
-                        </td>
-                        <td>
-                          <Form.Control
-                            type="text"
-                            id="customerName-field"
-                            defaultValue="App Code: 2683"
-                            required
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <Form.Label htmlFor="customerName-field">
-                            Billing Profile
-                          </Form.Label>
-                        </td>
-                        <td>
-                          <div className="form-check mb-2">
-                            <input
-                              className="form-check-input"
-                              type="radio"
-                              name="flexRadioDefault"
-                              id="flexRadioDefault1"
-                              checked
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor="flexRadioDefault1"
-                            >
-                              Yes
-                            </label>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="form-check">
-                            <input
-                              className="form-check-input"
-                              type="radio"
-                              name="flexRadioDefault"
-                              id="flexRadioDefault2"
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor="flexRadioDefault2"
-                            >
-                              No
-                            </label>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <Form.Label htmlFor="customerName-field">
-                            Prefix
-                          </Form.Label>
-                        </td>
-                        <td>
-                          <Form.Control
-                            type="text"
-                            id="customerName-field"
-                            required
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <td></td>
-                        <td>
-                          <div className="form-check mb-2">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              id="formCheck1"
-                              checked
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor="formCheck1"
-                            >
-                              Automatic copy Customer Details
-                            </label>
-                          </div>
-                        </td>
-                      </tr>
-                    </table>
-                  </Row>
-                </Form>
-              </div>
-            </Col>
-          </Row>
-        </form>
-      </Col>
+      <Row>
+        <Col lg={12}>
+          <table>
+            <tr>
+              <td>
+                <Form.Label htmlFor="customerName-field">
+                  Trading name
+                </Form.Label>
+              </td>
+              <td>
+                <Form.Control
+                  type="text"
+                  id={`trading-name-${app._id}`}
+                  value={tradingName}
+                  onChange={(e) => setTradingName(e.target.value)}
+                  onBlur={handleBlur}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <Form.Label htmlFor="customerName-field">
+                  Registered Name
+                </Form.Label>
+              </td>
+              <td>
+                <Form.Control
+                  type="text"
+                  id={`registred-name-${app._id}`}
+                  value={registredName}
+                  onChange={(e) => setRegistredName(e.target.value)}
+                  onBlur={handleBlur}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <Form.Label htmlFor="customerName-field">
+                  Company Number
+                </Form.Label>
+              </td>
+              <td>
+                <Form.Control
+                  type="text"
+                  id={`company-number-${app._id}`}
+                  value={companyNumber}
+                  onChange={(e) => setCompanyNumber(e.target.value)}
+                  onBlur={handleBlur}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <Form.Label htmlFor="customerName-field">Tax Number</Form.Label>
+              </td>
+              <td>
+                <Form.Control
+                  type="text"
+                  id={`tax-number-${app._id}`}
+                  value={taxNumber}
+                  onChange={(e) => setTaxNumber(e.target.value)}
+                  onBlur={handleBlur}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <Form.Label htmlFor={`driver-app-code-${app._id}`}>
+                  Driver App
+                </Form.Label>
+              </td>
+              <td>
+                <Form.Control
+                  type="text"
+                  id={`driver-app-code-${app._id}`}
+                  value={driverAppCode}
+                  onChange={(e) => setDriverAppCode(e.target.value)}
+                  onBlur={handleBlur}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <Form.Label htmlFor="customerName-field">
+                  Billing Profile
+                </Form.Label>
+              </td>
+              <td className="hstack gap-3">
+                <div className="form-check">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name={`billingProfile-${app._id}`}
+                    id={`billingYes-${app._id}`}
+                    checked={billingProfile === "Yes"}
+                    onChange={() => {
+                      setBillingProfile("Yes");
+                      handleBlur();
+                    }}
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor={`billingYes-${app._id}`}
+                  >
+                    Yes
+                  </label>
+                </div>
+                <div className="form-check">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name={`billingProfile-${app._id}`}
+                    id={`billingNo-${app._id}`}
+                    checked={billingProfile === "No"}
+                    onChange={() => {
+                      setBillingProfile("No");
+                      handleBlur();
+                    }}
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor={`billingNo-${app._id}`}
+                  >
+                    No
+                  </label>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <Form.Label htmlFor={`prefix-${app._id}`}>Prefix</Form.Label>
+              </td>
+              <td>
+                <Form.Control
+                  type="text"
+                  id={`prefix-${app._id}`}
+                  value={driverAppCode}
+                  onChange={(e) => setDriverAppCode(e.target.value)}
+                  onBlur={handleBlur}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>
+                <div className="form-check mb-2">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id="formCheck1"
+                    checked
+                  />
+                  <label className="form-check-label" htmlFor="formCheck1">
+                    Automatic copy Customer Details
+                  </label>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </Col>
+      </Row>
     </React.Fragment>
   );
 };

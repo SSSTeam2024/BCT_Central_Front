@@ -164,9 +164,7 @@ const QuoteDetails = () => {
                       </div>
                       <div className="flex-grow-1 hstack gap-2">
                         <h4>Quote n°: {quoteLocation.state?.quote_ref!}</h4>
-                        <span className="badge bg-danger">
-                          {quoteLocation.state.progress}
-                        </span>
+                        <span className="badge bg-info">Pending</span>
                       </div>
                     </div>
                     <Card.Header>

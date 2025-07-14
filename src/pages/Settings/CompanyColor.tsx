@@ -1,150 +1,67 @@
 import React, { useState } from "react";
-import {
-  Container,
-  Dropdown,
-  Form,
-  Row,
-  Card,
-  Col,
-  Button,
-  Image,
-  ListGroup,
-  Modal,
-} from "react-bootstrap";
-import DataTable from "react-data-table-component";
-import Breadcrumb from "Common/BreadCrumb";
-import Flatpickr from "react-flatpickr";
-import img1 from "assets/images/brands/img-1.png";
-import img2 from "assets/images/brands/img-2.png";
-import img3 from "assets/images/brands/img-3.png";
-import img4 from "assets/images/brands/img-4.png";
-import img5 from "assets/images/brands/img-5.png";
-import img6 from "assets/images/brands/img-6.png";
-import img7 from "assets/images/brands/img-7.png";
-import img8 from "assets/images/brands/img-8.png";
-import img9 from "assets/images/brands/img-9.png";
-import img10 from "assets/images/brands/img-10.png";
-import img11 from "assets/images/brands/img-11.png";
-import img12 from "assets/images/brands/img-12.png";
-import img13 from "assets/images/brands/img-13.png";
-import img14 from "assets/images/brands/img-14.png";
+import { Col, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import CompanyName from "./CompanyName";
-import AddressSetting from "./AddressSetting";
 import { SketchPicker } from "react-color";
+import {
+  GeneralSet,
+  useUpdateAppMutation,
+} from "features/generalSettings/generalSettingsSlice";
 
-const CompanyColor = () => {
-  const [modal_QuoteInfo, setmodal_QuoteInfo] = useState<boolean>(false);
-  function tog_QuoteInfo() {
-    setmodal_QuoteInfo(!modal_QuoteInfo);
-  }
+interface CompanyColorProps {
+  app: GeneralSet;
+}
 
-  const columns = [
-    {
-      name: <span className="font-weight-bold fs-13">Car Type</span>,
-      selector: (row: any) => row.carType,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Limit</span>,
-      selector: (row: any) => row.Limit,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Price</span>,
-      selector: (row: any) => row.Price,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Action</span>,
-      sortable: true,
+const CompanyColor: React.FC<CompanyColorProps> = ({ app }) => {
+  const [companyColor, setCompanyColor] = useState(app.color);
+  const [updateApp] = useUpdateAppMutation();
 
-      cell: () => {
-        return (
-          <ul className="hstack gap-2 list-unstyled mb-0">
-            <li>
-              <Link to="#" className="badge badge-soft-primary edit-item-btn">
-                <i className="ri-eye-line"></i>
-              </Link>
-            </li>
-            <li>
-              <Link to="#" className="badge badge-soft-success edit-item-btn">
-                <i className="ri-edit-2-line"></i>
-              </Link>
-            </li>
-            <li>
-              <Link to="#" className="badge badge-soft-danger remove-item-btn">
-                <i className="ri-delete-bin-2-line"></i>
-              </Link>
-            </li>
-          </ul>
-        );
-      },
-    },
-  ];
-  const data = [
-    {
-      carType: "10-16 Seat Standard Minibus",
-      Limit: "8 hours",
-      Price: "£ 5.00",
-    },
-    {
-      carType: "10-16 Seat Standard Minibus",
-      Limit: "15 hours",
-      Price: "£ 10.00",
-    },
-    {
-      carType: "10-16 Seat Executive Minibus",
-      Limit: "8 hours",
-      Price: "£ 5.00",
-    },
-    {
-      carType: "10-16 Seat Executive Minibus",
-      Limit: "15 hours",
-      Price: "£ 10.00",
-    },
-    {
-      carType: "17-24 Seat Standard Midi Coach",
-      Limit: "8 hours",
-      Price: "£ 6.00",
-    },
-    {
-      carType: "17-24 Seat Standard Midi Coach",
-      Limit: "15 hours",
-      Price: "£ 12.00",
-    },
-    {
-      carType: "17-24 Seat Executive Midi Coach",
-      Limit: "8 hours",
-      Price: "£ 6.00",
-    },
-    {
-      carType: "17-24 Seat Executive Midi Coach",
-      Limit: "15 hours",
-      Price: "£ 12.00",
-    },
-    {
-      carType: "17-24 Seat Luxury Midi Coach",
-      Limit: "6 hours",
-      Price: "£ 12.00",
-    },
-    {
-      carType: "29 Seat Standard Midi Coach",
-      Limit: "8 hours",
-      Price: "£ 7.00",
-    },
-  ];
+  const handleColorChange = (color: any) => {
+    const newColor = color.hex;
+    setCompanyColor(newColor);
 
-  const [modal_AddMileage, setmodal_AddMileage] = useState<boolean>(false);
-  function tog_AddMileage() {
-    setmodal_AddMileage(!modal_AddMileage);
-  }
+    if (newColor !== app.color) {
+      updateApp({
+        _id: app?._id!,
+        trading_name: app.trading_name,
+        registred_name: app.registred_name,
+        company_number: app.company_number,
+        tax_number: app.tax_number,
+        driver_app_code: app.driver_app_code,
+        billing_profile: app.billing_profile,
+        prefix: app.prefix,
+        copy_customer_details: app.copy_customer_details,
+        address: app.address,
+        tel: app.tel,
+        mobile: app.mobile,
+        sales_email: app.sales_email,
+        op_email: app.op_email,
+        color: newColor,
+        currency_symbol: app.currency_symbol,
+        symbol_position: app.symbol_position,
+        balance_due: app.balance_due,
+        default_deposit_type: app.default_deposit_type,
+        default_deposit_amount: app.default_deposit_amount,
+        auto_pricing_type: app.auto_pricing_type,
+        auto_pricing_amount: app.auto_pricing_amount,
+        enquiry_email: app.enquiry_email,
+        booking_email: app.booking_email,
+        regular_email: app.regular_email,
+        mobile_sms: app.mobile_sms,
+        bcc_email: app.bcc_email,
+        logo: app.logo,
+        show_journey_price: app.show_journey_price,
+        show_journey: app.show_journey,
+      });
+    }
+  };
 
   return (
     <React.Fragment>
-      <Col lg={12}>
-        <SketchPicker />
-      </Col>
+      <Row>
+        <Col lg={12}>
+          <SketchPicker color={companyColor} onChange={handleColorChange} />
+        </Col>
+      </Row>
     </React.Fragment>
   );
 };

@@ -1,156 +1,149 @@
-import React, { useState } from "react";
 import {
-  Container,
-  Dropdown,
-  Form,
-  Row,
-  Card,
-  Col,
-  Button,
-  Image,
-  ListGroup,
-  Modal,
-} from "react-bootstrap";
-import DataTable from "react-data-table-component";
-import Breadcrumb from "Common/BreadCrumb";
-import Flatpickr from "react-flatpickr";
-import img1 from "assets/images/brands/img-1.png";
-import img2 from "assets/images/brands/img-2.png";
-import img3 from "assets/images/brands/img-3.png";
-import img4 from "assets/images/brands/img-4.png";
-import img5 from "assets/images/brands/img-5.png";
-import img6 from "assets/images/brands/img-6.png";
-import img7 from "assets/images/brands/img-7.png";
-import img8 from "assets/images/brands/img-8.png";
-import img9 from "assets/images/brands/img-9.png";
-import img10 from "assets/images/brands/img-10.png";
-import img11 from "assets/images/brands/img-11.png";
-import img12 from "assets/images/brands/img-12.png";
-import img13 from "assets/images/brands/img-13.png";
-import img14 from "assets/images/brands/img-14.png";
-import { Link } from "react-router-dom";
-import SimpleBar from "simplebar-react";
+  GeneralSet,
+  useUpdateAppMutation,
+} from "features/generalSettings/generalSettingsSlice";
+import React, { useState } from "react";
+import { Form, Row, Col } from "react-bootstrap";
 
-const NotificationSetting = () => {
+interface NotificationProps {
+  app: GeneralSet;
+}
+
+const NotificationSetting: React.FC<NotificationProps> = ({ app }) => {
+  const [enquiryEmail, setEnquiryEmail] = useState(app.enquiry_email);
+  const [bookingEmail, setBookingEmail] = useState(app.booking_email);
+  const [regularEmail, setRegularEmail] = useState(app.regular_email);
+  const [mobileSms, setMobileSms] = useState(app.mobile_sms);
+
+  const [updateApp] = useUpdateAppMutation();
+
+  const handleBlur = () => {
+    if (
+      enquiryEmail !== app.enquiry_email ||
+      bookingEmail !== app.booking_email ||
+      regularEmail !== app.regular_email ||
+      mobileSms !== app.mobile_sms
+    ) {
+      updateApp({
+        _id: app?._id!,
+        ...app,
+        enquiry_email: enquiryEmail,
+        booking_email: bookingEmail,
+        regular_email: regularEmail,
+        mobile_sms: mobileSms,
+      });
+    }
+  };
+
   return (
     <React.Fragment>
-      <Col lg={12}>
-        <form
-          id="createproduct-form"
-          autoComplete="off"
-          className="needs-validation"
-          noValidate
-        >
-          <Row>
-            <Col lg={12}>
-              <div className="mb-3">
-                <Form className="tablelist-form">
-                  <input type="hidden" id="id-field" />
-
-                  <Row>
-                    <table>
-                      <tr>
-                        <td>
-                          <div className="form-check">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              id="formCheck1"
-                              checked
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor="formCheck1"
-                            >
-                              Email for enquiry
-                            </label>
-                          </div>
-                        </td>
-                        <td>
-                          <Form.Control
-                            type="text"
-                            id="customerName-field"
-                            defaultValue="info@boudencoachtravel.co.uk"
-                            required
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <div className="form-check">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              id="formCheck1"
-                              checked
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor="formCheck1"
-                            >
-                              Email for booking
-                            </label>
-                          </div>
-                        </td>
-                        <td>
-                          <Form.Control
-                            type="text"
-                            id="customerName-field"
-                            defaultValue="info@boudencoachtravel.co.uk"
-                            required
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <div className="form-check">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              id="formCheck1"
-                              checked
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor="formCheck1"
-                            >
-                              Email for Coach Trip
-                            </label>
-                          </div>
-                        </td>
-                        <td>
-                          <Form.Control
-                            type="text"
-                            id="customerName-field"
-                            // defaultValue="info@boudencoachtravel.co.uk"
-                            required
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <Form.Label htmlFor="customerName-field">
-                            Mobile (SMS Notification)
-                          </Form.Label>
-                        </td>
-                        <td>
-                          <Form.Control
-                            type="text"
-                            id="customerName-field"
-                            defaultValue="07427423972"
-                            readOnly
-                            required
-                          />
-                        </td>
-                      </tr>
-                    </table>
-                  </Row>
-                </Form>
-              </div>
-            </Col>
-          </Row>
-        </form>
-      </Col>
+      <Row>
+        <Col lg={12}>
+          <div className="mb-3">
+            <Row>
+              <table>
+                <tr>
+                  <td>
+                    <div className="form-check">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="formCheck1"
+                        checked
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor={`enquiry-email-${app._id}`}
+                      >
+                        Email for enquiry
+                      </label>
+                    </div>
+                  </td>
+                  <td>
+                    <Form.Control
+                      type="text"
+                      id={`enquiry-email-${app._id}`}
+                      value={enquiryEmail}
+                      onChange={(e) => setEnquiryEmail(e.target.value)}
+                      onBlur={handleBlur}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div className="form-check">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="formCheck1"
+                        checked
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor={`booking-email-${app._id}`}
+                      >
+                        Email for booking
+                      </label>
+                    </div>
+                  </td>
+                  <td>
+                    <Form.Control
+                      type="text"
+                      id={`booking-email-${app._id}`}
+                      value={bookingEmail}
+                      onChange={(e) => setBookingEmail(e.target.value)}
+                      onBlur={handleBlur}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div className="form-check">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="formCheck1"
+                        checked
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor={`regular-email-${app._id}`}
+                      >
+                        Email for Coach Trip
+                      </label>
+                    </div>
+                  </td>
+                  <td>
+                    <Form.Control
+                      type="text"
+                      id={`regular-email-${app._id}`}
+                      value={regularEmail}
+                      onChange={(e) => setRegularEmail(e.target.value)}
+                      onBlur={handleBlur}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <Form.Label htmlFor="customerName-field">
+                      Mobile (SMS Notification)
+                    </Form.Label>
+                  </td>
+                  <td>
+                    <Form.Control
+                      type="text"
+                      id={`mobile-sms-${app._id}`}
+                      value={mobileSms}
+                      onChange={(e) => setMobileSms(e.target.value)}
+                      onBlur={handleBlur}
+                    />
+                  </td>
+                </tr>
+              </table>
+            </Row>
+          </div>
+        </Col>
+      </Row>
     </React.Fragment>
   );
 };

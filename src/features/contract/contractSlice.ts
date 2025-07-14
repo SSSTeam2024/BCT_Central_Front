@@ -20,6 +20,8 @@ export interface Contract {
   accountPhone: string;
   unit_price: string;
   contractRef?: string;
+  idSchool?: string;
+  idCompany?: string;
 }
 
 export interface UpdateContractStatus {

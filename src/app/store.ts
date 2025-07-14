@@ -65,6 +65,9 @@ import { onTheRoadSlice } from "features/OnTheRoadComponent/onTheRoadSlice";
 import { inThePressSlice } from "features/InThePressComponent/inThePressSlice";
 import { notificationSlice } from "features/Notifications/notificationSlice";
 import { termConditionSlice } from "features/TermsConditionsComponent/termsCoditionSlice";
+import { generalSetSlice } from "features/generalSettings/generalSettingsSlice";
+import { offerSlice } from "features/offers/offerSlice";
+import { groupEmployeeSlice } from "features/employeeGroups/employeeGroupSlice";
 
 export const store = configureStore({
   reducer: {
@@ -125,6 +128,9 @@ export const store = configureStore({
     [inThePressSlice.reducerPath]: inThePressSlice.reducer,
     [notificationSlice.reducerPath]: notificationSlice.reducer,
     [termConditionSlice.reducerPath]: termConditionSlice.reducer,
+    [generalSetSlice.reducerPath]: generalSetSlice.reducer,
+    [offerSlice.reducerPath]: offerSlice.reducer,
+    [groupEmployeeSlice.reducerPath]: groupEmployeeSlice.reducer,
     auth: authSlice,
     Layout: LayoutReducer,
     ForgetPassword: ForgetPasswordReducer,
@@ -189,7 +195,10 @@ export const store = configureStore({
       onTheRoadSlice.middleware,
       inThePressSlice.middleware,
       notificationSlice.middleware,
-      termConditionSlice.middleware
+      termConditionSlice.middleware,
+      generalSetSlice.middleware,
+      offerSlice.middleware,
+      groupEmployeeSlice.middleware,
     ]);
   },
 });

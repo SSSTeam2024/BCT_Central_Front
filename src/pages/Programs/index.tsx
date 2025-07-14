@@ -23,7 +23,7 @@ import {
 } from "features/Programs/programSlice";
 import Swal from "sweetalert2";
 import { useSelector } from "react-redux";
-import { RootState } from "../../app/store"; // Import your RootState interface
+import { RootState } from "../../app/store";
 import { selectCurrentUser } from "../../features/Account/authSlice";
 
 interface ResponseMsg {
@@ -465,28 +465,30 @@ const ProgramList = () => {
                 </Link>
               </Dropdown>
             </li>
-            <li>
-              <Link
-                to={`/edit-program/${row.Name}`}
-                className="badge badge-soft-success edit-item-btn"
-                state={row}
-              >
-                <i
-                  className="ph ph-pencil-line"
-                  style={{
-                    transition: "transform 0.3s ease-in-out",
-                    cursor: "pointer",
-                    fontSize: "1.5em",
-                  }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.transform = "scale(1.2)")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.transform = "scale(1)")
-                  }
-                ></i>
-              </Link>
-            </li>
+            {row.status !== "Converted" && (
+              <li>
+                <Link
+                  to={`/edit-program/${row.programName}`}
+                  className="badge badge-soft-success edit-item-btn"
+                  state={row}
+                >
+                  <i
+                    className="ph ph-pencil-line"
+                    style={{
+                      transition: "transform 0.3s ease-in-out",
+                      cursor: "pointer",
+                      fontSize: "1.5em",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.2)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  ></i>
+                </Link>
+              </li>
+            )}
             <li>
               <Link
                 to="#"

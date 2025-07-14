@@ -1,10 +1,5 @@
-import React, { useState } from "react";
-import {
-  Row,
-  Card,
-  Col,
-} from "react-bootstrap";
-import { Link } from "react-router-dom";
+import React from "react";
+import { Row, Card, Col } from "react-bootstrap";
 import CompanyName from "./CompanyName";
 import AddressSetting from "./AddressSetting";
 import CompanyColor from "./CompanyColor";
@@ -12,184 +7,170 @@ import PrincingInfo from "./PricingInfo";
 import InvoiceLogo from "./InvoiceLogo";
 import NotificationSetting from "./NotificationSetting";
 import BCCOptional from "./BCCOptional";
+import { useGetAllAppsQuery } from "features/generalSettings/generalSettingsSlice";
 
 const CompanyData = () => {
-  const [modal_QuoteInfo, setmodal_QuoteInfo] = useState<boolean>(false);
-  function tog_QuoteInfo() {
-    setmodal_QuoteInfo(!modal_QuoteInfo);
-  }
-
-  const columns = [
-    {
-      name: <span className="font-weight-bold fs-13">Car Type</span>,
-      selector: (row: any) => row.carType,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Limit</span>,
-      selector: (row: any) => row.Limit,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Price</span>,
-      selector: (row: any) => row.Price,
-      sortable: true,
-    },
-    {
-      name: <span className="font-weight-bold fs-13">Action</span>,
-      sortable: true,
-
-      cell: () => {
-        return (
-          <ul className="hstack gap-2 list-unstyled mb-0">
-            <li>
-              <Link to="#" className="badge badge-soft-primary edit-item-btn">
-                <i className="ri-eye-line"></i>
-              </Link>
-            </li>
-            <li>
-              <Link to="#" className="badge badge-soft-success edit-item-btn">
-                <i className="ri-edit-2-line"></i>
-              </Link>
-            </li>
-            <li>
-              <Link to="#" className="badge badge-soft-danger remove-item-btn">
-                <i className="ri-delete-bin-2-line"></i>
-              </Link>
-            </li>
-          </ul>
-        );
-      },
-    },
-  ];
-  const data = [
-    {
-      carType: "10-16 Seat Standard Minibus",
-      Limit: "8 hours",
-      Price: "£ 5.00",
-    },
-    {
-      carType: "10-16 Seat Standard Minibus",
-      Limit: "15 hours",
-      Price: "£ 10.00",
-    },
-    {
-      carType: "10-16 Seat Executive Minibus",
-      Limit: "8 hours",
-      Price: "£ 5.00",
-    },
-    {
-      carType: "10-16 Seat Executive Minibus",
-      Limit: "15 hours",
-      Price: "£ 10.00",
-    },
-    {
-      carType: "17-24 Seat Standard Midi Coach",
-      Limit: "8 hours",
-      Price: "£ 6.00",
-    },
-    {
-      carType: "17-24 Seat Standard Midi Coach",
-      Limit: "15 hours",
-      Price: "£ 12.00",
-    },
-    {
-      carType: "17-24 Seat Executive Midi Coach",
-      Limit: "8 hours",
-      Price: "£ 6.00",
-    },
-    {
-      carType: "17-24 Seat Executive Midi Coach",
-      Limit: "15 hours",
-      Price: "£ 12.00",
-    },
-    {
-      carType: "17-24 Seat Luxury Midi Coach",
-      Limit: "6 hours",
-      Price: "£ 12.00",
-    },
-    {
-      carType: "29 Seat Standard Midi Coach",
-      Limit: "8 hours",
-      Price: "£ 7.00",
-    },
-  ];
-
-  const [modal_AddMileage, setmodal_AddMileage] = useState<boolean>(false);
-  function tog_AddMileage() {
-    setmodal_AddMileage(!modal_AddMileage);
-  }
+  const { data = [] } = useGetAllAppsQuery();
 
   return (
     <React.Fragment>
-      <Col lg={12}>
-        <Card id="shipmentsList">
-          <Card.Body>
-            <Row>
-              <Col lg={6}>
-                <Card>
-                  <Card.Header>Company name</Card.Header>
-                  <Card.Body>
-                    <CompanyName />
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col lg={6}>
-                <Card>
-                  <Card.Header>Address</Card.Header>
-                  <Card.Body>
-                    <AddressSetting />
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-            <Row>
-              <Col lg={6}>
-                <Card>
-                  <Card.Header>Company Color</Card.Header>
-                  <Card.Body>
-                    <CompanyColor />
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col lg={6}>
-                <Card>
-                  <Card.Header>Pricing Info</Card.Header>
-                  <Card.Body>
-                    <PrincingInfo />
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-            <Row>
-              <Col lg={6}>
-                <Card>
-                  <Card.Header>Invoice Logo</Card.Header>
-                  <Card.Body>
-                    <InvoiceLogo />
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col lg={6}>
-                <Card>
-                  <Card.Header>Notification</Card.Header>
-                  <Card.Body>
-                    <NotificationSetting />
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col lg={6}>
-                <Card>
-                  <Card.Header>BCC Optional</Card.Header>
-                  <Card.Body>
-                    <BCCOptional />
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-          </Card.Body>
-        </Card>
-      </Col>
+      <Card>
+        <Card.Body>
+          <Row>
+            <Col lg={6}>
+              <Card>
+                <Card.Header>
+                  <Row className="d-flex align-items-center">
+                    <Col lg={2}>
+                      <span className="badge bg-light rounded-5 text-dark">
+                        <i className="ph ph-identification-badge fs-24"></i>
+                      </span>
+                    </Col>
+                    <Col>
+                      <h4>Company name</h4>
+                    </Col>
+                  </Row>
+                </Card.Header>
+                <Card.Body>
+                  {data.map((app) => (
+                    <CompanyName key={app._id} app={app} />
+                  ))}
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col lg={6}>
+              <Card>
+                <Card.Header>
+                  <Row className="d-flex align-items-center">
+                    <Col lg={2}>
+                      <span className="badge bg-light rounded-5 text-dark">
+                        <i className="ph ph-map-pin-line fs-24"></i>
+                      </span>
+                    </Col>
+                    <Col>
+                      <h4>Address</h4>
+                    </Col>
+                  </Row>
+                </Card.Header>
+                <Card.Body>
+                  {data.map((app) => (
+                    <AddressSetting key={app._id} app={app} />
+                  ))}
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+          <Row>
+            <Col lg={6}>
+              <Card>
+                <Card.Header>
+                  <Row className="d-flex align-items-center">
+                    <Col lg={2}>
+                      <span className="badge bg-light rounded-5 text-dark">
+                        <i className="ph ph-palette fs-24"></i>
+                      </span>
+                    </Col>
+                    <Col>
+                      <h4>Company Color</h4>
+                    </Col>
+                  </Row>
+                </Card.Header>
+                <Card.Body>
+                  {data.map((app) => (
+                    <CompanyColor key={app._id} app={app} />
+                  ))}
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col lg={6}>
+              <Card>
+                <Card.Header>
+                  <Row className="d-flex align-items-center">
+                    <Col lg={2}>
+                      <span className="badge bg-light rounded-5 text-dark">
+                        <i className="ph ph-money fs-24"></i>
+                      </span>
+                    </Col>
+                    <Col>
+                      <h4>Pricing Info</h4>
+                    </Col>
+                  </Row>
+                </Card.Header>
+                <Card.Body>
+                  {data.map((app) => (
+                    <PrincingInfo key={app._id} app={app} />
+                  ))}
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+          <Row>
+            <Col lg={6}>
+              <Card>
+                <Card.Header>
+                  <Row className="d-flex align-items-center">
+                    <Col lg={2}>
+                      <span className="badge bg-light rounded-5 text-dark">
+                        <i className="ph ph-image-square fs-24"></i>
+                      </span>
+                    </Col>
+                    <Col>
+                      <h4>Invoice Logo</h4>
+                    </Col>
+                  </Row>
+                </Card.Header>
+                <Card.Body>
+                  {data.map((app) => (
+                    <InvoiceLogo key={app._id} app={app} />
+                  ))}
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col lg={6}>
+              <Card>
+                <Card.Header>
+                  <Row className="d-flex align-items-center">
+                    <Col lg={2}>
+                      <span className="badge bg-light rounded-5 text-dark">
+                        <i className="ph ph-bell-ringing fs-24"></i>
+                      </span>
+                    </Col>
+                    <Col>
+                      <h4>Notification</h4>
+                    </Col>
+                  </Row>
+                </Card.Header>
+                <Card.Body>
+                  {data.map((app) => (
+                    <NotificationSetting key={app._id} app={app} />
+                  ))}
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col lg={6}>
+              <Card>
+                <Card.Header>
+                  <Row className="d-flex align-items-center">
+                    <Col lg={2}>
+                      <span className="badge bg-light rounded-5 text-dark">
+                        <i className="ph ph-envelope fs-24"></i>
+                      </span>
+                    </Col>
+                    <Col>
+                      <h4>BCC Optional</h4>
+                    </Col>
+                  </Row>
+                </Card.Header>
+                <Card.Body>
+                  {data.map((app) => (
+                    <BCCOptional key={app._id} app={app} />
+                  ))}
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
     </React.Fragment>
   );
 };

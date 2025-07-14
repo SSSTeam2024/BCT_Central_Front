@@ -75,7 +75,8 @@ export interface Quote {
   }[];
   type?: string;
   heard_of_us?: string;
-  information?: string[]
+  information?: string[];
+  updatedAt?: string;
 }
 
 export interface BookEmail {

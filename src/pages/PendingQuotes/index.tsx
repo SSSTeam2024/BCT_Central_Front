@@ -161,26 +161,13 @@ const PendingQuotes = () => {
     },
     {
       name: <span className="font-weight-bold fs-13">Progress</span>,
-      selector: (cell: any) => {
-        switch (cell.progress) {
-          case "New":
-            return <span className="badge bg-danger"> {cell.progress} </span>;
-          case "Accepted":
-            return <span className="badge bg-danger"> New </span>;
-          case "Cancel":
-            return <span className="badge bg-dark"> {cell.progress} </span>;
-          case "Created":
-            return <span className="badge bg-info"> {cell.progress} </span>;
-          default:
-            return <span className="badge bg-danger"> {cell.progress} </span>;
-        }
-      },
+      selector: (cell: any) => <span className="badge bg-info"> Pending </span>,
       sortable: true,
       width: "88px",
     },
     {
       name: <span className="font-weight-bold fs-13">Status</span>,
-      selector: (row: any) => <span className="badge bg-danger"> New </span>,
+      selector: (row: any) => <span className="badge bg-info"> Pending </span>,
       sortable: true,
       width: "80px",
     },

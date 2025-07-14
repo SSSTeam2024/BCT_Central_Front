@@ -77,7 +77,6 @@ import Programs from "pages/Programs";
 import ProgramList from "pages/Programs/index";
 import ProgramClone from "pages/Programs/ProgramClone";
 import ProgramDetails from "pages/Programs/ProgramDetails";
-import EditProgram from "pages/Programs/ProgramEdit";
 import ReallyNewQuote from "pages/Visitorsquote/ReallyNewQuote";
 import NewQuoteBook from "pages/Visitorsquote/NewQuoteBook";
 import AddProgramm from "pages/Programs/AddProgramm";
@@ -114,6 +113,8 @@ import InThePress from "pages/InThePress";
 import OurPages from "pages/OurPages";
 import OurComponents from "pages/OurComponents";
 import QuoteDetails from "pages/PendingQuotes/QuoteDetails";
+import EidtOffer from "pages/CorporateTransport/Programming/Offers/EditOffer";
+import SuggestedRouteEdit from "pages/SuggestedRouteEdit";
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: <Dashboard /> },
@@ -134,7 +135,7 @@ const authProtectedRoutes = [
   { path: "/list-of-program", component: <ProgramList /> },
   { path: "/program/:name", component: <ProgramClone /> },
   { path: "/program-details/:name", component: <ProgramDetails /> },
-  { path: "/edit-program/:name", component: <EditProgram /> },
+  { path: "/edit-program/:name", component: <SuggestedRouteEdit /> },
   {
     path: "/continue-suggested-route/:name",
     component: <ContinueCreateProgram />,
@@ -172,7 +173,7 @@ const authProtectedRoutes = [
 
   { path: "/new-offer", component: <AddNewOffer /> },
   { path: "/offer-details/:name", component: <OfferDetails /> },
-  { path: "/edit-offer/:name", component: <AddNewOffer /> },
+  { path: "/edit-offer/:name", component: <EidtOffer /> },
   { path: "/edit-team/:name", component: <EditTeam /> },
   { path: "/edit-driver/:name", component: <EditDriver /> },
   //? Corporate

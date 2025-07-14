@@ -39,8 +39,8 @@ export interface Programm {
     notes: string;
     dropOff_time: string;
     pickUp_Time: string;
-    school_id?: string;
-    company_id?: string;
+    school_id?: any;
+    company_id?: any;
     luggage?: string;
     vehiculeType?: string;
     unit_price?: string;
@@ -232,6 +232,13 @@ export const programmSlice = createApi({
           body: updatedProgram,
         }),
       }),
+      editProgram: builder.mutation({
+        query: ({ id, updatedProgram }) => ({
+          url: `/edit/${id}`,
+          method: 'PUT',
+          body: updatedProgram,
+        }),
+      }),
       sendResponse: builder.mutation<void, SendResponse>({
         query({
           id,
@@ -317,5 +324,6 @@ export const {
   useUpdateStatusMutation,
   useUpdateProgramMutation,
   useFetchEmployeeGroupsByProgramIdMutation,
-  useFetchStudentGroupsByProgramIdMutation
+  useFetchStudentGroupsByProgramIdMutation,
+  useEditProgramMutation
 } = programmSlice;

@@ -1,49 +1,20 @@
-import React, { useState } from "react";
-import {
-  Container,
-  Dropdown,
-  Form,
-  Row,
-  Card,
-  Col,
-  Button,
-  Image,
-  ListGroup,
-  Modal,
-} from "react-bootstrap";
-import DataTable from "react-data-table-component";
-import Breadcrumb from "Common/BreadCrumb";
-import Flatpickr from "react-flatpickr";
-import img1 from "assets/images/brands/img-1.png";
-import img2 from "assets/images/brands/img-2.png";
-import img3 from "assets/images/brands/img-3.png";
-import img4 from "assets/images/brands/img-4.png";
-import img5 from "assets/images/brands/img-5.png";
-import img6 from "assets/images/brands/img-6.png";
-import img7 from "assets/images/brands/img-7.png";
-import img8 from "assets/images/brands/img-8.png";
-import img9 from "assets/images/brands/img-9.png";
-import img10 from "assets/images/brands/img-10.png";
-import img11 from "assets/images/brands/img-11.png";
-import img12 from "assets/images/brands/img-12.png";
-import img13 from "assets/images/brands/img-13.png";
-import img14 from "assets/images/brands/img-14.png";
+import React, { useState, useRef } from "react";
+import { Row, Card, Col } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import SimpleBar from "simplebar-react";
 import Dropzone from "react-dropzone";
+import {
+  GeneralSet,
+  useUpdateAppMutation,
+} from "features/generalSettings/generalSettingsSlice";
 
-const InvoiceLogo = () => {
-  const [selectedFiles, setselectedFiles] = useState([]);
+interface InvoiceProps {
+  app: GeneralSet;
+}
 
-  function handleAcceptedFiles(files: any) {
-    files.map((file: any) =>
-      Object.assign(file, {
-        preview: URL.createObjectURL(file),
-        formattedSize: formatBytes(file.size),
-      })
-    );
-    setselectedFiles(files);
-  }
+const InvoiceLogo: React.FC<InvoiceProps> = ({ app }) => {
+  const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
+
+  const [updateApp] = useUpdateAppMutation();
 
   function formatBytes(bytes: any, decimals = 2) {
     if (bytes === 0) return "0 Bytes";
@@ -54,82 +25,122 @@ const InvoiceLogo = () => {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
   }
+
+  const [logoBase64, setLogoBase64] = useState<string | null>(null);
+  const [logoExtension, setLogoExtension] = useState<string | null>(null);
+  const hasChanged = useRef(false);
+
+  const handleAcceptedFiles = async (files: any[]) => {
+    const file = files[0];
+    if (!file) return;
+
+    file.preview = URL.createObjectURL(file);
+    file.formattedSize = formatBytes(file.size);
+    setSelectedFiles([file]);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64String = (reader.result as string).split(",")[1];
+      setLogoBase64(base64String);
+      setLogoExtension(file.name.split(".").pop());
+      hasChanged.current = true;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleBlur = () => {
+    if (hasChanged.current && logoBase64 && logoExtension) {
+      updateApp({
+        _id: app._id,
+        ...app,
+        logoBase64Strings: logoBase64,
+        logoExtension: logoExtension,
+      });
+      hasChanged.current = false;
+    }
+  };
+
   return (
     <React.Fragment>
       <Col lg={12}>
-        <form
-          id="createproduct-form"
-          autoComplete="off"
-          className="needs-validation"
-          noValidate
-        >
-          <Row>
-            <Col lg={12}>
-              <div className="mb-3">
-                <Form className="tablelist-form">
-                  <input type="hidden" id="id-field" />
-
-                  <Row>
-                    <Dropzone
-                      onDrop={(acceptedFiles) => {
-                        handleAcceptedFiles(acceptedFiles);
-                      }}
-                    >
-                      {({ getRootProps }) => (
-                        <div className="dropzone dz-clickable text-center">
-                          <div
-                            className="dz-message needsclick"
-                            {...getRootProps()}
-                          >
-                            <div className="mb-3">
-                              <i className="display-4 text-muted ri-upload-cloud-2-fill" />
-                            </div>
-                            <h4>Drop files here or click to upload.</h4>
-                          </div>
+        <Row>
+          <Col lg={12}>
+            <div className="mb-3">
+              <Row onBlur={handleBlur}>
+                <Dropzone onDrop={handleAcceptedFiles} multiple={false}>
+                  {({ getRootProps }) => (
+                    <div className="dropzone dz-clickable text-center">
+                      <div
+                        className="dz-message needsclick"
+                        {...getRootProps()}
+                      >
+                        <div className="mb-3">
+                          <i className="display-8 text-muted ri-upload-cloud-2-fill" />
                         </div>
-                      )}
-                    </Dropzone>
-                    <div className="list-unstyled mb-0" id="file-previews">
-                      {selectedFiles.map((f: any, i: number) => {
-                        return (
-                          <Card
-                            className="mt-1 mb-0 shadow-none border dz-processing dz-image-preview dz-success dz-complete"
-                            key={i + "-file"}
-                          >
-                            <div className="p-2">
-                              <Row className="align-items-center">
-                                <Col className="col-auto">
-                                  <img
-                                    data-dz-thumbnail=""
-                                    height="80"
-                                    className="avatar-sm rounded bg-light"
-                                    alt={f.name}
-                                    src={f.preview}
-                                  />
-                                </Col>
-                                <Col>
-                                  <Link
-                                    to="#"
-                                    className="text-muted font-weight-bold"
-                                  >
-                                    {f.name}
-                                  </Link>
-                                  <p className="mb-0">
-                                    <strong>{f.formattedSize}</strong>
-                                  </p>
-                                </Col>
-                              </Row>
-                            </div>
-                          </Card>
-                        );
-                      })}
+                        <h4>Drop logo here or click to upload.</h4>
+                      </div>
                     </div>
-                  </Row>
-                </Form>
-              </div>
-            </Col>
-          </Row>
-        </form>
+                  )}
+                </Dropzone>
+
+                <div className="list-unstyled mb-0" id="file-previews">
+                  {selectedFiles.length > 0
+                    ? selectedFiles.map((f, i) => (
+                        <Card
+                          className="mt-1 mb-0 shadow-none border dz-image-preview"
+                          key={i}
+                        >
+                          <div className="p-2">
+                            <Row className="align-items-center">
+                              <Col className="col-auto">
+                                <img
+                                  height="100"
+                                  className="avatar-lg rounded bg-light"
+                                  alt={f.name}
+                                  src={f.preview}
+                                />
+                              </Col>
+                              <Col>
+                                <Link
+                                  to="#"
+                                  className="text-muted font-weight-bold"
+                                >
+                                  {f.name}
+                                </Link>
+                                <p className="mb-0">
+                                  <strong>{f.formattedSize}</strong>
+                                </p>
+                              </Col>
+                            </Row>
+                          </div>
+                        </Card>
+                      ))
+                    : app.logo && (
+                        <Card className="mt-1 mb-0 shadow-none border dz-image-preview">
+                          <div className="p-2">
+                            <Row className="align-items-center">
+                              <Col className="col-auto">
+                                <img
+                                  height="100"
+                                  className="avatar-lg rounded bg-light"
+                                  alt="Existing Logo"
+                                  src={`${process.env.REACT_APP_BASE_URL}/appFiles/${app.logo}`}
+                                />
+                              </Col>
+                              <Col>
+                                <p className="mb-0">
+                                  <strong>Current logo</strong>
+                                </p>
+                              </Col>
+                            </Row>
+                          </div>
+                        </Card>
+                      )}
+                </div>
+              </Row>
+            </div>
+          </Col>
+        </Row>
       </Col>
     </React.Fragment>
   );

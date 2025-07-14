@@ -262,24 +262,12 @@ const CompletedJobs = () => {
     {
       name: <span className="font-weight-bold fs-13">Payment Status</span>,
       sortable: true,
-      selector: (cell: any) => {
-        switch (cell.PaymentStatus) {
-          case "Not Paid":
-            return (
-              <span className="badge bg-danger"> {cell.PaymentStatus} </span>
-            );
-          case "Medium":
-            return (
-              <span className="badge bg-info"> {cell.PaymentStatus} </span>
-            );
-          case "Low":
-            return (
-              <span className="badge bg-success"> {cell.PaymentStatus} </span>
-            );
-          default:
-            return <span className="badge bg-warning"> Not Paid </span>;
-        }
-      },
+      selector: (row: any) =>
+        row?.payment_method! === undefined ? (
+          <span className="badge bg-danger">Not Paid</span>
+        ) : (
+          <span className="badge bg-success">Paid</span>
+        ),
     },
     {
       name: <span className="font-weight-bold fs-13">Account Name</span>,
